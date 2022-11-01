@@ -1,5 +1,4 @@
-from setuptools import setup
-from setuptools import Extension
+from setuptools import setup, Extension
 
 from os.path import join as path_join
 
