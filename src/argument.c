@@ -127,9 +127,9 @@ QBAFArgument_init(QBAFArgumentObject *self, PyObject *args, PyObject *kwds)
 }
 
 static PyMemberDef QBAFArgument_members[] = {
-    {"initial_weight", T_INT, offsetof(QBAFArgumentObject, initial_weight), 0,
+    {"initial_weight", T_DOUBLE, offsetof(QBAFArgumentObject, initial_weight), 0,
      "initial weight"},
-    {"final_weight", T_INT, offsetof(QBAFArgumentObject, final_weight), 0,
+    {"final_weight", T_DOUBLE, offsetof(QBAFArgumentObject, final_weight), 0,
      "final weight"},
     {NULL}  /* Sentinel */
 };
@@ -213,7 +213,7 @@ static PyModuleDef custommodule = {
 };
 
 PyMODINIT_FUNC
-PyInit_argument(void)
+PyInit_qbaf(void)
 {
     PyObject *m;
     if (PyType_Ready(&QBAFArgumentType) < 0)

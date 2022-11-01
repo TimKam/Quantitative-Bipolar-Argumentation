@@ -1,11 +1,17 @@
 from setuptools import setup, Extension
+import os
 
-from os.path import join as path_join
+def main():
+    # Folder that contains all the C code
+    module_folder = "src"
+    # Relative paths of the files in module folder
+    files = [os.path.join(module_folder, file) for file in os.listdir(module_folder)]
 
-module_folder = "src"
+    setup(
+        name='qbaf-lib',
+        version='0.1',
+        ext_modules=[Extension('qbaf', files)],
+    )
 
-setup(
-    name='qbaf-lib',
-    version='0.1',
-    ext_modules=[Extension('argument', [path_join(module_folder, 'argument.c')])],
-)
+if __name__ == '__main__':
+    main()
