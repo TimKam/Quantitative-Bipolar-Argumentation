@@ -205,30 +205,6 @@ static PyTypeObject QBAFArgumentType = {
     .tp_str = QBAFArgument_str,                 // __str__ function
 };
 
-static PyModuleDef custommodule = {
-    PyModuleDef_HEAD_INIT,
-    .m_name = "qbaf",
-    .m_doc = "Module that creates a QBAFArgument type.",
-    .m_size = -1,
-};
-
-PyMODINIT_FUNC
-PyInit_qbaf(void)
-{
-    PyObject *m;
-    if (PyType_Ready(&QBAFArgumentType) < 0)
-        return NULL;
-
-    m = PyModule_Create(&custommodule);
-    if (m == NULL)
-        return NULL;
-
-    Py_INCREF(&QBAFArgumentType);
-    if (PyModule_AddObject(m, "QBAFArgument", (PyObject *) &QBAFArgumentType) < 0) {
-        Py_DECREF(&QBAFArgumentType);
-        Py_DECREF(m);
-        return NULL;
-    }
-
-    return m;
+PyTypeObject *get_QBAFArgumentType() {
+    return &QBAFArgumentType;
 }
