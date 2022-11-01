@@ -5,7 +5,7 @@ from os.path import join as path_join
 module_folder = "src"
 
 setup(
-    name='test-qbaf-test',
-    version='1',
-    ext_modules=[Extension('_custom', [path_join(module_folder, '_custom.c')])],
+    name='qbaf-lib',
+    version='0.1',
+    ext_modules=[Extension('argument', [path_join(module_folder, 'argument.c')])],
 )

@@ -212,7 +212,7 @@ static PyModuleDef custommodule = {
 };
 
 PyMODINIT_FUNC
-PyInit__custom(void)
+PyInit_argument(void)
 {
     PyObject *m;
     if (PyType_Ready(&QBAFArgumentType) < 0)
