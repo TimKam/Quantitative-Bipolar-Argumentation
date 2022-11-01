@@ -2,182 +2,212 @@
 #include <Python.h>
 #include "structmember.h"
 
+/**
+ * @brief Struct that defines the Object Type Argument in a QBAF
+ * 
+ */
 typedef struct {
     PyObject_HEAD
-    PyObject *first; /* first name */
-    PyObject *last;  /* last name */
-    int number;
-} CustomObject;
+    PyObject *name;         /* name of the argument and identifier */
+    PyObject *description;  /* description of the argument */
+    double initial_weight;  /* initial weight */
+    double final_weight;    /* final weight */
+} QBAFArgumentObject;
 
+// TODO
+/**
+ * @brief 
+ * 
+ * @param self 
+ * @param visit 
+ * @param arg 
+ * @return int 
+ */
 static int
-Custom_traverse(CustomObject *self, visitproc visit, void *arg)
+QBAFArgument_traverse(QBAFArgumentObject *self, visitproc visit, void *arg)
 {
-    Py_VISIT(self->first);
-    Py_VISIT(self->last);
+    Py_VISIT(self->name);
+    Py_VISIT(self->description);
     return 0;
 }
 
+// TODO
+/**
+ * @brief 
+ * 
+ * @param self 
+ * @return int 
+ */
 static int
-Custom_clear(CustomObject *self)
+QBAFArgument_clear(QBAFArgumentObject *self)
 {
-    Py_CLEAR(self->first);
-    Py_CLEAR(self->last);
+    Py_CLEAR(self->name);
+    Py_CLEAR(self->description);
     return 0;
 }
 
+// TODO
+/**
+ * @brief 
+ * 
+ * @param self 
+ */
 static void
-Custom_dealloc(CustomObject *self)
+QBAFArgument_dealloc(QBAFArgumentObject *self)
 {
     PyObject_GC_UnTrack(self);
-    Custom_clear(self);
+    QBAFArgument_clear(self);
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// TODO
+/**
+ * @brief 
+ * 
+ * @param type 
+ * @param args 
+ * @param kwds 
+ * @return PyObject* 
+ */
 static PyObject *
-Custom_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+QBAFArgument_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-    CustomObject *self;
-    self = (CustomObject *) type->tp_alloc(type, 0);
+    QBAFArgumentObject *self;
+    self = (QBAFArgumentObject *) type->tp_alloc(type, 0);
     if (self != NULL) {
-        self->first = PyUnicode_FromString("");
-        if (self->first == NULL) {
+        self->name = PyUnicode_FromString("");
+        if (self->name == NULL) {
             Py_DECREF(self);
             return NULL;
         }
-        self->last = PyUnicode_FromString("");
-        if (self->last == NULL) {
+        self->description = PyUnicode_FromString("");
+        if (self->description == NULL) {
             Py_DECREF(self);
             return NULL;
         }
-        self->number = 0;
+        self->initial_weight = 0;
+        self->final_weight = 0;
     }
     return (PyObject *) self;
 }
 
+// TODO
+/**
+ * @brief 
+ * 
+ * @param self 
+ * @param args 
+ * @param kwds 
+ * @return int 
+ */
 static int
-Custom_init(CustomObject *self, PyObject *args, PyObject *kwds)
+QBAFArgument_init(QBAFArgumentObject *self, PyObject *args, PyObject *kwds)
 {
-    static char *kwlist[] = {"first", "last", "number", NULL};
-    PyObject *first = NULL, *last = NULL, *tmp;
+    static char *kwlist[] = {"name", "description", "initial_weight", NULL};
+    PyObject *name = NULL, *description = NULL, *tmp;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|UUi", kwlist,
-                                     &first, &last,
-                                     &self->number))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|UUd", kwlist,
+                                     &name, &description,
+                                     &self->initial_weight))
         return -1;
 
-    if (first) {
-        tmp = self->first;
-        Py_INCREF(first);
-        self->first = first;
+    if (name) {
+        tmp = self->name;
+        Py_INCREF(name);
+        self->name = name;
         Py_DECREF(tmp);
     }
-    if (last) {
-        tmp = self->last;
-        Py_INCREF(last);
-        self->last = last;
+    if (description) {
+        tmp = self->description;
+        Py_INCREF(description);
+        self->description = description;
         Py_DECREF(tmp);
     }
     return 0;
 }
 
-static PyMemberDef Custom_members[] = {
-    {"number", T_INT, offsetof(CustomObject, number), 0,
-     "custom number"},
+static PyMemberDef QBAFArgument_members[] = {
+    {"initial_weight", T_INT, offsetof(QBAFArgumentObject, initial_weight), 0,
+     "initial weight"},
+    {"final_weight", T_INT, offsetof(QBAFArgumentObject, final_weight), 0,
+     "final weight"},
     {NULL}  /* Sentinel */
 };
 
 static PyObject *
-Custom_getfirst(CustomObject *self, void *closure)
+QBAFArgument_getname(QBAFArgumentObject *self, void *closure)
 {
-    Py_INCREF(self->first);
-    return self->first;
-}
-
-static int
-Custom_setfirst(CustomObject *self, PyObject *value, void *closure)
-{
-    if (value == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Cannot delete the first attribute");
-        return -1;
-    }
-    if (!PyUnicode_Check(value)) {
-        PyErr_SetString(PyExc_TypeError,
-                        "The first attribute value must be a string");
-        return -1;
-    }
-    Py_INCREF(value);
-    Py_CLEAR(self->first);
-    self->first = value;
-    return 0;
+    Py_INCREF(self->name);
+    return self->name;
 }
 
 static PyObject *
-Custom_getlast(CustomObject *self, void *closure)
+QBAFArgument_getdescription(QBAFArgumentObject *self, void *closure)
 {
-    Py_INCREF(self->last);
-    return self->last;
+    Py_INCREF(self->description);
+    return self->description;
 }
 
 static int
-Custom_setlast(CustomObject *self, PyObject *value, void *closure)
+QBAFArgument_setdescription(QBAFArgumentObject *self, PyObject *value, void *closure)
 {
     if (value == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Cannot delete the last attribute");
+        PyErr_SetString(PyExc_TypeError, "Cannot delete the description attribute");
         return -1;
     }
     if (!PyUnicode_Check(value)) {
         PyErr_SetString(PyExc_TypeError,
-                        "The last attribute value must be a string");
+                        "The description attribute value must be a string");
         return -1;
     }
     Py_INCREF(value);
-    Py_CLEAR(self->last);
-    self->last = value;
+    Py_CLEAR(self->description);
+    self->description = value;
     return 0;
 }
 
-static PyGetSetDef Custom_getsetters[] = {
-    {"first", (getter) Custom_getfirst, (setter) Custom_setfirst,
-     "first name", NULL},
-    {"last", (getter) Custom_getlast, (setter) Custom_setlast,
-     "last name", NULL},
+static PyGetSetDef QBAFArgument_getsetters[] = {
+    {"name", (getter) QBAFArgument_getname, NULL,
+     "name and identifier", NULL},
+    {"description", (getter) QBAFArgument_getdescription, (setter) QBAFArgument_setdescription,
+     "argument description", NULL},
     {NULL}  /* Sentinel */
 };
 
 static PyObject *
-Custom_name(CustomObject *self, PyObject *Py_UNUSED(ignored))
+QBAFArgument___str__(QBAFArgumentObject *self, PyObject *Py_UNUSED(ignored))
 {
-    return PyUnicode_FromFormat("%S %S", self->first, self->last);
+    return PyUnicode_FromFormat("QBAFArgument(%S)", self->name);
 }
 
-static PyMethodDef Custom_methods[] = {
-    {"name", (PyCFunction) Custom_name, METH_NOARGS,
-     "Return the name, combining the first and last name"
+static PyMethodDef QBAFArgument_methods[] = {
+    {"__str__", (PyCFunction) QBAFArgument___str__, METH_NOARGS,
+     "Return the string format of the object: QBAFArgument(<name>)"
     },
     {NULL}  /* Sentinel */
 };
 
-static PyTypeObject CustomType = {
+static PyTypeObject QBAFArgumentType = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    .tp_name = "custom4.Custom",
-    .tp_doc = PyDoc_STR("Custom objects"),
-    .tp_basicsize = sizeof(CustomObject),
+    .tp_name = "qbaf.QBAFArgument",
+    .tp_doc = PyDoc_STR("QBAFArgument objects"),
+    .tp_basicsize = sizeof(QBAFArgumentObject),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC,
-    .tp_new = Custom_new,
-    .tp_init = (initproc) Custom_init,
-    .tp_dealloc = (destructor) Custom_dealloc,
-    .tp_traverse = (traverseproc) Custom_traverse,
-    .tp_clear = (inquiry) Custom_clear,
-    .tp_members = Custom_members,
-    .tp_methods = Custom_methods,
-    .tp_getset = Custom_getsetters,
+    .tp_new = QBAFArgument_new,
+    .tp_init = (initproc) QBAFArgument_init,
+    .tp_dealloc = (destructor) QBAFArgument_dealloc,
+    .tp_traverse = (traverseproc) QBAFArgument_traverse,
+    .tp_clear = (inquiry) QBAFArgument_clear,
+    .tp_members = QBAFArgument_members,
+    .tp_methods = QBAFArgument_methods,
+    .tp_getset = QBAFArgument_getsetters,
 };
 
 static PyModuleDef custommodule = {
     PyModuleDef_HEAD_INIT,
-    .m_name = "custom4",
-    .m_doc = "Example module that creates an extension type.",
+    .m_name = "qbaf",
+    .m_doc = "Module that creates a QBAFArgument type.",
     .m_size = -1,
 };
 
@@ -185,16 +215,16 @@ PyMODINIT_FUNC
 PyInit__custom(void)
 {
     PyObject *m;
-    if (PyType_Ready(&CustomType) < 0)
+    if (PyType_Ready(&QBAFArgumentType) < 0)
         return NULL;
 
     m = PyModule_Create(&custommodule);
     if (m == NULL)
         return NULL;
 
-    Py_INCREF(&CustomType);
-    if (PyModule_AddObject(m, "Custom", (PyObject *) &CustomType) < 0) {
-        Py_DECREF(&CustomType);
+    Py_INCREF(&QBAFArgumentType);
+    if (PyModule_AddObject(m, "QBAFArgument", (PyObject *) &QBAFArgumentType) < 0) {
+        Py_DECREF(&QBAFArgumentType);
         Py_DECREF(m);
         return NULL;
     }
