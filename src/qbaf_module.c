@@ -1,8 +1,18 @@
+/**
+ * @file qbaf_module.c
+ * @author Jose Ruiz Alarcon
+ * @brief Module to crate a QBAFramework with the python C api.
+ */
+
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
 #include "argument.h"
 
+/**
+ * @brief Definition of the module QBAF
+ * 
+ */
 static PyModuleDef QBAFmodule = {
     PyModuleDef_HEAD_INIT,
     .m_name = "qbaf",
@@ -10,6 +20,11 @@ static PyModuleDef QBAFmodule = {
     .m_size = -1,
 };
 
+/**
+ * @brief Creates a module that implements the QBAFArgument type.
+ * 
+ * @return PyMODINIT_FUNC is just python idiom to create a module
+ */
 PyMODINIT_FUNC
 PyInit_qbaf(void)
 {
