@@ -175,13 +175,13 @@ static PyGetSetDef QBAFArgument_getsetters[] = {
 };
 
 static PyObject *
-QBAFArgument___str__(QBAFArgumentObject *self, PyObject *Py_UNUSED(ignored))
+QBAFArgument_str(QBAFArgumentObject *self, PyObject *Py_UNUSED(ignored))
 {
     return PyUnicode_FromFormat("QBAFArgument(%S)", self->name);
 }
 
 static PyMethodDef QBAFArgument_methods[] = {
-    {"__str__", (PyCFunction) QBAFArgument___str__, METH_NOARGS,
+    {"str", (PyCFunction) QBAFArgument_str, METH_NOARGS,
      "Return the string format of the object: QBAFArgument(<name>)"
     },
     {NULL}  /* Sentinel */
@@ -202,6 +202,7 @@ static PyTypeObject QBAFArgumentType = {
     .tp_members = QBAFArgument_members,
     .tp_methods = QBAFArgument_methods,
     .tp_getset = QBAFArgument_getsetters,
+    .tp_str = QBAFArgument_str,                 // __str__ function
 };
 
 static PyModuleDef custommodule = {
