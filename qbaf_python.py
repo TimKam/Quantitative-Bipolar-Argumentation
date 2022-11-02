@@ -66,14 +66,22 @@ class QBAFARelations:
         self.__agent_patients = dict()      # dictonary of (key, value) = (Agent, set of Patients)
         self.__patient_agents = dict()      # dictonary of (key, value) = (Patient, set of Agents)
         for agent, patient in self.__relations:
-            self.__agent_patients.get(agent, default = set()).add(patient)
-            self.__patient_agents.get(patient, default = set()).add(agent)
+            if agent not in self.__agent_patients:
+                self.__agent_patients[agent] = set()
+            self.__agent_patients[agent].add(patient)
+            if patient not in self.__patient_agents:
+                self.__patient_agents[patient] = set()
+            self.__patient_agents[patient].add(agent)
 
     def patients(self, agent: QBAFArgument) -> list:
-        return list(self.__agent_patients.get(agent, default = set()))
+        if agent in self.__agent_patients:
+            return list(self.__agent_patients[agent])
+        return []
 
     def agents(self, patient: QBAFArgument) -> list:
-        return list(self.__patient_agents.get(patient, default = set()))
+        if patient in self.__patient_agents:
+            return list(self.__patient_agents[patient])
+        return []
 
     def contains(self, agent: QBAFArgument, patient: QBAFArgument) -> bool:
         return (agent, patient) in self.__relations
@@ -81,14 +89,18 @@ class QBAFARelations:
     def add(self, agent: QBAFArgument, patient: QBAFArgument):
         if (agent, patient) not in self.__relations:
             self.__relations.add((agent, patient))
-            self.__agent_patients.get(agent, default = set()).add(patient)
-            self.__patient_agents.get(patient, default = set()).add(agent)
+            if agent not in self.__agent_patients:
+                self.__agent_patients[agent] = set()
+            self.__agent_patients[agent].add(patient)
+            if patient not in self.__patient_agents:
+                self.__patient_agents[patient] = set()
+            self.__patient_agents[patient].add(agent)
 
     def remove(self, agent: QBAFArgument, patient: QBAFArgument):
         if (agent, patient) in self.__relations:
             self.__relations.remove((agent, patient))
-            self.__agent_patients.get(agent, default = set()).remove(patient)
-            self.__patient_agents.get(patient, default = set()).remove(agent)
+            self.__agent_patients[agent].remove(patient)
+            self.__patient_agents[patient].remove(agent)
 
     @property
     def relations(self) -> set:
