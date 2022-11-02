@@ -210,9 +210,17 @@ static PyGetSetDef QBAFArgument_getsetters[] = {
  * @return PyObject* a object with the result of the comparison
  */
 static PyObject *
-QBAFArgument_richcompare(QBAFArgumentObject *self, QBAFArgumentObject *other, int op)
+QBAFArgument_richcompare(QBAFArgumentObject *self, PyObject *other, int op)
 {
-    return PyObject_RichCompare(self->name, other->name, op);
+    if (other == NULL) {
+        PyErr_SetString(PyExc_TypeError, "Compare instance of 'QBAFArgument' with 'None' not supported");
+        return -1;
+    }
+    if (!PyObject_TypeCheck(other, Py_TYPE(self))) {
+        PyErr_SetString(PyExc_TypeError, "Compare instance of 'QBAFArgument' with instance of a different type not supported");
+        return -1;
+    }
+    return PyObject_RichCompare(self->name, ((QBAFArgumentObject *)other)->name, op);
 }
 
 /**
