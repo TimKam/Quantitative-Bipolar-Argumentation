@@ -2,6 +2,7 @@
  * @file argument.c
  * @author Jose Ruiz Alarcon
  * @brief Definition of the PyTypeObject QBAFArgument
+ * Note: The class QBAFArgument does not support compare functions with objects that are not QBAFArgument
  */
 
 #define PY_SSIZE_T_CLEAN
@@ -16,8 +17,6 @@ typedef struct {
     PyObject_HEAD
     PyObject *name;         /* name of the argument and identifier */
     PyObject *description;  /* description of the argument */
-    double initial_weight;  /* initial weight */
-    double final_weight;    /* final weight */
 } QBAFArgumentObject;
 
 /**
@@ -87,8 +86,6 @@ QBAFArgument_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
             Py_DECREF(self);
             return NULL;
         }
-        self->initial_weight = 0;
-        self->final_weight = 0;
     }
     return (PyObject *) self;
 }
@@ -104,15 +101,14 @@ QBAFArgument_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 static int
 QBAFArgument_init(QBAFArgumentObject *self, PyObject *args, PyObject *kwds)
 {
-    static char *kwlist[] = {"name", "description", "initial_weight", NULL};
+    static char *kwlist[] = {"name", "description", NULL};
     PyObject *name = NULL, *description = NULL, *tmp;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|UUd", kwlist,
-                                     &name, &description,
-                                     &self->initial_weight))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "U|U", kwlist,
+                                     &name, &description))
         return -1;
 
-    if (name) {
+    if (name) { // It will always be true
         tmp = self->name;
         Py_INCREF(name);
         self->name = name;
@@ -132,10 +128,10 @@ QBAFArgument_init(QBAFArgumentObject *self, PyObject *args, PyObject *kwds)
  * 
  */
 static PyMemberDef QBAFArgument_members[] = {
-    {"initial_weight", T_DOUBLE, offsetof(QBAFArgumentObject, initial_weight), 0,
-     "initial weight"},
-    {"final_weight", T_DOUBLE, offsetof(QBAFArgumentObject, final_weight), 0,
-     "final weight"},
+//    {"initial_weight", T_DOUBLE, offsetof(QBAFArgumentObject, initial_weight), 0, // TOREMOVE
+//     "initial weight"},
+//    {"final_weight", T_DOUBLE, offsetof(QBAFArgumentObject, final_weight), 0,     // TOREMOVE
+//     "final weight"},
     {NULL}  /* Sentinel */
 };
 
@@ -206,6 +202,32 @@ static PyGetSetDef QBAFArgument_getsetters[] = {
 };
 
 /**
+ * @brief Return the comparison of the names of two QBAFArgument instances.
+ * 
+ * @param self a QBAFArgument object
+ * @param other another QBAFArgument object
+ * @param op the operation type (Py_LT, Py_LE ,Py_EQ ,Py_NE ,Py_GT or Py_GE)
+ * @return PyObject* a object with the result of the comparison
+ */
+static PyObject *
+QBAFArgument_richcompare(QBAFArgumentObject *self, QBAFArgumentObject *other, int op)
+{
+    return PyObject_RichCompare(self->name, other->name, op);
+}
+
+/**
+ * @brief Return the hash of the name of a QBAFArgument instance.
+ * 
+ * @param self the QBAFArgument object
+ * @return PyObject* a object with the hash
+ */
+static PyObject *
+QBAFArgument_hashfunc(QBAFArgumentObject *self)
+{
+    return PyObject_Hash(self->name);
+}
+
+/**
  * @brief Return the string format of a QBAFArgument object
  * 
  * @param self the QBAFArgument object
@@ -248,7 +270,9 @@ static PyTypeObject QBAFArgumentType = {
     .tp_members = QBAFArgument_members,
     .tp_methods = QBAFArgument_methods,
     .tp_getset = QBAFArgument_getsetters,
-    .tp_str = QBAFArgument_str,                 // __str__ function
+    .tp_str = (reprfunc) QBAFArgument_str,                      // __str__
+    .tp_richcompare = (richcmpfunc) QBAFArgument_richcompare,   // __lt__, __le__, __eq__, __ne__, __gt__, __ge__
+    .tp_hash = (hashfunc) QBAFArgument_hashfunc,                // __hash__
 };
 
 /**

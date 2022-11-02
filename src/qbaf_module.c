@@ -28,7 +28,7 @@ static PyModuleDef QBAFmodule = {
 PyMODINIT_FUNC
 PyInit_qbaf(void)
 {
-
+    // A pointer to the class description of QBAFArgument
     PyTypeObject *QBAFArgumentType = get_QBAFArgumentType();
 
     PyObject *m;
