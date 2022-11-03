@@ -31,16 +31,29 @@ PyInit_qbaf(void)
     // A pointer to the class description of QBAFArgument
     PyTypeObject *QBAFArgumentType = get_QBAFArgumentType();
 
-    PyObject *m;
+    // A pointer to the class description of QBAFARelations
+    PyTypeObject *QBAFARelationsType = get_QBAFARelationsType();
+
     if (PyType_Ready(QBAFArgumentType) < 0)
         return NULL;
 
-    m = PyModule_Create(&QBAFmodule);
+    if (PyType_Ready(QBAFARelationsType) < 0)
+        return NULL;
+
+    PyObject *m = PyModule_Create(&QBAFmodule);
     if (m == NULL)
         return NULL;
 
     Py_INCREF(QBAFArgumentType);
     if (PyModule_AddObject(m, "QBAFArgument", (PyObject *) QBAFArgumentType) < 0) {
+        Py_DECREF(QBAFArgumentType);
+        Py_DECREF(m);
+        return NULL;
+    }
+
+    Py_INCREF(QBAFARelationsType);
+    if (PyModule_AddObject(m, "QBAFARelations", (PyObject *) QBAFARelationsType) < 0) {
+        Py_DECREF(QBAFARelationsType);
         Py_DECREF(QBAFArgumentType);
         Py_DECREF(m);
         return NULL;
