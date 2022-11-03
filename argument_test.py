@@ -1,13 +1,13 @@
-import qbaf_python.argument
+import qbaf_python
 import qbaf
 
 def main():
     c_args = [qbaf.QBAFArgument('a', 'desc'),
                 qbaf.QBAFArgument('a'),
                 qbaf.QBAFArgument('b', 'desc')]
-    py_args = [qbaf_python.argument.QBAFArgument('a', 'desc'),
-                qbaf_python.argument.QBAFArgument('a'),
-                qbaf_python.argument.QBAFArgument('b', 'desc')]
+    py_args = [qbaf_python.QBAFArgument('a', 'desc'),
+                qbaf_python.QBAFArgument('a'),
+                qbaf_python.QBAFArgument('b', 'desc')]
 
     for args in [c_args, py_args]:
         for arg in args:

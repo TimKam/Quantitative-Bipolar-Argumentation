@@ -1,13 +1,14 @@
 /**
  * @file argument.c
  * @author Jose Ruiz Alarcon
- * @brief Definition of the PyTypeObject QBAFArgument
- * Note: The class QBAFArgument does not support compare functions with objects that are not QBAFArgument
+ * @brief Definition of the PyTypeObject QBAFArgument.
  */
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include "structmember.h"
+
+#include "argument.h"
 
 /**
  * @brief Struct that defines the Object Type Argument in a QBAF.
@@ -210,9 +211,17 @@ static PyGetSetDef QBAFArgument_getsetters[] = {
  * @return PyObject* a object with the result of the comparison
  */
 static PyObject *
-QBAFArgument_richcompare(QBAFArgumentObject *self, QBAFArgumentObject *other, int op)
+QBAFArgument_richcompare(QBAFArgumentObject *self, PyObject *other, int op)
 {
-    return PyObject_RichCompare(self->name, other->name, op);
+    if (other == NULL) {
+        PyErr_SetString(PyExc_TypeError, "Compare instance of 'QBAFArgument' with NULL not supported");
+        return NULL;
+    }
+    if (!PyObject_TypeCheck(other, Py_TYPE(self))) {
+        PyErr_SetString(PyExc_TypeError, "Compare instance of 'QBAFArgument' with instance of a different type not supported");
+        return NULL;
+    }
+    return PyObject_RichCompare(self->name, ((QBAFArgumentObject *)other)->name, op);
 }
 
 /**
@@ -245,9 +254,9 @@ QBAFArgument_str(QBAFArgumentObject *self, PyObject *Py_UNUSED(ignored))
  * 
  */
 static PyMethodDef QBAFArgument_methods[] = {
-    {"str", (PyCFunction) QBAFArgument_str, METH_NOARGS,
-     "Return the string format of the object: QBAFArgument(<name>)"
-    },
+//    {"str", (PyCFunction) QBAFArgument_str, METH_NOARGS,              // TOREMOVE
+//     "Return the string format of the object: QBAFArgument(<name>)"
+//    },
     {NULL}  /* Sentinel */
 };
 
@@ -271,6 +280,7 @@ static PyTypeObject QBAFArgumentType = {
     .tp_methods = QBAFArgument_methods,
     .tp_getset = QBAFArgument_getsetters,
     .tp_str = (reprfunc) QBAFArgument_str,                      // __str__
+    .tp_repr = (reprfunc) QBAFArgument_str,                     // __repr__
     .tp_richcompare = (richcmpfunc) QBAFArgument_richcompare,   // __lt__, __le__, __eq__, __ne__, __gt__, __ge__
     .tp_hash = (hashfunc) QBAFArgument_hashfunc,                // __hash__
 };
