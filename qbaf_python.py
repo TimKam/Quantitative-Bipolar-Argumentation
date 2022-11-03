@@ -49,6 +49,14 @@ class QBAFArgument:
         """
         return f'QBAFArgument({self.name})'
 
+    def __repr__(self) -> str:
+        """ Return the string representing the object with format QBAFArgument(<name>).
+
+        Returns:
+            str: The string representing the object
+        """
+        return self.__str__()
+
 
 class QBAFARelations:
     """ Class representing a set of Relations (Agent, Patient) of type QBAFArgument.
@@ -149,14 +157,6 @@ class QBAFARelations:
             set: A set of tuples (Agent: QBAFArgument, Patient: QBAFArgument)
         """
         return self.__relations.copy()
-
-    def __str__(self) -> str:
-        """ String representation of an instance of QBAFARelations.
-
-        Returns:
-            str: The string represtation
-        """
-        return f'QBAFARelations{self.__relations}'
     
     def __copy__(self):
         """ Return a copy of this instance.
@@ -166,3 +166,19 @@ class QBAFARelations:
             QBAFARelations: A copy of this QBAFARelations instance
         """
         return QBAFARelations(self.__relations)
+
+    def __str__(self) -> str:
+        """ String representation of an instance of QBAFARelations.
+
+        Returns:
+            str: The string represtation
+        """
+        return f'QBAFARelations{self.__relations}'
+
+    def __repr__(self) -> str:
+        """ String representation of an instance of QBAFARelations.
+
+        Returns:
+            str: The string represtation
+        """
+        return self.__str__()
