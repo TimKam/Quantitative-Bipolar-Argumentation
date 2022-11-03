@@ -1,8 +1,8 @@
 /**
  * @file argument.c
  * @author Jose Ruiz Alarcon
- * @brief Definition of the PyTypeObject QBAFArgument
- * Note: The class QBAFArgument does not support compare functions with objects that are not QBAFArgument
+ * @brief Definition of the PyTypeObject QBAFArgument.
+ * 
  */
 
 #define PY_SSIZE_T_CLEAN
@@ -213,12 +213,12 @@ static PyObject *
 QBAFArgument_richcompare(QBAFArgumentObject *self, PyObject *other, int op)
 {
     if (other == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Compare instance of 'QBAFArgument' with 'None' not supported");
-        return -1;
+        PyErr_SetString(PyExc_TypeError, "Compare instance of 'QBAFArgument' with NULL not supported");
+        return NULL;
     }
     if (!PyObject_TypeCheck(other, Py_TYPE(self))) {
         PyErr_SetString(PyExc_TypeError, "Compare instance of 'QBAFArgument' with instance of a different type not supported");
-        return -1;
+        return NULL;
     }
     return PyObject_RichCompare(self->name, ((QBAFArgumentObject *)other)->name, op);
 }
