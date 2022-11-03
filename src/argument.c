@@ -2,12 +2,13 @@
  * @file argument.c
  * @author Jose Ruiz Alarcon
  * @brief Definition of the PyTypeObject QBAFArgument.
- * 
  */
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include "structmember.h"
+
+#include "argument.h"
 
 /**
  * @brief Struct that defines the Object Type Argument in a QBAF.

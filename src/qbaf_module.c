@@ -7,7 +7,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
-#include "argument.h"
+#include "qbaf_module.h"
 
 /**
  * @brief Definition of the module QBAF
