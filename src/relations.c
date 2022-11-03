@@ -121,15 +121,71 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
         return -1;
 
     if (relations) { // It will always be true
+
         if (!PySet_Check(relations) && !PyList_Check(relations)) {
             PyErr_SetString(PyExc_TypeError,
-                            "The relations parameter must be a set or a list");
+                            "relations parameter must be a set or a list");
             return -1;
         }
 
+        // Initialize relations
         tmp = self->relations;
         self->relations = PySet_New(relations);     // It creates a new set reference
         Py_DECREF(tmp);                             // This instance stops owning the set created in the constructor
+
+        // Initialize agent_patients & patient_agents
+        PyObject *iterator = PyObject_GetIter(self->relations);
+        PyObject *item;
+        PyObject *agent, *patient;
+
+        if (iterator == NULL) {
+            /* propagate error */
+            return -1;
+        }
+
+        while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+            /* do something with item */
+            if (!PyTuple_Check(item) || (PyTuple_Size(item) != 2)) {
+                PyErr_SetString(PyExc_TypeError,
+                            "all items of relations must be a tuple of size 2");
+                Py_DECREF(item);
+                return -1;
+            }
+
+            agent = PyTuple_GetItem(item, 0);       // Returns borrowed reference. NULL if the index is wrong.
+            Py_INCREF(agent);
+            patient = PyTuple_GetItem(item, 1);     // Returns borrowed reference. NULL if the index is wrong.
+            Py_INCREF(patient);
+
+            Py_DECREF(item);
+
+            if (!PyDict_Contains(self->agent_patients, agent)) {    // PyDict_Contains returns -1 in case of error (not checked)
+                // Add a new set to the dictionary
+                if (PyDict_SetItem(self->agent_patients, agent, PySet_New(NULL)) < 0)
+                    return -1;
+            }
+            // Add patient to the set
+            if (PySet_Add(PyDict_GetItem(self->agent_patients, agent), patient) < 0)
+                return -1;
+
+            if (!PyDict_Contains(self->patient_agents, patient)) {    // PyDict_Contains returns -1 in case of error (not checked)
+                // Add a new set to the dictionary
+                if (PyDict_SetItem(self->patient_agents, patient, PySet_New(NULL)) < 0)
+                    return -1;
+            }
+            // Add agent to the set
+            if (PySet_Add(PyDict_GetItem(self->patient_agents, patient), agent) < 0)
+                return -1;
+            
+        }
+
+        Py_DECREF(iterator);
+
+        if (PyErr_Occurred()) {
+            /* propagate error */
+            return -1;
+        }
+
     }
     return 0;
 }
