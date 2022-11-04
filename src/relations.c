@@ -103,6 +103,36 @@ QBAFARelations_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * @brief Return the object from dictionary dict which has a key key. If the key does not exist return a new set.
+ * Return NULL with an exception set if an exception occurred.
+ * 
+ * @param dict the dictionary
+ * @param key the key
+ * @return PyObject* Borrowed reference
+ */
+static inline PyObject *
+PyDict_GetItemDefaultPySet_New(PyObject *dict, PyObject *key)
+{
+    PyObject *set;
+    int contains = PyDict_Contains(dict, key);
+    if (contains < 0) { //PyDict_Contains returns -1 in case of error
+        return NULL;
+    }
+    if (!contains) {
+        set = PySet_New(NULL);      // Return new reference
+        if (set == NULL)
+            return NULL;
+        // Add a new set to the dictionary
+        if (PyDict_SetItem(dict, key, set) < 0) {
+            Py_DECREF(set);
+            return NULL;
+        }
+        return set;
+    }
+    return PyDict_GetItemWithError(dict, key);
+}
+
+/**
  * @brief Initializer of a QBAFARelations. It is called right after the constructor by the python interpreter.
  * 
  * @param self the Object 
@@ -130,13 +160,18 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
 
         // Initialize relations
         tmp = self->relations;
-        self->relations = PySet_New(relations);     // It creates a new set reference
+        relations = PySet_New(relations);           // It creates a new reference
+        if (relations == NULL) { // If any item is not hashable it raises and error
+            return -1;
+        }
+        self->relations = relations;
         Py_DECREF(tmp);                             // This instance stops owning the set created in the constructor
 
         // Initialize agent_patients & patient_agents
         PyObject *iterator = PyObject_GetIter(self->relations);
         PyObject *item;
         PyObject *agent, *patient;
+        PyObject *set;
 
         if (iterator == NULL) {
             /* propagate error */
@@ -147,35 +182,40 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
             /* do something with item */
             if (!PyTuple_Check(item) || (PyTuple_Size(item) != 2)) {
                 PyErr_SetString(PyExc_TypeError,
-                            "all items of relations must be a tuple of size 2");
+                            "every item of relations must be a tuple of size 2");
                 Py_DECREF(item);
-                return -1;
+                break;
             }
 
             agent = PyTuple_GetItem(item, 0);       // Returns borrowed reference. NULL if the index is wrong.
-            Py_INCREF(agent);
             patient = PyTuple_GetItem(item, 1);     // Returns borrowed reference. NULL if the index is wrong.
-            Py_INCREF(patient);
 
             Py_DECREF(item);
 
-            if (!PyDict_Contains(self->agent_patients, agent)) {    // PyDict_Contains returns -1 in case of error (not checked)
-                // Add a new set to the dictionary
-                if (PyDict_SetItem(self->agent_patients, agent, PySet_New(NULL)) < 0)
-                    return -1;
+            if (agent == NULL || patient == NULL) {
+                break;
             }
-            // Add patient to the set
-            if (PySet_Add(PyDict_GetItem(self->agent_patients, agent), patient) < 0)
-                return -1;
 
-            if (!PyDict_Contains(self->patient_agents, patient)) {    // PyDict_Contains returns -1 in case of error (not checked)
-                // Add a new set to the dictionary
-                if (PyDict_SetItem(self->patient_agents, patient, PySet_New(NULL)) < 0)
-                    return -1;
+            set = PyDict_GetItemDefaultPySet_New(self->agent_patients, agent);  // Return borrowed reference
+            if (set == NULL) {
+                break;
             }
+            Py_INCREF(agent);
+            // Add patient to the set
+            if (PySet_Add(set, patient) < 0) {
+                Py_DECREF(agent);
+                break;
+            }
+
+            set = PyDict_GetItemDefaultPySet_New(self->patient_agents, patient);  // Return borrowed reference
+            if (set == NULL) {
+                break;
+            }
+            Py_INCREF(patient);
             // Add agent to the set
-            if (PySet_Add(PyDict_GetItem(self->patient_agents, patient), agent) < 0)
-                return -1;
+            if (PySet_Add(set, agent) < 0) {
+                break;
+            }
             
         }
 
