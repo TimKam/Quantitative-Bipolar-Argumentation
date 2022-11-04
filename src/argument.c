@@ -66,7 +66,7 @@ QBAFArgument_dealloc(QBAFArgumentObject *self)
 /**
  * @brief Constructor of a QBAFArgument.
  * 
- * @param type the Object 
+ * @param type the Object type
  * @param args the argument values that might be used by the constructor
  * @param kwds the names of the argument values
  * @return PyObject* The created object of type QBAFArgument
@@ -84,6 +84,7 @@ QBAFArgument_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         }
         self->description = PyUnicode_FromString("");
         if (self->description == NULL) {
+            Py_DECREF(self->name); // TODO: Check if this is correct
             Py_DECREF(self);
             return NULL;
         }
@@ -92,9 +93,9 @@ QBAFArgument_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 }
 
 /**
- * @brief Initializer of a QBAFArgument. It is called right after the constructor by the python interpreter.
+ * @brief Initializer of a QBAFArgument instance. It is called right after the constructor by the python interpreter.
  * 
- * @param type the Object 
+ * @param self the Object 
  * @param args the argument values that might be used by the constructor
  * @param kwds the names of the argument values
  * @return int 0 if it was executed with no errors. Otherwise, -1.
@@ -137,7 +138,7 @@ static PyMemberDef QBAFArgument_members[] = {
 };
 
 /**
- * @brief Getter of the attribute name
+ * @brief Getter of the attribute name.
  * 
  * @param self the QBAFArgument object
  * @param closure 

@@ -17,4 +17,11 @@
  */
 PyTypeObject *get_QBAFArgumentType(void);
 
+/**
+ * @brief Get the QBAFARelationsType object that defines the class QBAFARelations
+ * 
+ * @return PyTypeObject* a pointer to the QBAFARelations class definition
+ */
+PyTypeObject *get_QBAFARelationsType(void);
+
 #endif
