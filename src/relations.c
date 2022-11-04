@@ -269,9 +269,176 @@ static PyGetSetDef QBAFARelations_getsetters[] = {
  * @return PyObject* the string representing the object
  */
 static PyObject *
-QBAFARelations_str(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
+QBAFARelations___str__(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
 {
     return PyUnicode_FromFormat("QBAFARelations%S", self->relations);
+}
+
+/**
+ * @brief Return the amount of relations of the instance.
+ * 
+ * @param self instance of QBAFARelations
+ * @return Py_ssize_t length of set relations
+ */
+static Py_ssize_t
+QBAFARelations___len__(QBAFARelationsObject *self)
+{
+    return PySet_Size(self->relations);
+}
+
+/**
+ * @brief Return whether or not exists the relation (agent, patient) in this instance.
+ * 
+ * @param self instance of QBAFARelations
+ * @param key a tuple (agent: QBAFArgument, patient: QBAFArgument)
+ * @return int 1 if found, 0 if not found, and -1 if an error is encountered
+ */
+static int
+QBAFARelations___contains__(QBAFARelationsObject *self, PyObject *key)
+{
+    if (!PyTuple_Check(key) || (PyTuple_Size(key) != 2)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "relation must be a tuple of size 2");
+        return -1;
+    }
+
+    return PySet_Contains(self->relations, key);
+}
+
+/**
+ * @brief Return the patients that undergo the effect of a certain action (e.g. attack, support)
+ * initiated by the agent. Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param args the argument values (agent: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* list of QBAFArgument 
+ */
+static PyObject *
+QBAFARelations_patients(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"agent", NULL};
+    PyObject *agent, *tmp;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
+                                     &agent))
+        return NULL;
+
+    // TODO
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+/**
+ * @brief Return the agents that initiate a certain action (e.g. attack, support)
+ * which effects are undergone by the patient. Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param args the argument values (patient: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* list of QBAFArgument
+ */
+static PyObject *
+QBAFARelations_agents(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"patient", NULL};
+    PyObject *patient, *tmp;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
+                                     &patient))
+        return NULL;
+
+    // TODO
+    Py_RETURN_NOTIMPLEMENTED;
+}
+
+/**
+ * @brief Return whether or not exists the relation (agent, patient) in this instance.
+ * Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param args the argument values (agent: QBAFArgument, patient: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new PyBool
+ */
+static PyObject *
+QBAFARelations_contains(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"agent", "patient", NULL};
+    PyObject *agent, *patient, *tmp;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
+                                     &agent, &patient))
+        return NULL;
+
+    // TODO
+    Py_RETURN_FALSE;
+}
+
+/**
+ * @brief Add the relation (agent, patient) to this instance. Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param args the argument values (agent: QBAFArgument, patient: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new Py_NONE
+ */
+static PyObject *
+QBAFARelations_add(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"agent", "patient", NULL};
+    PyObject *agent, *patient, *tmp;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
+                                     &agent, &patient))
+        return NULL;
+
+    // TODO
+    Py_RETURN_NONE;
+}
+
+/**
+ * @brief Remove the relation (agent, patient) of this instance. Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param args the argument values (agent: QBAFArgument, patient: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new Py_NONE
+ */
+static PyObject *
+QBAFARelations_remove(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"agent", "patient", NULL};
+    PyObject *agent, *patient, *tmp;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
+                                     &agent, &patient))
+        return NULL;
+
+    // TODO
+    Py_RETURN_NONE;
+}
+
+/**
+ * @brief Return a copy of this instance.
+ * New references are created for the copy, except for the QBAFArgument objects.
+ * 
+ * @param self instance of QBAFARelations
+ * @return PyObject* new instance of QBAFARelations
+ */
+static PyObject *
+QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
+{
+    static char *kwds[] = {"relations", NULL};
+    PyObject *args[] = {self->relations, NULL};
+
+    QBAFARelationsObject *copy = QBAFARelations_new(NULL, NULL, NULL);
+    if (copy == NULL)
+        return NULL;
+    if (QBAFARelations_init(copy, args, kwds) < 0) {
+        Py_DECREF(copy);
+        return NULL;
+    }
+    return copy;
 }
 
 /**
@@ -279,7 +446,30 @@ QBAFARelations_str(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
  * 
  */
 static PyMethodDef QBAFARelations_methods[] = {
+    {"patients", (PyCFunction) QBAFARelations_patients, METH_VARARGS | METH_KEYWORDS,
+    "Return the patients that undergo the effect of a certain action (e.g. attack, support) initiated by the agent."
+    },
+    {"agents", (PyCFunction) QBAFARelations_agents, METH_VARARGS | METH_KEYWORDS,
+    "Return the agents that initiate a certain action (e.g. attack, support) which effects are undergone by the patient."
+    },
+    {"contains", (PyCFunction) QBAFARelations_contains, METH_VARARGS | METH_KEYWORDS,
+    "Return whether or not exists the relation (agent, patient) in this instance."
+    },
+    {"add", (PyCFunction) QBAFARelations_add, METH_VARARGS | METH_KEYWORDS,
+    "Add the relation (agent, patient) to the instance."
+    },
+    {"remove", (PyCFunction) QBAFARelations_remove, METH_VARARGS | METH_KEYWORDS,
+    "Remove the relation (agent, patient) from the instance."
+    },
+    {"copy", (PyCFunction) QBAFARelations_copy, METH_NOARGS,
+    "Return a copy of the instance."
+    },
     {NULL}  /* Sentinel */
+};
+
+static PySequenceMethods QBAFARelations_sequencemethods = {
+    .sq_length = (lenfunc) QBAFARelations___len__,              // __len__
+    .sq_contains = (objobjproc) QBAFARelations___contains__,    // __contains__
 };
 
 /**
@@ -301,8 +491,9 @@ static PyTypeObject QBAFARelationsType = {
     .tp_members = QBAFARelations_members,
     .tp_methods = QBAFARelations_methods,
     .tp_getset = QBAFARelations_getsetters,
-    .tp_str = (reprfunc) QBAFARelations_str,                      // __str__
-    .tp_repr = (reprfunc) QBAFARelations_str,                     // __repr__
+    .tp_str = (reprfunc) QBAFARelations___str__,                // __str__
+    .tp_repr = (reprfunc) QBAFARelations___str__,               // __repr__
+    .tp_as_sequence = &QBAFARelations_sequencemethods,          // __len__, __contains__
 };
 
 /**

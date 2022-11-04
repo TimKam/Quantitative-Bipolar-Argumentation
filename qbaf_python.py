@@ -182,3 +182,23 @@ class QBAFARelations:
             str: The string represtation
         """
         return self.__str__()
+
+    def __len__(self) -> int:
+        """ Return the amount of relations of the instance.
+
+        Returns:
+            int: the length
+        """
+        return len(self.__relations)
+
+    def __contains__(self, agent_patient: tuple) -> bool:
+        """ Return whether or not exists the relation (agent, patient) in this instance.
+
+        Args:
+            agent_patient (tuple): a tuple (Agent: QBAFArgument, Patient: QBAFArgument)
+
+        Returns:
+            bool: True if the relation exists. Otherwise, False
+        """
+        agent, patient = agent_patient
+        return self.contains(agent, patient)
