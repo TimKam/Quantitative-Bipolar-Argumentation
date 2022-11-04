@@ -1,5 +1,5 @@
 from qbaf import QBAFArgument as Arg
-from qbaf_python import QBAFARelations as Relations
+from qbaf import QBAFARelations as Relations
 
 def main():
     a,b,c,d = Arg('a'), Arg('b'), Arg('c'), Arg('d')

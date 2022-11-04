@@ -200,10 +200,10 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
             if (set == NULL) {
                 break;
             }
-            Py_INCREF(agent);
+            Py_INCREF(patient);
             // Add patient to the set
             if (PySet_Add(set, patient) < 0) {
-                Py_DECREF(agent);
+                Py_DECREF(patient);
                 break;
             }
 
@@ -211,9 +211,10 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
             if (set == NULL) {
                 break;
             }
-            Py_INCREF(patient);
+            Py_INCREF(agent);
             // Add agent to the set
             if (PySet_Add(set, agent) < 0) {
+                Py_DECREF(agent);
                 break;
             }
             
@@ -318,14 +319,46 @@ static PyObject *
 QBAFARelations_patients(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"agent", NULL};
-    PyObject *agent, *tmp;
+    PyObject *agent;
+    PyObject *set, *list;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
                                      &agent))
         return NULL;
 
-    // TODO
-    Py_RETURN_NOTIMPLEMENTED;
+    int contains = PyDict_Contains(self->agent_patients, agent);
+    if (contains < 0)
+        return NULL;
+    if (contains) {
+        set = PyDict_GetItem(self->agent_patients, agent);
+        list = PyList_New(PySet_GET_SIZE(set));
+
+        if (list == NULL)
+            return NULL;
+        
+        PyObject *iterator = PyObject_GetIter(set);
+        PyObject *item;
+
+        if (iterator == NULL) {
+            /* propagate error */
+            return NULL;
+        }
+
+        Py_ssize_t index = 0;
+        while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+            /* do something with item */
+
+            PyList_SET_ITEM(list, index, item);
+            
+            index++;
+        }
+
+        Py_DECREF(iterator);
+
+        return list;
+    }
+
+    return PyList_New(0);
 }
 
 /**
@@ -341,14 +374,46 @@ static PyObject *
 QBAFARelations_agents(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"patient", NULL};
-    PyObject *patient, *tmp;
+    PyObject *patient;
+    PyObject *set, *list;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
                                      &patient))
         return NULL;
 
-    // TODO
-    Py_RETURN_NOTIMPLEMENTED;
+    int contains = PyDict_Contains(self->patient_agents, patient);
+    if (contains < 0)
+        return NULL;
+    if (contains) {
+        set = PyDict_GetItem(self->patient_agents, patient);
+        list = PyList_New(PySet_GET_SIZE(set));
+
+        if (list == NULL)
+            return NULL;
+        
+        PyObject *iterator = PyObject_GetIter(set);
+        PyObject *item;
+
+        if (iterator == NULL) {
+            /* propagate error */
+            return NULL;
+        }
+
+        Py_ssize_t index = 0;
+        while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+            /* do something with item */
+
+            PyList_SET_ITEM(list, index, item);
+            
+            index++;
+        }
+
+        Py_DECREF(iterator);
+
+        return list;
+    }
+
+    return PyList_New(0);
 }
 
 /**
@@ -364,13 +429,29 @@ static PyObject *
 QBAFARelations_contains(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"agent", "patient", NULL};
-    PyObject *agent, *patient, *tmp;
+    PyObject *agent, *patient;
+    PyObject *tuple;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
                                      &agent, &patient))
         return NULL;
 
-    // TODO
+    Py_INCREF(agent);
+    Py_INCREF(patient);
+    tuple = PyTuple_Pack(2, agent, patient);    // new reference
+    if (tuple == NULL) {
+        Py_DECREF(agent);
+        Py_DECREF(patient);
+        return NULL;
+    }
+    
+    int contains = QBAFARelations___contains__(self, tuple);
+    if (contains < 0) {
+        Py_DECREF(tuple);
+        return NULL;
+    }
+    if (contains)
+        Py_RETURN_TRUE;
     Py_RETURN_FALSE;
 }
 
@@ -386,13 +467,61 @@ static PyObject *
 QBAFARelations_add(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"agent", "patient", NULL};
-    PyObject *agent, *patient, *tmp;
+    PyObject *agent, *patient;
+    PyObject *tuple, *set;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
                                      &agent, &patient))
         return NULL;
 
-    // TODO
+    Py_INCREF(agent);
+    Py_INCREF(patient);
+    tuple = PyTuple_Pack(2, agent, patient);    // new reference
+    if (tuple == NULL) {
+        Py_DECREF(agent);
+        Py_DECREF(patient);
+        return NULL;
+    }
+
+    int contains = PySet_Contains(self->relations, tuple);
+    if (contains < 0) {
+        Py_DECREF(tuple);
+        return NULL;
+    }
+    if (contains) {
+        Py_DECREF(tuple);
+        Py_RETURN_NONE;
+    }
+
+    // If not contains it is inserted
+
+    if (PySet_Add(self->relations, tuple) < 0) {
+        Py_DECREF(tuple);
+        return NULL;
+    }
+
+    set = PyDict_GetItemDefaultPySet_New(self->agent_patients, agent);  // Return borrowed reference
+    if (set == NULL) {
+        return NULL;
+    }
+    Py_INCREF(patient);
+    // Add patient to the set
+    if (PySet_Add(set, patient) < 0) {
+        Py_DECREF(patient);
+        return NULL;
+    }
+
+    set = PyDict_GetItemDefaultPySet_New(self->patient_agents, patient);  // Return borrowed reference
+    if (set == NULL) {
+        return NULL;
+    }
+    Py_INCREF(agent);
+    // Add agent to the set
+    if (PySet_Add(set, agent) < 0) {
+        Py_DECREF(agent);
+        return NULL;
+    }
+
     Py_RETURN_NONE;
 }
 
@@ -408,13 +537,59 @@ static PyObject *
 QBAFARelations_remove(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"agent", "patient", NULL};
-    PyObject *agent, *patient, *tmp;
+    PyObject *agent, *patient;
+    PyObject *tuple, *set;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
                                      &agent, &patient))
         return NULL;
 
-    // TODO
+    Py_INCREF(agent);
+    Py_INCREF(patient);
+    tuple = PyTuple_Pack(2, agent, patient);    // new reference
+    if (tuple == NULL) {
+        Py_DECREF(agent);
+        Py_DECREF(patient);
+        return NULL;
+    }
+
+    int contains = PySet_Contains(self->relations, tuple);
+    if (contains < 0) {
+        Py_DECREF(tuple);
+        return NULL;
+    }
+    if (!contains) {
+        Py_DECREF(tuple);
+        Py_RETURN_NONE;
+    }
+
+    // If contains it is removed
+
+    if (PySet_Discard(self->relations, tuple) < 0) {
+        Py_DECREF(tuple);
+        return NULL;
+    }
+
+    Py_DECREF(tuple);
+
+    set = PyDict_GetItem(self->agent_patients, agent);  // Return borrowed reference
+    if (set == NULL) {
+        return NULL;
+    }
+    // Remove patient from the set
+    if (PySet_Discard(set, patient) < 0) {
+        return NULL;
+    }
+
+    set = PyDict_GetItem(self->patient_agents, patient);  // Return borrowed reference
+    if (set == NULL) {
+        return NULL;
+    }
+    // Add agent to the set
+    if (PySet_Discard(set, agent) < 0) {
+        return NULL;
+    }
+
     Py_RETURN_NONE;
 }
 
