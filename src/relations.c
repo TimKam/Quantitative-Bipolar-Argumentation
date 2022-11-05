@@ -266,11 +266,10 @@ static PyGetSetDef QBAFARelations_getsetters[] = {
  * @brief Return the string format of a QBAFARelations object
  * 
  * @param self the QBAFARelations instance
- * @param Py_UNUSED 
  * @return PyObject* the string representing the object
  */
 static PyObject *
-QBAFARelations___str__(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
+QBAFARelations___str__(QBAFARelationsObject *self)
 {
     return PyUnicode_FromFormat("QBAFARelations%S", self->relations);
 }
@@ -598,21 +597,26 @@ QBAFARelations_remove(QBAFARelationsObject *self, PyObject *args, PyObject *kwds
  * New references are created for the copy, except for the QBAFArgument objects.
  * 
  * @param self instance of QBAFARelations
+ * @param Py_UNUSED 
  * @return PyObject* new instance of QBAFARelations
  */
 static PyObject *
 QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
 {
-    static char *kwds[] = {"relations", NULL};
-    PyObject *args[] = {self->relations, NULL};
+    PyObject *kwds = NULL;
+    PyObject *args = PyTuple_Pack(1, self->relations);
+    if (args == NULL)
+        return NULL;
 
-    QBAFARelationsObject *copy = QBAFARelations_new(NULL, NULL, NULL);
+    QBAFARelationsObject *copy = QBAFARelations_new(Py_TYPE(self), args, kwds);
     if (copy == NULL)
         return NULL;
     if (QBAFARelations_init(copy, args, kwds) < 0) {
         Py_DECREF(copy);
+        Py_DECREF(args);
         return NULL;
     }
+    Py_DECREF(args);
     return copy;
 }
 
@@ -621,19 +625,19 @@ QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
  * 
  */
 static PyMethodDef QBAFARelations_methods[] = {
-    {"patients", (PyCFunction) QBAFARelations_patients, METH_VARARGS | METH_KEYWORDS,
+    {"patients", (PyCFunctionWithKeywords) QBAFARelations_patients, METH_VARARGS | METH_KEYWORDS,
     "Return the patients that undergo the effect of a certain action (e.g. attack, support) initiated by the agent."
     },
-    {"agents", (PyCFunction) QBAFARelations_agents, METH_VARARGS | METH_KEYWORDS,
+    {"agents", (PyCFunctionWithKeywords) QBAFARelations_agents, METH_VARARGS | METH_KEYWORDS,
     "Return the agents that initiate a certain action (e.g. attack, support) which effects are undergone by the patient."
     },
-    {"contains", (PyCFunction) QBAFARelations_contains, METH_VARARGS | METH_KEYWORDS,
+    {"contains", (PyCFunctionWithKeywords) QBAFARelations_contains, METH_VARARGS | METH_KEYWORDS,
     "Return whether or not exists the relation (agent, patient) in this instance."
     },
-    {"add", (PyCFunction) QBAFARelations_add, METH_VARARGS | METH_KEYWORDS,
+    {"add", (PyCFunctionWithKeywords) QBAFARelations_add, METH_VARARGS | METH_KEYWORDS,
     "Add the relation (agent, patient) to the instance."
     },
-    {"remove", (PyCFunction) QBAFARelations_remove, METH_VARARGS | METH_KEYWORDS,
+    {"remove", (PyCFunctionWithKeywords) QBAFARelations_remove, METH_VARARGS | METH_KEYWORDS,   // TODO: Check implement this with (_PyCFunctionFast)
     "Remove the relation (agent, patient) from the instance."
     },
     {"copy", (PyCFunction) QBAFARelations_copy, METH_NOARGS,
