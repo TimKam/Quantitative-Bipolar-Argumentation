@@ -202,3 +202,163 @@ class QBAFARelations:
         """
         agent, patient = agent_patient
         return self.contains(agent, patient)
+
+    def isdisjoint(self, other) -> bool:
+        """ Return whether or not this instance has no relation in common with the instance other.
+
+        Args:
+            other (QBAFARelations): other instance of QBAFARelations
+
+        Returns:
+            bool: Return True if the instances do not share any relations. Otherwise, False.
+        """
+        return self.__relations.isdisjoint(other.__relations)
+
+class QBAFramework:
+
+    def __init__(self, arguments: list, initial_weights: list, attack_relations: Union[set,list], support_relations: Union[set,list]):
+        self.__arguments = set(arguments)
+        self.__initial_weights = dict()
+        for arg, init_weight in zip(arguments, initial_weights):
+            self.__initial_weights[arg] = init_weight
+        self.__attack_relations = QBAFARelations(attack_relations)
+        self.__support_relations = QBAFARelations(support_relations)
+        if not self.__attack_relations.isdisjoint(self.__support_relations):
+            raise ValueError
+        self.__final_weights = dict()
+        self.__modified = True          # True if the object have been modified after calculating the final weights
+
+    @property
+    def arguments(self) -> set:
+        return self.__arguments.copy()
+
+    @property
+    def attack_relations(self) -> QBAFARelations:
+        return self.__attack_relations
+
+    @property
+    def support_relations(self) -> QBAFARelations:
+        return self.__support_relations
+
+    def set_initial_weight(self, argument: QBAFArgument, initial_weight: float):
+        self.__modified = True
+        self.__initial_weights[argument] = initial_weight
+    
+    def get_initial_weight(self, argument: QBAFARelations) -> float:
+        return self.__initial_weights[argument]
+
+    def add_argument(self, argument: QBAFArgument, initial_weight=0.0):
+        if argument not in self.__arguments:
+            self.__modified = True
+            self.__arguments.add(argument)
+            self.__initial_weights[argument] = initial_weight
+
+    def remove_argument(self, argument: QBAFArgument):
+        if argument in self.__arguments:
+            self.__modified = True
+            self.__arguments.remove(argument)
+            del self.__initial_weights[argument]
+
+    def add_attack_relation(self, attacker: QBAFArgument, attacked: QBAFArgument):
+        if attacker not in self.__arguments or attacked not in self.__arguments:
+            raise ValueError
+        if (attacker, attacked) in self.__support_relations:
+            raise ValueError
+        self.__modified = True
+        self.__attack_relations.add(attacker, attacked)
+
+    def remove_attack_relation(self, attacker: QBAFArgument, attacked: QBAFArgument):
+        self.__modified = True
+        self.__attack_relations.remove(attacker, attacked)
+
+    def add_support_relation(self, supporter: QBAFArgument, supported: QBAFArgument):
+        if supporter not in self.__arguments or supported not in self.__arguments:
+            raise ValueError
+        if (supporter, supported) in self.__attack_relations:
+            raise ValueError
+        self.__modified = True
+        self.__support_relations.add(supporter, supported)
+
+    def remove_support_relation(self, supporter: QBAFArgument, supported: QBAFArgument):
+        self.__modified = True
+        self.__support_relations.remove(supporter, supported)
+
+    def contains_argument(self, argument: QBAFArgument) -> bool:
+        return argument in self.__arguments
+
+    def contains_attack_relation(self, attacker: QBAFArgument, attacked: QBAFArgument) -> bool:
+        return self.__attack_relations.contains(attacker, attacked)
+
+    def contains_support_relation(self, supporter: QBAFArgument, supported: QBAFArgument) -> bool:
+        return self.__support_relations.contains(supporter, supported)
+
+    def __copy__(self):
+        arguments = []
+        initial_weights = []
+        for arg, init_weight in self.__initial_weights.items():
+            arguments.append(arg)
+            initial_weights.append(init_weight)
+        attack_relations = self.__attack_relations.relations
+        support_relations = self.__support_relations.relations
+        return QBAFramework(arguments, initial_weights, attack_relations, support_relations)
+
+    def __connected_arguments(self, argument:QBAFArgument, visiting: set, not_visited: set) -> list:
+        # If argument is being visit, do not visit it again but return it
+        if argument in visiting:
+            return [argument]
+        # We add it to visiting
+        visiting.add(argument)
+        children = self.__attack_relations.patients(argument) + self.__support_relations.patients(argument)
+        result = []
+        for child in children:
+            if child in not_visited:
+                result += self.__connected_arguments(child, visiting, not_visited)
+        not_visited.remove(argument)
+        visiting.remove(argument)
+        return result
+
+    def isacyclic(self) -> bool:
+        not_visited = self.__arguments.copy()
+        while len(not_visited) > 0:
+            argument = not_visited.pop()
+            not_visited.add(argument)
+            connected_arguments = self.__connected_arguments(argument, set(), not_visited)
+            detected_cycle = len(connected_arguments) > len(set(connected_arguments))
+            if detected_cycle:
+                return False
+        return True
+
+    def __calculate_f_weight(self, argument: QBAFArgument) -> float:
+        if argument in self.__final_weights:
+            return self.__final_weights[argument]
+        final_weight = self.get_initial_weight(argument)
+        for attacker in self.__attack_relations.agents(argument):
+            final_weight -= self.__calculate_f_weight(attacker)
+        for supporter in self.__support_relations.agents(argument):
+            final_weight += self.__calculate_f_weight(supporter)
+        self.__final_weights[argument] = final_weight
+        return final_weight
+
+    def __calculate_final_weights(self):
+        if not self.isacyclic:
+            raise NotImplementedError
+
+        self.__final_weights = dict()
+        not_visited = self.__arguments.copy()
+        while len(not_visited) > 0:
+            argument = not_visited.pop()
+            self.__calculate_f_weight(argument)
+
+    @property
+    def final_weights(self) -> dict:
+        if self.__modified:
+            self.__calculate_final_weights()
+            self.__modified = False
+        return self.__final_weights
+
+    def are_strength_consistent(self, other, arg1: QBAFArgument, arg2: QBAFArgument) -> bool:
+        if self.final_weights[arg1] < self.final_weights[arg2]:
+            return other.final_weights[arg1] < other.final_weights[arg2]
+        if self.final_weights[arg1] > self.final_weights[arg2]:
+            return other.final_weights[arg1] > other.final_weights[arg2]
+        return other.final_weights[arg1] == other.final_weights[arg2]
