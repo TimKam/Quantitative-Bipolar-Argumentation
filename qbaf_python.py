@@ -215,51 +215,126 @@ class QBAFARelations:
         return self.__relations.isdisjoint(other.__relations)
 
 class QBAFramework:
-
+    """ This class represents a Quantitative Bipolar Argumentation Framework (QBAF).
+        A QBAF is is a quadruple (Args,τ,Att,Supp) consisting of a set of arguments Args, 
+        an attack relation Att ⊆ Args x Args, a support relation Supp ⊆ Args x Args and
+        a total function τ : Args → I that assigns the initial strength τ(a) to every a ∈ Args.
+    """
     def __init__(self, arguments: list, initial_weights: list, attack_relations: Union[set,list], support_relations: Union[set,list]):
+        """ Init function of a QBAFramework.
+
+        Args:
+            arguments (list): a list of QBAFArgument
+            initial_weights (list): a list of floats corresponding to the arguments
+            attack_relations (Union[set,list]): a collection of tuples (attacker: QBAFArgument, attacked: QBAFArgument)
+            support_relations (Union[set,list]): a collection of tuples (supporter: QBAFArgument, supported: QBAFArgument)
+
+        Raises:
+            ValueError: An argument in the attack or support relations is not in the list of arguments.
+            ValueError: The attack relations and the support relations are not disjoint
+        """
         self.__arguments = set(arguments)
         self.__initial_weights = dict()
         for arg, init_weight in zip(arguments, initial_weights):
             self.__initial_weights[arg] = init_weight
         self.__attack_relations = QBAFARelations(attack_relations)
         self.__support_relations = QBAFARelations(support_relations)
+        # Checking its integrity
+        for attacker, attacked in self.__attack_relations:
+            if attacker not in self.__arguments or attacked not in self.__arguments:
+                raise ValueError
+        for supporter, supported in self.__attack_relations:
+            if supporter not in self.__arguments or supported not in self.__arguments:
+                raise ValueError
         if not self.__attack_relations.isdisjoint(self.__support_relations):
             raise ValueError
+        # Adding support variables
         self.__final_weights = dict()
         self.__modified = True          # True if the object have been modified after calculating the final weights
 
     @property
     def arguments(self) -> set:
+        """ Return a copy of the arguments of the instance.
+
+        Returns:
+            set: a set of QBAFArgument
+        """
         return self.__arguments.copy()
 
     @property
     def attack_relations(self) -> QBAFARelations:
+        """ Return the attack relations of the instance.
+
+        Returns:
+            QBAFARelations: an instance of QBAFARelations
+        """
         return self.__attack_relations
 
     @property
     def support_relations(self) -> QBAFARelations:
+        """ Return the support relations of the instance.
+
+        Returns:
+            QBAFARelations: an instance of QBAFARelations
+        """
         return self.__support_relations
 
     def set_initial_weight(self, argument: QBAFArgument, initial_weight: float):
+        """ Modify the initial weight of the Argument argument.
+
+        Args:
+            argument (QBAFArgument): the argument to be modified
+            initial_weight (float): the new value of initial weight
+        """
         self.__modified = True
         self.__initial_weights[argument] = initial_weight
     
     def get_initial_weight(self, argument: QBAFARelations) -> float:
+        """ Return the initial weight of the Argument argument
+
+        Args:
+            argument (QBAFARelations): the argument
+
+        Returns:
+            float: the initial weight
+        """
         return self.__initial_weights[argument]
 
     def add_argument(self, argument: QBAFArgument, initial_weight=0.0):
+        """ Add the Argument argument to the Framework.
+
+        Args:
+            argument (QBAFArgument): the argument
+            initial_weight (float, optional): the initial weight of the argument. Defaults to 0.0.
+        """
         if argument not in self.__arguments:
             self.__modified = True
             self.__arguments.add(argument)
             self.__initial_weights[argument] = initial_weight
 
     def remove_argument(self, argument: QBAFArgument):
+        """ Remove the Argument argument from the Framework
+
+        Args:
+            argument (QBAFArgument): the argument
+        """
         if argument in self.__arguments:
+            # TODO: Check that the argument is not in attack/support relations
             self.__modified = True
             self.__arguments.remove(argument)
             del self.__initial_weights[argument]
 
     def add_attack_relation(self, attacker: QBAFArgument, attacked: QBAFArgument):
+        """ Add the Attack relation (attacker, attacked) to the Framework.
+
+        Args:
+            attacker (QBAFArgument): the argument that is attacking
+            attacked (QBAFArgument): the argument that is attacked
+
+        Raises:
+            ValueError: The attacker or the attacked are not an argument in this Framework
+            ValueError: There is a support relation (attacker, attacked)
+        """
         if attacker not in self.__arguments or attacked not in self.__arguments:
             raise ValueError
         if (attacker, attacked) in self.__support_relations:
@@ -268,10 +343,26 @@ class QBAFramework:
         self.__attack_relations.add(attacker, attacked)
 
     def remove_attack_relation(self, attacker: QBAFArgument, attacked: QBAFArgument):
+        """ Remove the Attack relation (attacker, attacked) from the Framework
+
+        Args:
+            attacker (QBAFArgument): the argument that is attacking
+            attacked (QBAFArgument): the argument that is attacked
+        """
         self.__modified = True
         self.__attack_relations.remove(attacker, attacked)
 
     def add_support_relation(self, supporter: QBAFArgument, supported: QBAFArgument):
+        """ Add the Support relation (attacker, attacked) to the Framework.
+
+        Args:
+            supporter (QBAFArgument): the argument that is supporting
+            supported (QBAFArgument): the argument that is supported
+
+        Raises:
+            ValueError: The supporter or the supported are not an argument in this Framework.
+            ValueError: There is an attack relation (supporter, supported)
+        """
         if supporter not in self.__arguments or supported not in self.__arguments:
             raise ValueError
         if (supporter, supported) in self.__attack_relations:
@@ -280,19 +371,56 @@ class QBAFramework:
         self.__support_relations.add(supporter, supported)
 
     def remove_support_relation(self, supporter: QBAFArgument, supported: QBAFArgument):
+        """ Remove the Attack relation (supporter, supported) from the Framework.
+
+        Args:
+            supporter (QBAFArgument): the argument that is supporting
+            supported (QBAFArgument): the argument that is supported
+        """
         self.__modified = True
         self.__support_relations.remove(supporter, supported)
 
     def contains_argument(self, argument: QBAFArgument) -> bool:
+        """ Return whether or not the Framework contains the Argument argument.
+
+        Args:
+            argument (QBAFArgument): the argument
+
+        Returns:
+            bool: True if it is contanied. False, otherwise.
+        """
         return argument in self.__arguments
 
     def contains_attack_relation(self, attacker: QBAFArgument, attacked: QBAFArgument) -> bool:
+        """ Return whether or not the Attack relation (attacker, attacked) is contained in the Framework.
+
+        Args:
+            attacker (QBAFArgument): the argument that is attacking
+            attacked (QBAFArgument): the argument that is attacked
+
+        Returns:
+            bool: True if it is contanied. False, otherwise.
+        """
         return self.__attack_relations.contains(attacker, attacked)
 
     def contains_support_relation(self, supporter: QBAFArgument, supported: QBAFArgument) -> bool:
+        """ Return whether or not the Support relation (supporter, supported) is contained in the Framework.
+
+        Args:
+            supporter (QBAFArgument): the argument that is supporting
+            supported (QBAFArgument): the argument that is supported
+
+        Returns:
+            bool: True if it is contanied. False, otherwise.
+        """
         return self.__support_relations.contains(supporter, supported)
 
     def __copy__(self):
+        """ Return a copy of the Framework.
+
+        Returns:
+            QBAFramework: a new QBAFramework
+        """
         arguments = []
         initial_weights = []
         for arg, init_weight in self.__initial_weights.items():
@@ -302,7 +430,18 @@ class QBAFramework:
         support_relations = self.__support_relations.relations
         return QBAFramework(arguments, initial_weights, attack_relations, support_relations)
 
-    def __connected_arguments(self, argument:QBAFArgument, visiting: set, not_visited: set) -> list:
+    def __incycle_arguments(self, argument:QBAFArgument, not_visited: set, visiting=set()) -> list:
+        """ Return a list with the arguments that are being attacked/supported by Argument argument (itself included)
+            that are in a cycle.
+
+        Args:
+            argument (QBAFArgument): a QBAFArgument
+            not_visited (set): a set of arguments that have not been visited yet (this set is modified in this fucntion)
+            visiting (set, optional): a set of arguments that are being visited in this function. Defaults to set().
+
+        Returns:
+            list: list of QBAFArgument that contain at least one cycle
+        """
         # If argument is being visit, do not visit it again but return it
         if argument in visiting:
             return [argument]
@@ -312,23 +451,38 @@ class QBAFramework:
         result = []
         for child in children:
             if child in not_visited:
-                result += self.__connected_arguments(child, visiting, not_visited)
+                result += self.__incycle_arguments(child, not_visited, visiting)
         not_visited.remove(argument)
         visiting.remove(argument)
         return result
 
     def isacyclic(self) -> bool:
+        """ Return whether or not the relations of the Framework are acyclic
+
+        Returns:
+            bool: True if there are no cycles. False, otherwise.
+        """
         not_visited = self.__arguments.copy()
         while len(not_visited) > 0:
             argument = not_visited.pop()
             not_visited.add(argument)
-            connected_arguments = self.__connected_arguments(argument, set(), not_visited)
-            detected_cycle = len(connected_arguments) > len(set(connected_arguments))
+            in_cycle_arguments = self.__incycle_arguments(argument, not_visited)
+            detected_cycle = len(in_cycle_arguments) > 0
             if detected_cycle:
                 return False
         return True
 
     def __calculate_f_weight(self, argument: QBAFArgument) -> float:
+        """ Return the final weight of a specifi argument.
+            This function calls itself recursively. So, it only works with acyclic arguments.
+            It stores all the calculated final weights in self.__final_weights.
+
+        Args:
+            argument (QBAFArgument): _description_
+
+        Returns:
+            float: _description_
+        """
         if argument in self.__final_weights:
             return self.__final_weights[argument]
         final_weight = self.get_initial_weight(argument)
@@ -340,6 +494,12 @@ class QBAFramework:
         return final_weight
 
     def __calculate_final_weights(self):
+        """ Calculate the final weights of all the arguments of the Framework.
+            It stores all the calculated final weights in self.__final_weights.
+
+        Raises:
+            NotImplementedError: The relations are not acyclic. There is no implementation for cyclic relations.
+        """
         if not self.isacyclic:
             raise NotImplementedError
 
@@ -351,12 +511,29 @@ class QBAFramework:
 
     @property
     def final_weights(self) -> dict:
+        """ Return the final weights of arguments of the Framework.
+            If the framework has been modified from the last time they were calculated
+            they are calculated again. Otherwise, it returns the already calculated final weights.
+
+        Returns:
+            dict: a dictionary with (key, value): (argument: QBAFArgument, final_weight: float)
+        """
         if self.__modified:
             self.__calculate_final_weights()
             self.__modified = False
         return self.__final_weights
 
     def are_strength_consistent(self, other, arg1: QBAFArgument, arg2: QBAFArgument) -> bool:
+        """ Return whether or not a pair of arguments are strength consistent between two frameworks.
+
+        Args:
+            other (QBAFramework): a different instance of QBAFramework
+            arg1 (QBAFArgument): first argument
+            arg2 (QBAFArgument): second argument
+
+        Returns:
+            bool: True if they are strength consistent. False, otherwise.
+        """
         if self.final_weights[arg1] < self.final_weights[arg2]:
             return other.final_weights[arg1] < other.final_weights[arg2]
         if self.final_weights[arg1] > self.final_weights[arg2]:
