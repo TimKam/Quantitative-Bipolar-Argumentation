@@ -19,4 +19,32 @@
  */
 // PyTypeObject *get_QBAFARelationsType(void);
 
+/**
+ * @brief Struct that defines the Object Type ARelations in a QBAF.
+ * 
+ */
+typedef struct {
+    PyObject_HEAD
+    PyObject *relations;        /* set of tuples (Agent: QBAFArgument, Patient: QBAFArgument) */
+    PyObject *agent_patients;   /* dictonary of (key, value) = (Agent, set of Patients) */
+    PyObject *patient_agents;   /* dictonary of (key, value) = (Patient, set of Agents) */
+} QBAFARelationsObject;
+
+/**
+ * @brief Create a new object QBAFARelations.
+ * 
+ * @param relations a set/list of tuples (Agent: QBAFArgument, Patient QBAFArgument)
+ * @return PyObject* New reference
+ */
+PyObject *QBAFARelations_Create(PyObject *relations);
+
+/**
+ * @brief Return 1 if their relations are disjoint, 0 if they are not, and -1 if an error is encountered.
+ * 
+ * @param self a QBAFARelations instance (not NULL)
+ * @param other a different QBAFARelations instance (not NULL)
+ * @return int 1 if they are disjoint, 0 if they are not, and -1 if an error is encountered
+ */
+int _QBAFARelations_isDisjoint(QBAFARelationsObject *self, QBAFARelationsObject *other);
+
 #endif

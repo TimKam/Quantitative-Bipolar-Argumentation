@@ -15,12 +15,12 @@
  * @brief Struct that defines the Object Type ARelations in a QBAF.
  * 
  */
-typedef struct {
-    PyObject_HEAD
-    PyObject *relations;        /* set of tuples (Agent: QBAFArgument, Patient: QBAFArgument) */
-    PyObject *agent_patients;   /* dictonary of (key, value) = (Agent, set of Patients) */
-    PyObject *patient_agents;   /* dictonary of (key, value) = (Patient, set of Agents) */
-} QBAFARelationsObject;
+//typedef struct {
+//    PyObject_HEAD
+//    PyObject *relations;        /* set of tuples (Agent: QBAFArgument, Patient: QBAFArgument) */
+//    PyObject *agent_patients;   /* dictonary of (key, value) = (Agent, set of Patients) */
+//    PyObject *patient_agents;   /* dictonary of (key, value) = (Patient, set of Agents) */
+//} QBAFARelationsObject;
 
 /**
  * @brief This function is used by the garbage collector to detect reference cycles.
@@ -610,8 +610,10 @@ QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
         return NULL;
 
     QBAFARelationsObject *copy = QBAFARelations_new(Py_TYPE(self), args, kwds);
-    if (copy == NULL)
+    if (copy == NULL) {
+        Py_DECREF(args);
         return NULL;
+    }
     if (QBAFARelations_init(copy, args, kwds) < 0) {
         Py_DECREF(copy);
         Py_DECREF(args);
@@ -628,7 +630,7 @@ QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
  * @param other a different QBAFARelations instance (not NULL)
  * @return int 1 if they are disjoint, 0 if they are not, and -1 if an error is encountered
  */
-static int
+int
 _QBAFARelations_isDisjoint(QBAFARelationsObject *self, QBAFARelationsObject *other) {
     return PySet_IsDisjoint(self->relations, other->relations);
 }
@@ -732,4 +734,34 @@ static PyTypeObject QBAFARelationsType = {
  */
 PyTypeObject *get_QBAFARelationsType() {
     return &QBAFARelationsType;
+}
+
+/**
+ * @brief Create a new object QBAFARelations.
+ * 
+ * @param relations a set/list of tuples (Agent: QBAFArgument, Patient QBAFArgument)
+ * @return PyObject* New reference
+ */
+PyObject *
+QBAFARelations_Create(PyObject *relations)
+{
+    PyObject *kwds = NULL;
+    PyObject *args = PyTuple_Pack(1, relations);
+    if (args == NULL)
+        return NULL;
+
+    QBAFARelationsObject *new = QBAFARelations_new(&QBAFARelationsType, args, kwds);
+    if (new == NULL) {
+        Py_DECREF(args);
+        return NULL;
+    }
+
+    if (QBAFARelations_init(new, args, kwds) < 0) {
+        Py_DECREF(new);
+        Py_DECREF(args);
+        return NULL;
+    }
+
+    Py_DECREF(args);
+    return (PyObject*) new;
 }

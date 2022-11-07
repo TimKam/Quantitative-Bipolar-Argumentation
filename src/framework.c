@@ -9,6 +9,7 @@
 #include "structmember.h"
 
 #include "framework.h"
+#include "relations.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -106,6 +107,62 @@ QBAFramework_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 }
 
 /**
+ * @brief It creates a PyDict from a list of keys and a list of values.
+ * 
+ * @param keys a list of keys (not NULL)
+ * @param values a list of values (not NULL) with same size as keys
+ * @return PyObject* New reference
+ */
+static inline PyObject *
+PyDict_FromLists(PyObject *keys, PyObject *values) {
+    PyObject *key_iterator, *value_iterator;
+    PyObject *key_item, *value_item;
+
+    key_iterator = PyObject_GetIter(keys);
+    if (key_iterator == NULL) {
+        return NULL;
+    }
+
+    value_iterator = PyObject_GetIter(values);
+    if (value_iterator == NULL) {
+        Py_DECREF(key_iterator);
+        return NULL;
+    }
+
+    PyObject *dict = PyDict_New();
+    if (dict == NULL) {
+        Py_DECREF(key_iterator);
+        Py_DECREF(value_iterator);
+        return NULL;
+    }
+
+    while ((key_item = PyIter_Next(key_iterator))) {    // PyIter_Next returns a new reference
+        value_item = PyIter_Next(value_iterator);
+        if (value_item == NULL) {
+            Py_DECREF(key_item);
+            Py_DECREF(key_iterator);
+            Py_DECREF(value_iterator);
+            Py_DECREF(dict);
+            return NULL; 
+        }
+
+        if (PyDict_SetItem(dict, key_item, value_item) < 0) {
+            Py_DECREF(key_item);
+            Py_DECREF(value_item);
+            Py_DECREF(key_iterator);
+            Py_DECREF(value_iterator);
+            Py_DECREF(dict);
+            return NULL;
+        }
+    }
+
+    Py_DECREF(key_iterator);
+    Py_DECREF(value_iterator);
+
+    return dict;
+}
+
+/**
  * @brief Initializer of a QBAFramework instance. It is called right after the constructor by the python interpreter.
  * 
  * @param self the Object 
@@ -117,7 +174,7 @@ static int
 QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"arguments", "initial_weights", "attack_relations", "support_relations", NULL};
-    PyObject *arguments, *initial_weights, *attack_relations, *support_relations;
+    PyObject *arguments, *initial_weights, *attack_relations, *support_relations, *tmp;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOOO|", kwlist,
                                      &arguments, &initial_weights, &attack_relations, &support_relations))
@@ -138,7 +195,57 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
         return -1;
     }
     
-    // TODO
+    // Initialize arguments
+    tmp = self->arguments;
+    self->arguments = PySet_New(arguments);
+    if (self->arguments == NULL) {
+        /* propagate error*/
+        self->arguments = tmp;
+        return -1;
+    }
+    Py_DECREF(tmp);
+
+    // Initialize initial_weights
+    tmp = self->initial_weights;
+    self->initial_weights = PyDict_FromLists(arguments, initial_weights);
+    if (self->initial_weights == NULL) {
+        /* propagate error*/
+        self->initial_weights = tmp;
+        return -1;
+    }
+    Py_DECREF(tmp);
+
+    // Initialize attack relations
+    tmp = self->attack_relations;
+    self->attack_relations = QBAFARelations_Create(attack_relations);
+    if (self->attack_relations == NULL) {
+        /* propagate error*/
+        self->attack_relations = tmp;
+        return -1;
+    }
+    Py_DECREF(tmp);
+
+    // Initialize support relations
+    tmp = self->support_relations;
+    self->support_relations = QBAFARelations_Create(support_relations);
+    if (self->support_relations == NULL) {
+        /* propagate error*/
+        self->support_relations = tmp;
+        return -1;
+    }
+    Py_DECREF(tmp);
+
+    // TODO: Check that the arguments in attack and support relations are in the arguments
+
+    // Check attack and support relations are disjoint
+    int disjoint = _QBAFARelations_isDisjoint(self->attack_relations, self->support_relations);
+    if (disjoint < 0) {
+        return -1;
+    }
+    if (!disjoint) {
+        PyErr_SetString(PyExc_ValueError, "attack_relations and support_relations must be disjoint");
+        return -1;
+    }
 
     return 0;
 }
@@ -162,6 +269,19 @@ static PyObject *
 QBAFramework_getarguments(QBAFrameworkObject *self, void *closure)
 {
     return PySet_New(self->arguments);
+}
+
+/**
+ * @brief Getter of the attribute initial_weights.
+ * 
+ * @param self the QBAFramework object
+ * @param closure 
+ * @return PyObject* copy of a dict of (argument: QBAFArgument, initial_weight: float)
+ */
+static PyObject *
+QBAFramework_getinitial_weights(QBAFrameworkObject *self, void *closure)
+{
+    return PyDict_Copy(self->initial_weights);
 }
 
 /**
@@ -197,6 +317,8 @@ QBAFramework_getsupport_relations(QBAFrameworkObject *self, void *closure)
 static PyGetSetDef QBAFramework_getsetters[] = {
     {"arguments", (getter) QBAFramework_getarguments, NULL,
      "Return a copy of the arguments of the instance.", NULL},
+    {"initial_weights", (getter) QBAFramework_getinitial_weights, NULL,
+     "Return a copy of the initial weights.", NULL},
     {"attack_relations", (getter) QBAFramework_getattack_relations, NULL,
      "Return the attack relations of the instance.", NULL},
     {"support_relations", (getter) QBAFramework_getsupport_relations, NULL,

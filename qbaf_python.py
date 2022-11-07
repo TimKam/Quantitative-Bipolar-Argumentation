@@ -279,6 +279,15 @@ class QBAFramework:
         """
         return self.__support_relations
 
+    @property
+    def initial_weights(self) -> dict:
+        """ Return a copy of the initial weights.
+
+        Returns:
+            dict: a dictionary (argument: QBAFArgument, initial_weight: float)
+        """
+        return self.__initial_weights.copy()
+
     def set_initial_weight(self, argument: QBAFArgument, initial_weight: float):
         """ Modify the initial weight of the Argument argument.
 
