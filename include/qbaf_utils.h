@@ -1,7 +1,7 @@
 /**
  * @file qbaf_utils.h
  * @author Jose Ruiz Alarcon
- * @brief  Module with util functions for PySet and PyList
+ * @brief  Module that defines utility functions for PySet and PyList
  */
 
 #ifndef _QBAF_UTILS_H_

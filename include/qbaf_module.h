@@ -24,4 +24,11 @@ PyTypeObject *get_QBAFArgumentType(void);
  */
 PyTypeObject *get_QBAFARelationsType(void);
 
+/**
+ * @brief Get the QBAFrameworkType object that defines the class QBAFramework
+ * 
+ * @return PyTypeObject* a pointer to the QBAFramework class definition
+ */
+PyTypeObject *get_QBAFrameworkType(void);
+
 #endif
