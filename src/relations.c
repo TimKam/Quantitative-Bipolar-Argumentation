@@ -765,3 +765,59 @@ QBAFARelations_Create(PyObject *relations)
     Py_DECREF(args);
     return (PyObject*) new;
 }
+
+/**
+ * @brief Return True if all the arguments of self are contained in arguments, if not False,
+ *        and -1 if there is an error.
+ * 
+ * @param self an instance of QBAFARelations
+ * @param arguments a set of QBAFArgument
+ * @return int 1 if contained, 0 if not contained, and -1 if an error is encountered
+ */
+int
+QBAFARelations_ArgsContained(QBAFARelationsObject *self, PyObject *arguments) {
+    PyObject *iterator = PyObject_GetIter(self->relations);
+    PyObject *item;
+    PyObject *agent, *patient;
+    int contains;
+
+    if (iterator == NULL) {
+        /* propagate error */
+        return -1;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        agent = PyTuple_GetItem(item, 0);       // Returns borrowed reference. NULL if the index is wrong.
+        patient = PyTuple_GetItem(item, 1);     // Returns borrowed reference. NULL if the index is wrong.
+        Py_DECREF(item);
+
+        if (agent == NULL || patient == NULL) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+
+        contains = PySet_Contains(arguments, agent);
+        if (contains < 0) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+        if (!contains) {
+            Py_DECREF(iterator);
+            return 0;   // return False
+        }
+
+        contains = PySet_Contains(arguments, patient);
+        if (contains < 0) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+        if (!contains) {
+            Py_DECREF(iterator);
+            return 0;   // return False
+        }
+    }
+
+    Py_DECREF(iterator);
+
+    return 1;   // return True
+}

@@ -235,7 +235,25 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
     }
     Py_DECREF(tmp);
 
-    // TODO: Check that the arguments in attack and support relations are in the arguments
+    // Check that the arguments of attack relations are in the arguments
+    int contained = QBAFARelations_ArgsContained(self->attack_relations, self->arguments);
+    if (contained < 0) {
+        return -1;
+    }
+    if (!contained)  {
+        PyErr_SetString(PyExc_ValueError, "all relation components of attack_relations must be in arguments");
+        return -1;
+    }
+
+    // Check that the arguments of support relations are in the arguments
+    contained = QBAFARelations_ArgsContained(self->support_relations, self->arguments);
+    if (contained < 0) {
+        return -1;
+    }
+    if (!contained)  {
+        PyErr_SetString(PyExc_ValueError, "all relation components of support_relations must be in arguments");
+        return -1;
+    }
 
     // Check attack and support relations are disjoint
     int disjoint = _QBAFARelations_isDisjoint(self->attack_relations, self->support_relations);
