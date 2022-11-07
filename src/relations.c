@@ -9,6 +9,7 @@
 #include "structmember.h"
 
 #include "relations.h"
+#include "qbaf_utils.h"
 
 /**
  * @brief Struct that defines the Object Type ARelations in a QBAF.
@@ -621,6 +622,49 @@ QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
 }
 
 /**
+ * @brief Return 1 if their relations are disjoint, 0 if they are not, and -1 if an error is encountered.
+ * 
+ * @param self a QBAFARelations instance (not NULL)
+ * @param other a different QBAFARelations instance (not NULL)
+ * @return int 1 if they are disjoint, 0 if they are not, and -1 if an error is encountered
+ */
+static int
+_QBAFARelations_isDisjoint(QBAFARelationsObject *self, QBAFARelationsObject *other) {
+    return PySet_IsDisjoint(self->relations, other->relations);
+}
+
+/**
+ * @brief Return True if their relations are disjoint, False if they are not, and NULL if an error is encountered.
+ * 
+ * @param self a QBAFARelations instance (not NULL)
+ * @param other a different QBAFARelations instance (not NULL)
+ * @return PyObject* Py_True if they are disjoint, Py_False if they are not, and NULL if an error is encountered
+ */
+static PyObject *
+QBAFARelations_isDisjoint(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"other", NULL};
+    PyObject * other;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
+                                     &other))
+        return NULL;
+
+    if (!PyObject_TypeCheck(other, Py_TYPE(self))) {
+        PyErr_SetString(PyExc_TypeError, "Disjoint operation of 'QBAFARelations' with instance of a different type not supported");
+        return NULL;
+    }
+
+    int disjoint = _QBAFARelations_isDisjoint(self, (QBAFARelationsObject*) other);
+    if (disjoint < 0)
+        return NULL;
+    
+    if (disjoint)
+        Py_RETURN_TRUE;
+    Py_RETURN_FALSE;
+}
+
+/**
  * @brief List of functions of the class QBAFARelations.
  * 
  */
@@ -637,11 +681,17 @@ static PyMethodDef QBAFARelations_methods[] = {
     {"add", (PyCFunctionWithKeywords) QBAFARelations_add, METH_VARARGS | METH_KEYWORDS,
     "Add the relation (agent, patient) to the instance."
     },
-    {"remove", (PyCFunctionWithKeywords) QBAFARelations_remove, METH_VARARGS | METH_KEYWORDS,   // TODO: Check implement this with (_PyCFunctionFast)
+    {"remove", (PyCFunctionWithKeywords) QBAFARelations_remove, METH_VARARGS | METH_KEYWORDS, 
     "Remove the relation (agent, patient) from the instance."
+    },
+    {"__copy__", (PyCFunction) QBAFARelations_copy, METH_NOARGS,
+    "Return a copy of the instance."
     },
     {"copy", (PyCFunction) QBAFARelations_copy, METH_NOARGS,
     "Return a copy of the instance."
+    },
+    {"isdisjoint", (PyCFunctionWithKeywords) QBAFARelations_isDisjoint, METH_VARARGS | METH_KEYWORDS, 
+    "Return True if their relations are disjoint, False if they are not."
     },
     {NULL}  /* Sentinel */
 };
