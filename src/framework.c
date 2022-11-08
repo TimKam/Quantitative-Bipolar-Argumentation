@@ -163,6 +163,68 @@ PyDict_FromLists(PyObject *keys, PyObject *values) {
 }
 
 /**
+ * @brief It creates a list of PyFloat from a list of numeric (PyFloat or PyLong),
+ *        return NULL if an error occurred and raises an exception.
+ *        Note: The error description assumes this is run in the init.
+ * 
+ * @param list a PyList (not NULL) of numeric values
+ * @return PyObject* a new PyList
+ */
+static inline PyObject *
+PyListFloat_FromPyListNumeric(PyObject *list) {
+    PyObject *new = PyList_New(PyList_GET_SIZE(list));  // New reference
+    if (new == NULL)
+        return NULL;
+
+    PyObject *iterator = PyObject_GetIter(list);
+    PyObject *item;
+
+    if (iterator == NULL) {
+        Py_DECREF(new);
+        return NULL;
+    }
+
+    Py_ssize_t index = 0;
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+
+        if (!PyFloat_Check(item) && !PyLong_Check(item)) {
+            PyErr_SetString(PyExc_TypeError, "all items of initial_weights must be of a numeric type (int, float)");
+            Py_DECREF(item);
+            Py_DECREF(iterator);
+            Py_DECREF(new);
+            return NULL;
+        }
+
+        if (PyLong_Check(item)) {
+            // Transform the PyLong to PyFloat
+            double weight = PyLong_AsDouble(item);
+            Py_DECREF(item);
+            if (weight == -1.0 && PyErr_Occurred()) {
+                Py_DECREF(iterator);
+                Py_DECREF(new);
+                return NULL;
+            }
+
+            item = PyFloat_FromDouble(weight);  // New reference
+            if (item == NULL) {
+                PyErr_SetString(PyExc_ValueError, "float could not be created");
+                Py_DECREF(iterator);
+                Py_DECREF(new);
+                return NULL;
+            }
+        }
+
+        PyList_SET_ITEM(new, index, item);
+
+        index++;
+    }
+
+    Py_DECREF(iterator);
+
+    return new;
+}
+
+/**
  * @brief Initializer of a QBAFramework instance. It is called right after the constructor by the python interpreter.
  * 
  * @param self the Object 
@@ -205,9 +267,16 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
     }
     Py_DECREF(tmp);
 
+    // Check that all init weights are numerical values
+    initial_weights = PyListFloat_FromPyListNumeric(initial_weights);   // New reference
+    if (initial_weights == NULL) {
+        return -1;
+    }
+
     // Initialize initial_weights
     tmp = self->initial_weights;
     self->initial_weights = PyDict_FromLists(arguments, initial_weights);
+    Py_DECREF(initial_weights);
     if (self->initial_weights == NULL) {
         /* propagate error*/
         self->initial_weights = tmp;
@@ -345,10 +414,85 @@ static PyGetSetDef QBAFramework_getsetters[] = {
 };
 
 /**
+ * @brief Modify the initial weight of the Argument argument.
+ * 
+ * @param self an instance of QBAFramework
+ * @param args the argument values (argument: QBAFArgument, initial_weight: float)
+ * @param kwds the argument names
+ * @return PyObject* new Py_None, NULL in case of error
+ */
+static PyObject *
+QBAFramework_modify_initial_weights(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"argument", "initial_weight", NULL};
+    PyObject *argument, *initial_weight;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
+                                     &argument, &initial_weight))
+        return NULL;
+
+    if (!PyFloat_Check(initial_weight) && !PyLong_Check(initial_weight)) {
+        PyErr_SetString(PyExc_TypeError, "initial_weight must be of a numeric type");
+        return NULL;
+    }
+
+    if (PyLong_Check(initial_weight)) {
+        // Transform the PyLong to PyFloat
+        double weight = PyLong_AsDouble(initial_weight);
+        if (weight == -1.0 && PyErr_Occurred()) {
+            return NULL;
+        }
+
+        initial_weight = PyFloat_FromDouble(weight);
+        if (initial_weight == NULL) {
+            PyErr_SetString(PyExc_ValueError, "initial_weight could not be transformed to float");
+            return NULL;
+        }
+    }
+
+    Py_INCREF(argument);
+    if (PyDict_SetItem(self->initial_weights, argument, initial_weight) < 0) {
+        Py_DECREF(argument);
+        return NULL;
+    }
+
+    self->modified = TRUE;
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * @brief Return the initial weight of the Argument argument, NULL in case of error.
+ * 
+ * @param self an instance of QBAFramework
+ * @param args the argument values (argument: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new PyFloat
+ */
+static PyObject *
+QBAFramework_initial_weight(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"argument", NULL};
+    PyObject *argument;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
+                                     &argument))
+        return NULL;
+
+    return PyDict_GetItemWithError(self->initial_weights, argument);
+}
+
+/**
  * @brief List of functions of the class QBAFramework
  * 
  */
 static PyMethodDef QBAFramework_methods[] = {
+    {"modify_initial_weight", (PyCFunctionWithKeywords) QBAFramework_modify_initial_weights, METH_VARARGS | METH_KEYWORDS,
+    "Modify the initial weight of the Argument argument."
+    },
+    {"initial_weight", (PyCFunctionWithKeywords) QBAFramework_initial_weight, METH_VARARGS | METH_KEYWORDS,
+    "Return the initial weight of the Argument argument."
+    },
     {NULL}  /* Sentinel */
 };
 

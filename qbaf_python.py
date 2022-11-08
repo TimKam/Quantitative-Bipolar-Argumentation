@@ -288,7 +288,7 @@ class QBAFramework:
         """
         return self.__initial_weights.copy()
 
-    def set_initial_weight(self, argument: QBAFArgument, initial_weight: float):
+    def modify_initial_weight(self, argument: QBAFArgument, initial_weight: float):
         """ Modify the initial weight of the Argument argument.
 
         Args:
@@ -298,8 +298,8 @@ class QBAFramework:
         self.__modified = True
         self.__initial_weights[argument] = initial_weight
     
-    def get_initial_weight(self, argument: QBAFARelations) -> float:
-        """ Return the initial weight of the Argument argument
+    def initial_weight(self, argument: QBAFARelations) -> float:
+        """ Return the initial weight of the Argument argument.
 
         Args:
             argument (QBAFARelations): the argument

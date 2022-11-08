@@ -137,7 +137,7 @@ PyDict_GetItemDefaultPySet_New(PyObject *dict, PyObject *key)
  * @brief Initializer of a QBAFARelations. It is called right after the constructor by the python interpreter.
  * 
  * @param self the Object 
- * @param args the argument values that might be used by the constructor
+ * @param args the argument values that might be used by the initializator
  * @param kwds the names of the argument values
  * @return int 0 if it was executed with no errors. Otherwise, -1.
  */
