@@ -58,4 +58,14 @@ int _QBAFARelations_isDisjoint(QBAFARelationsObject *self, QBAFARelationsObject 
 int
 QBAFARelations_ArgsContained(QBAFARelationsObject *self, PyObject *arguments);
 
+/**
+ * @brief Return True if if the argument is contained, False if not contained, and -1 if an error is encountered.
+ * 
+ * @param self an instance of QBAFARelations
+ * @param argument an instance of QBAFArgument
+ * @return int 1 if contained, 0 if not contained, and -1 if an error is encountered
+ */
+int
+QBAFARelations_contains_argument(QBAFARelationsObject *self, PyObject *argument);
+
 #endif

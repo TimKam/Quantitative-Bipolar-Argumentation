@@ -443,18 +443,23 @@ QBAFramework_modify_initial_weights(QBAFrameworkObject *self, PyObject *args, Py
             return NULL;
         }
 
-        initial_weight = PyFloat_FromDouble(weight);
+        initial_weight = PyFloat_FromDouble(weight);    // New reference
         if (initial_weight == NULL) {
             PyErr_SetString(PyExc_ValueError, "initial_weight could not be transformed to float");
             return NULL;
         }
+    } else {  
+        Py_INCREF(initial_weight);
     }
 
     Py_INCREF(argument);
     if (PyDict_SetItem(self->initial_weights, argument, initial_weight) < 0) {
         Py_DECREF(argument);
+        Py_DECREF(initial_weight);
         return NULL;
     }
+
+    Py_DECREF(initial_weight);
 
     self->modified = TRUE;
 
@@ -483,6 +488,147 @@ QBAFramework_initial_weight(QBAFrameworkObject *self, PyObject *args, PyObject *
 }
 
 /**
+ * @brief Add an Argument to the Framework. If it exists already it does nothing.
+ * 
+ * @param self an instance of QBAFramework
+ * @param args the argument values (argument: QBAFArgument, initial_weight: float)
+ * @param kwds the argument names
+ * @return PyObject* new Py_None, NULL in case of error
+ */
+static PyObject *
+QBAFramework_add_argument(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"argument", "initial_weight", NULL};
+    PyObject *argument, *initial_weight = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|O", kwlist,
+                                     &argument, &initial_weight))
+        return NULL;
+
+    double default_initial_weight = 0.0;
+
+    if (initial_weight == NULL) {
+
+        initial_weight = PyFloat_FromDouble(default_initial_weight);    // New reference
+        if (initial_weight == NULL)
+            return NULL;
+
+    } else {
+
+        if (!PyFloat_Check(initial_weight) && !PyLong_Check(initial_weight)) {
+            PyErr_SetString(PyExc_TypeError, "initial_weight must be of a numeric type");
+            return NULL;
+        }
+
+        if (PyLong_Check(initial_weight)) {
+            // Transform the PyLong to PyFloat
+            double weight = PyLong_AsDouble(initial_weight);
+            if (weight == -1.0 && PyErr_Occurred()) {
+                return NULL;
+            }
+
+            initial_weight = PyFloat_FromDouble(weight);    // New reference
+            if (initial_weight == NULL) {
+                PyErr_SetString(PyExc_ValueError, "initial_weight could not be transformed to float");
+                return NULL;
+            }
+        } else {  
+            Py_INCREF(initial_weight);
+        }
+
+    }
+
+    int contains = PySet_Contains(self->arguments, argument);
+    if (contains < 0) {
+        Py_DECREF(initial_weight);
+        return NULL;
+    }
+    if (contains) { // If the argument already exists it does nothing
+        Py_RETURN_NONE;
+    }
+
+    Py_INCREF(argument);
+    if (PyDict_SetItem(self->initial_weights, argument, initial_weight) < 0) {
+        Py_DECREF(argument);
+        Py_DECREF(initial_weight);
+        return NULL;
+    }
+
+    Py_DECREF(initial_weight);
+
+    Py_INCREF(argument);
+    if (PySet_Add(self->arguments, argument) < 0) {
+        Py_DECREF(argument);
+        return NULL;
+    }
+
+    self->modified = TRUE;
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * @brief Remove an Argument from the Framework. If it does not exists already it does nothing.
+ * 
+ * @param self an instance of QBAFramework
+ * @param args the argument values (argument: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new Py_None, NULL in case of error
+ */
+static PyObject *
+QBAFramework_remove_argument(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"argument", NULL};
+    PyObject *argument;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
+                                     &argument))
+        return NULL;
+
+    int contains = PySet_Contains(self->arguments, argument);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (!contains) { // If the argument does not exist it does nothing
+        Py_RETURN_NONE;
+    }
+
+    // Check that the argument is not in attack relations
+    contains = QBAFARelations_contains_argument(self->attack_relations, argument);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (contains) {
+        PyErr_SetString(PyExc_ValueError,
+                        "cannot remove argument that is contained in attack relations");
+        return NULL;
+    }
+
+    // Check that the argument is not in support relations
+    contains = QBAFARelations_contains_argument(self->support_relations, argument);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (contains) {
+        PyErr_SetString(PyExc_ValueError,
+                        "cannot remove argument that is contained in support relations");
+        return NULL;
+    }
+
+    if (PySet_Discard(self->arguments, argument) < 0) {
+        return NULL;
+    }
+
+    if (PyDict_DelItem(self->initial_weights, argument) < 0) {
+        return NULL;
+    }
+
+    self->modified = TRUE;
+
+    Py_RETURN_NONE;
+}
+
+/**
  * @brief List of functions of the class QBAFramework
  * 
  */
@@ -492,6 +638,12 @@ static PyMethodDef QBAFramework_methods[] = {
     },
     {"initial_weight", (PyCFunctionWithKeywords) QBAFramework_initial_weight, METH_VARARGS | METH_KEYWORDS,
     "Return the initial weight of the Argument argument."
+    },
+    {"add_argument", (PyCFunctionWithKeywords) QBAFramework_add_argument, METH_VARARGS | METH_KEYWORDS,
+    "Add an Argument to the Framework. If it exists already it does nothing."
+    },
+    {"remove_argument", (PyCFunctionWithKeywords) QBAFramework_remove_argument, METH_VARARGS | METH_KEYWORDS,
+    "Remove the Argument argument from the Framework. If it does not exist it does nothing."
     },
     {NULL}  /* Sentinel */
 };

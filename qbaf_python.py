@@ -310,7 +310,7 @@ class QBAFramework:
         return self.__initial_weights[argument]
 
     def add_argument(self, argument: QBAFArgument, initial_weight=0.0):
-        """ Add the Argument argument to the Framework.
+        """ Add an Argument to the Framework. If it exists already it does nothing.
 
         Args:
             argument (QBAFArgument): the argument
@@ -322,7 +322,7 @@ class QBAFramework:
             self.__initial_weights[argument] = initial_weight
 
     def remove_argument(self, argument: QBAFArgument):
-        """ Remove the Argument argument from the Framework
+        """ Remove the Argument argument from the Framework. If it does not exist it does nothing.
 
         Args:
             argument (QBAFArgument): the argument

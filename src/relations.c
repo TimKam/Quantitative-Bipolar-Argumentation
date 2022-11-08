@@ -821,3 +821,43 @@ QBAFARelations_ArgsContained(QBAFARelationsObject *self, PyObject *arguments) {
 
     return 1;   // return True
 }
+
+/**
+ * @brief Return True if if the argument is contained, False if not contained, and -1 if an error is encountered.
+ * 
+ * @param self an instance of QBAFARelations
+ * @param argument an instance of QBAFArgument
+ * @return int 1 if contained, 0 if not contained, and -1 if an error is encountered
+ */
+int
+QBAFARelations_contains_argument(QBAFARelationsObject *self, PyObject *argument) {
+    PyObject *tuple, *list;
+
+    tuple = PyTuple_Pack(1, argument); // New reference
+
+    list = QBAFARelations_agents(self, tuple, NULL);
+    if (list == NULL) {
+        Py_DECREF(tuple);
+        return -1;
+    }
+    if (PyList_GET_SIZE(list) > 0) {
+        Py_DECREF(tuple);
+        return 1;   // return True
+    }
+
+    list = QBAFARelations_patients(self, tuple, NULL);
+    if (list == NULL) {
+        Py_DECREF(tuple);
+        return -1;
+    }
+
+    Py_DECREF(tuple);
+    if (PyList_GET_SIZE(list) > 0) {
+        Py_DECREF(tuple);
+        return 1;   // return True
+    }
+
+    Py_DECREF(tuple);
+
+    return 0;   // return False
+}
