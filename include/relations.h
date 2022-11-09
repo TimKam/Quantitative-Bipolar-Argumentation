@@ -87,4 +87,14 @@ int _QBAFARelations_contains(QBAFARelationsObject *self, PyObject *agent, PyObje
  */
 int _QBAFARelations_add(QBAFARelationsObject *self, PyObject *agent, PyObject *patient);
 
+/**
+ * @brief Remove the relation (agent, patient) to this instance. Return -1 if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @param patient instance of QBAFArgument
+ * @return int 0 if success, -1 in case of error
+ */
+int _QBAFARelations_remove(QBAFARelationsObject *self, PyObject *agent, PyObject *patient);
+
 #endif

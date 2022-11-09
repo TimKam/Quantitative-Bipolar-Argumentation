@@ -934,3 +934,37 @@ _QBAFARelations_add(QBAFARelationsObject *self, PyObject *agent, PyObject *patie
 
     return 0;
 }
+
+/**
+ * @brief Remove the relation (agent, patient) to this instance. Return -1 if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @param patient instance of QBAFArgument
+ * @return int 0 if success, -1 in case of error
+ */
+int
+_QBAFARelations_remove(QBAFARelationsObject *self, PyObject *agent, PyObject *patient)
+{
+    static char *kwds = NULL;
+    PyObject *args;
+
+    Py_INCREF(agent);
+    Py_INCREF(patient);
+    args = PyTuple_Pack(2, agent, patient); // New reference
+    if (args == NULL) {
+        Py_DECREF(agent);
+        Py_DECREF(patient);
+        return -1;
+    }
+
+    PyObject *none = QBAFARelations_remove(self, args, kwds);
+    Py_DECREF(args);
+    if (none == NULL) {
+        return -1;
+    }
+
+    Py_DECREF(none);
+
+    return 0;
+}
