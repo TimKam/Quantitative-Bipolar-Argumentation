@@ -833,6 +833,99 @@ QBAFramework_remove_support_relation(QBAFrameworkObject *self, PyObject *args, P
 }
 
 /**
+ * @brief Return True if the argument is contained, False if it is not, NULL if an error has occurred.
+ * 
+ * @param self an instance of QBAFramework
+ * @param args the argument values (argument: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new PyBool, NULL in case of error
+ */
+static PyObject *
+QBAFramework_contains_argument(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"argument", NULL};
+    PyObject *argument;
+    int contains;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
+                                     &argument))
+        return NULL;
+
+    contains = PySet_Contains(self->arguments, argument);
+    if (contains < 0) {
+        return NULL;
+    }
+
+    if (contains) {
+        Py_RETURN_TRUE;
+    }
+
+    Py_RETURN_FALSE;
+}
+
+/**
+ * @brief Return True if the Attack relation is contained, False if it is not, NULL if an error has occurred.
+ * 
+ * @param self an instance of QBAFramework
+ * @param args the argument values (attacker: QBAFArgument, attacked: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new PyBool, NULL in case of error
+ */
+static PyObject *
+QBAFramework_contains_attack_relation(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"attacker", "attacked", NULL};
+    PyObject *agent, *patient;
+    int contains;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
+                                     &agent, &patient))
+        return NULL;
+
+    contains = _QBAFARelations_contains((QBAFARelationsObject*) self->attack_relations, agent, patient);
+    if (contains < 0) {
+        return NULL;
+    }
+
+    if (contains) {
+        Py_RETURN_TRUE;
+    }
+
+    Py_RETURN_FALSE;
+}
+
+/**
+ * @brief Return True if the Support relation is contained, False if it is not, NULL if an error has occurred.
+ * 
+ * @param self an instance of QBAFramework
+ * @param args the argument values (supporter: QBAFArgument, supported: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new PyBool, NULL in case of error
+ */
+static PyObject *
+QBAFramework_contains_support_relation(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"supporter", "supported", NULL};
+    PyObject *agent, *patient;
+    int contains;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
+                                     &agent, &patient))
+        return NULL;
+
+    contains = _QBAFARelations_contains((QBAFARelationsObject*) self->support_relations, agent, patient);
+    if (contains < 0) {
+        return NULL;
+    }
+
+    if (contains) {
+        Py_RETURN_TRUE;
+    }
+
+    Py_RETURN_FALSE;
+}
+
+/**
  * @brief List of functions of the class QBAFramework
  * 
  */
@@ -860,6 +953,15 @@ static PyMethodDef QBAFramework_methods[] = {
     },
     {"remove_support_relation", (PyCFunctionWithKeywords) QBAFramework_remove_support_relation, METH_VARARGS | METH_KEYWORDS,
     "Remove the Support relation (supporter, supported) from the Framework."
+    },
+    {"contains_argument", (PyCFunctionWithKeywords) QBAFramework_contains_argument, METH_VARARGS | METH_KEYWORDS,
+    "Return whether or not the Framework contains the Argument argument."
+    },
+    {"contains_attack_relation", (PyCFunctionWithKeywords) QBAFramework_contains_attack_relation, METH_VARARGS | METH_KEYWORDS,
+    "Return whether or not the Attack relation (attacker, attacked) is contained in the Framework."
+    },
+    {"contains_support_relation", (PyCFunctionWithKeywords) QBAFramework_contains_support_relation, METH_VARARGS | METH_KEYWORDS,
+    "Return whether or not the Support relation (supporter, supported) is contained in the Framework."
     },
     {NULL}  /* Sentinel */
 };
