@@ -39,6 +39,17 @@ typedef struct {
 PyObject *QBAFARelations_Create(PyObject *relations);
 
 /**
+ * @brief Return a copy of this instance.
+ * New references are created for the copy, except for the QBAFArgument objects.
+ * 
+ * @param self instance of QBAFARelations
+ * @param Py_UNUSED 
+ * @return PyObject* new instance of QBAFARelations
+ */
+PyObject *
+QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored));
+
+/**
  * @brief Return 1 if their relations are disjoint, 0 if they are not, and -1 if an error is encountered.
  * 
  * @param self a QBAFARelations instance (not NULL)

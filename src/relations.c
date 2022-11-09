@@ -604,7 +604,7 @@ QBAFARelations_remove(QBAFARelationsObject *self, PyObject *args, PyObject *kwds
  * @param Py_UNUSED 
  * @return PyObject* new instance of QBAFARelations
  */
-static PyObject *
+PyObject *
 QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
 {
     PyObject *kwds = NULL;

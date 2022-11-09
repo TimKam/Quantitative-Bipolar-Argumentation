@@ -926,6 +926,68 @@ QBAFramework_contains_support_relation(QBAFrameworkObject *self, PyObject *args,
 }
 
 /**
+ * @brief Return a shallow copy of this instance.
+ * New references are created for the copy, except for the QBAFArgument and QBAFARelations.
+ * 
+ * @param self instance of QBAFramework
+ * @param Py_UNUSED 
+ * @return PyObject* new instance of QBAFramework
+ */
+PyObject *
+QBAFramework_copy(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
+{
+    PyObject *kwds = NULL;
+    PyObject *args = NULL;
+    PyObject *tmp;
+
+    QBAFrameworkObject *copy = (QBAFrameworkObject*) QBAFramework_new(Py_TYPE(self), args, kwds);
+    if (copy == NULL) {
+        return NULL;
+    }
+
+    Py_DECREF(copy->arguments);
+    copy->arguments = PySet_New(self->arguments);
+    if (copy->arguments == NULL) {
+        Py_DECREF(copy);
+        return NULL;
+    }
+
+    Py_DECREF(copy->initial_weights);
+    copy->initial_weights = PyDict_Copy(self->initial_weights);
+    if (copy->initial_weights == NULL) {
+        Py_DECREF(copy);
+        return NULL;
+    }
+
+    Py_DECREF(copy->attack_relations);
+    copy->attack_relations = QBAFARelations_copy((QBAFARelationsObject*)self->attack_relations, NULL);
+    if (copy->attack_relations == NULL) {
+        Py_DECREF(copy);
+        return NULL;
+    }
+
+    Py_DECREF(copy->support_relations);
+    copy->support_relations = QBAFARelations_copy((QBAFARelationsObject*)self->support_relations, NULL);
+    if (copy->support_relations == NULL) {
+        Py_DECREF(copy);
+        return NULL;
+    }
+
+    if (PyDict_Check(copy->final_weights)) {
+        Py_DECREF(copy->final_weights);
+        copy->final_weights = PyDict_Copy(self->final_weights);
+        if (copy->final_weights == NULL) {
+            Py_DECREF(copy);
+            return NULL;
+        }
+    }
+
+    copy->modified = self->modified;
+    
+    return (PyObject*)copy;
+}
+
+/**
  * @brief List of functions of the class QBAFramework
  * 
  */
@@ -962,6 +1024,12 @@ static PyMethodDef QBAFramework_methods[] = {
     },
     {"contains_support_relation", (PyCFunctionWithKeywords) QBAFramework_contains_support_relation, METH_VARARGS | METH_KEYWORDS,
     "Return whether or not the Support relation (supporter, supported) is contained in the Framework."
+    },
+    {"__copy__", (PyCFunction) QBAFramework_copy, METH_NOARGS,
+    "Return shallow a copy of the instance."
+    },
+    {"copy", (PyCFunction) QBAFramework_copy, METH_NOARGS,
+    "Return shallow a copy of the instance."
     },
     {NULL}  /* Sentinel */
 };
