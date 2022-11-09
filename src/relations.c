@@ -450,6 +450,9 @@ QBAFARelations_contains(QBAFARelationsObject *self, PyObject *args, PyObject *kw
         Py_DECREF(tuple);
         return NULL;
     }
+
+    Py_DECREF(tuple);
+
     if (contains)
         Py_RETURN_TRUE;
     Py_RETURN_FALSE;
@@ -860,4 +863,74 @@ QBAFARelations_contains_argument(QBAFARelationsObject *self, PyObject *argument)
     Py_DECREF(tuple);
 
     return 0;   // return False
+}
+
+/**
+ * @brief Return whether or not exists the relation (agent, patient) in this instance.
+ * Return -1 if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @param patient instance of QBAFArgument
+ * @return PyObject* 1 if is contained, 0 if not contained, -1 if an error has occurred
+ */
+int
+_QBAFARelations_contains(QBAFARelationsObject *self, PyObject *agent, PyObject *patient)
+{
+    PyObject *tuple;
+
+    Py_INCREF(agent);
+    Py_INCREF(patient);
+    tuple = PyTuple_Pack(2, agent, patient);    // new reference
+    if (tuple == NULL) {
+        Py_DECREF(agent);
+        Py_DECREF(patient);
+        return NULL;
+    }
+    
+    int contains = QBAFARelations___contains__(self, tuple);
+    if (contains < 0) {
+        Py_DECREF(tuple);
+        return NULL;
+    }
+
+    Py_DECREF(tuple);
+
+    if (contains)
+        return 1;
+    return 0;
+}
+
+/**
+ * @brief Add the relation (agent, patient) to this instance. Return -1 if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @param patient instance of QBAFArgument
+ * @return int 0 if success, -1 in case of error
+ */
+int
+_QBAFARelations_add(QBAFARelationsObject *self, PyObject *agent, PyObject *patient)
+{
+    static char *kwds = NULL;
+    PyObject *args;
+
+    Py_INCREF(agent);
+    Py_INCREF(patient);
+    args = PyTuple_Pack(2, agent, patient); // New reference
+    if (args == NULL) {
+        Py_DECREF(agent);
+        Py_DECREF(patient);
+        return -1;
+    }
+
+    PyObject *none = QBAFARelations_add(self, args, kwds);
+    Py_DECREF(args);
+    if (none == NULL) {
+        return -1;
+    }
+
+    Py_DECREF(none);
+
+    return 0;
 }

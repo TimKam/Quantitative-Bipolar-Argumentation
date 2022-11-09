@@ -629,6 +629,72 @@ QBAFramework_remove_argument(QBAFrameworkObject *self, PyObject *args, PyObject 
 }
 
 /**
+ * @brief Add the Attack relation (attacker, attacked) to the Framework.
+ * 
+ * @param self an instance of QBAFramework
+ * @param args the argument values (attacker: QBAFArgument, attacked: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new Py_None, NULL in case of error
+ */
+static PyObject *
+QBAFramework_add_attack_relation(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"attacker", "attacked", NULL};
+    PyObject *agent, *patient;
+    int contains;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
+                                     &agent, &patient))
+        return NULL;
+
+    contains = PySet_Contains(self->arguments, agent);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (!contains) {
+        PyErr_SetString(PyExc_ValueError,
+                        "argument attacker is not contained in the framework");
+        return NULL;
+    }
+
+    contains = PySet_Contains(self->arguments, patient);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (!contains) {
+        PyErr_SetString(PyExc_ValueError,
+                        "argument attacked is not contained in the framework");
+        return NULL;
+    }
+
+    contains = _QBAFARelations_contains((QBAFARelationsObject*) self->support_relations, agent, patient);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (contains) {
+        PyErr_SetString(PyExc_ValueError,
+                        "attacker relation already exists as support relation");
+        return NULL;
+    }
+
+    contains = _QBAFARelations_contains((QBAFARelationsObject*) self->attack_relations, agent, patient);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (contains) {
+        Py_RETURN_NONE;
+    }
+
+    if (_QBAFARelations_add((QBAFARelationsObject*) self->attack_relations, agent, patient) < 0) {
+        return NULL;
+    }
+
+    self->modified = TRUE;
+
+    Py_RETURN_NONE;
+}
+
+/**
  * @brief List of functions of the class QBAFramework
  * 
  */

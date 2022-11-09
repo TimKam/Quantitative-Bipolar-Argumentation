@@ -55,8 +55,7 @@ int _QBAFARelations_isDisjoint(QBAFARelationsObject *self, QBAFARelationsObject 
  * @param arguments a set of QBAFArgument
  * @return int 1 if contained, 0 if not contained, and -1 if an error is encountered
  */
-int
-QBAFARelations_ArgsContained(QBAFARelationsObject *self, PyObject *arguments);
+int QBAFARelations_ArgsContained(QBAFARelationsObject *self, PyObject *arguments);
 
 /**
  * @brief Return True if if the argument is contained, False if not contained, and -1 if an error is encountered.
@@ -65,7 +64,27 @@ QBAFARelations_ArgsContained(QBAFARelationsObject *self, PyObject *arguments);
  * @param argument an instance of QBAFArgument
  * @return int 1 if contained, 0 if not contained, and -1 if an error is encountered
  */
-int
-QBAFARelations_contains_argument(QBAFARelationsObject *self, PyObject *argument);
+int QBAFARelations_contains_argument(QBAFARelationsObject *self, PyObject *argument);
+
+/**
+ * @brief Return whether or not exists the relation (agent, patient) in this instance.
+ * Return -1 if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @param patient instance of QBAFArgument
+ * @return PyObject* 1 if is contained, 0 if not contained, -1 if an error has occurred
+ */
+int _QBAFARelations_contains(QBAFARelationsObject *self, PyObject *agent, PyObject *patient);
+
+/**
+ * @brief Add the relation (agent, patient) to this instance. Return -1 if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @param patient instance of QBAFArgument
+ * @return int 0 if success, -1 in case of error
+ */
+int _QBAFARelations_add(QBAFARelationsObject *self, PyObject *agent, PyObject *patient);
 
 #endif
