@@ -28,10 +28,11 @@ typedef struct {
     PyObject *relations;        /* set of tuples (Agent: QBAFArgument, Patient: QBAFArgument) */
     PyObject *agent_patients;   /* dictonary of (key, value) = (Agent, set of Patients) */
     PyObject *patient_agents;   /* dictonary of (key, value) = (Patient, set of Agents) */
+    int modifiable;             /* 1 if this object can be modified through python, 0 otherwise */
 } QBAFARelationsObject;
 
 /**
- * @brief Create a new object QBAFARelations.
+ * @brief Create a new object QBAFARelations. It cannot be modified from python.
  * 
  * @param relations a set/list of tuples (Agent: QBAFArgument, Patient QBAFArgument)
  * @return PyObject* New reference

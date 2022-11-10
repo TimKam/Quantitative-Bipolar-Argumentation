@@ -20,6 +20,7 @@
 //    PyObject *relations;        /* set of tuples (Agent: QBAFArgument, Patient: QBAFArgument) */
 //    PyObject *agent_patients;   /* dictonary of (key, value) = (Agent, set of Patients) */
 //    PyObject *patient_agents;   /* dictonary of (key, value) = (Patient, set of Agents) */
+//    int modifiable;             /* 1 if this object can be modified through python, 0 otherwise */
 //} QBAFARelationsObject;
 
 /**
@@ -99,6 +100,7 @@ QBAFARelations_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
             Py_DECREF(self);
             return NULL;
         }
+        self->modifiable = 1;
     }
     return (PyObject *) self;
 }
@@ -530,6 +532,12 @@ _QBAFARelations_add(QBAFARelationsObject *self, PyObject *agent, PyObject *patie
 static PyObject *
 QBAFARelations_add(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
 {
+    if (!self->modifiable) {
+        PyErr_SetString(PyExc_PermissionError,
+                        "cannot modify directly a QBAFARelation that belongs to a QBAFramework");
+        return NULL;
+    }
+
     static char *kwlist[] = {"agent", "patient", NULL};
     PyObject *agent, *patient;
 
@@ -617,6 +625,12 @@ _QBAFARelations_remove(QBAFARelationsObject *self, PyObject *agent, PyObject *pa
 static PyObject *
 QBAFARelations_remove(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
 {
+    if (!self->modifiable) {
+        PyErr_SetString(PyExc_PermissionError,
+                        "cannot modify directly a QBAFARelation that belongs to a QBAFramework");
+        return NULL;
+    }
+
     static char *kwlist[] = {"agent", "patient", NULL};
     PyObject *agent, *patient;
 
@@ -775,7 +789,7 @@ PyTypeObject *get_QBAFARelationsType() {
 }
 
 /**
- * @brief Create a new object QBAFARelations.
+ * @brief Create a new object QBAFARelations. It cannot be modified from python.
  * 
  * @param relations a set/list of tuples (Agent: QBAFArgument, Patient QBAFArgument)
  * @return PyObject* New reference
@@ -799,6 +813,8 @@ QBAFARelations_Create(PyObject *relations)
         Py_DECREF(args);
         return NULL;
     }
+
+    new->modifiable = 0;    // This instance cannot be modified from python
 
     Py_DECREF(args);
     return (PyObject*) new;
