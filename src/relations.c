@@ -398,6 +398,36 @@ QBAFARelations_agents(QBAFARelationsObject *self, PyObject *args, PyObject *kwds
 
 /**
  * @brief Return whether or not exists the relation (agent, patient) in this instance.
+ * Return -1 if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @param patient instance of QBAFArgument
+ * @return PyObject* 1 if is contained, 0 if not contained, -1 if an error has occurred
+ */
+int
+_QBAFARelations_contains(QBAFARelationsObject *self, PyObject *agent, PyObject *patient)
+{
+    PyObject *tuple;
+
+    Py_INCREF(agent);
+    Py_INCREF(patient);
+    tuple = PyTuple_Pack(2, agent, patient);    // new reference
+    if (tuple == NULL) {
+        Py_DECREF(agent);
+        Py_DECREF(patient);
+        return NULL;
+    }
+    
+    int contains = PySet_Contains(self->relations, tuple); // QBAFARelations___contains__(self, tuple);
+
+    Py_DECREF(tuple);
+
+    return contains;
+}
+
+/**
+ * @brief Return whether or not exists the relation (agent, patient) in this instance.
  * Return NULL if an error has ocurred.
  * 
  * @param self instance of QBAFARelations
@@ -410,28 +440,15 @@ QBAFARelations_contains(QBAFARelationsObject *self, PyObject *args, PyObject *kw
 {
     static char *kwlist[] = {"agent", "patient", NULL};
     PyObject *agent, *patient;
-    PyObject *tuple;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
                                      &agent, &patient))
         return NULL;
 
-    Py_INCREF(agent);
-    Py_INCREF(patient);
-    tuple = PyTuple_Pack(2, agent, patient);    // new reference
-    if (tuple == NULL) {
-        Py_DECREF(agent);
-        Py_DECREF(patient);
-        return NULL;
-    }
-    
-    int contains = QBAFARelations___contains__(self, tuple);
+    int contains = _QBAFARelations_contains(self, agent, patient);
     if (contains < 0) {
-        Py_DECREF(tuple);
         return NULL;
     }
-
-    Py_DECREF(tuple);
 
     if (contains)
         Py_RETURN_TRUE;
@@ -834,7 +851,6 @@ QBAFARelations_contains_argument(QBAFARelationsObject *self, PyObject *argument)
         return -1;
     }
 
-    Py_DECREF(tuple);
     if (PyList_GET_SIZE(list) > 0) {
         Py_DECREF(tuple);
         return 1;   // return True
@@ -843,42 +859,6 @@ QBAFARelations_contains_argument(QBAFARelationsObject *self, PyObject *argument)
     Py_DECREF(tuple);
 
     return 0;   // return False
-}
-
-/**
- * @brief Return whether or not exists the relation (agent, patient) in this instance.
- * Return -1 if an error has ocurred.
- * 
- * @param self instance of QBAFARelations
- * @param agent instance of QBAFArgument
- * @param patient instance of QBAFArgument
- * @return PyObject* 1 if is contained, 0 if not contained, -1 if an error has occurred
- */
-int
-_QBAFARelations_contains(QBAFARelationsObject *self, PyObject *agent, PyObject *patient)
-{
-    PyObject *tuple;
-
-    Py_INCREF(agent);
-    Py_INCREF(patient);
-    tuple = PyTuple_Pack(2, agent, patient);    // new reference
-    if (tuple == NULL) {
-        Py_DECREF(agent);
-        Py_DECREF(patient);
-        return NULL;
-    }
-    
-    int contains = QBAFARelations___contains__(self, tuple);
-    if (contains < 0) {
-        Py_DECREF(tuple);
-        return NULL;
-    }
-
-    Py_DECREF(tuple);
-
-    if (contains)
-        return 1;
-    return 0;
 }
 
 /**
