@@ -382,6 +382,7 @@ QBAFramework_getinitial_weights(QBAFrameworkObject *self, void *closure)
 static PyObject *
 QBAFramework_getattack_relations(QBAFrameworkObject *self, void *closure)
 {
+    Py_INCREF(self->attack_relations);
     return self->attack_relations;
 }
 
@@ -395,6 +396,7 @@ QBAFramework_getattack_relations(QBAFrameworkObject *self, void *closure)
 static PyObject *
 QBAFramework_getsupport_relations(QBAFrameworkObject *self, void *closure)
 {
+    Py_INCREF(self->support_relations);
     return self->support_relations;
 }
 
