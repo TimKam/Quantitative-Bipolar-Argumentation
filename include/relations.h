@@ -46,8 +46,7 @@ PyObject *QBAFARelations_Create(PyObject *relations);
  * @param Py_UNUSED 
  * @return PyObject* new instance of QBAFARelations
  */
-PyObject *
-QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored));
+PyObject *QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored));
 
 /**
  * @brief Return 1 if their relations are disjoint, 0 if they are not, and -1 if an error is encountered.
@@ -107,5 +106,25 @@ int _QBAFARelations_add(QBAFARelationsObject *self, PyObject *agent, PyObject *p
  * @return int 0 if success, -1 in case of error
  */
 int _QBAFARelations_remove(QBAFARelationsObject *self, PyObject *agent, PyObject *patient);
+
+/**
+ * @brief Return the patients that undergo the effect of a certain action (e.g. attack, support)
+ * initiated by the agent. Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @return PyObject* list of QBAFArgument
+ */
+PyObject *_QBAFARelations_patients(QBAFARelationsObject *self, PyObject *agent);
+
+/**
+ * @brief Return the agents that initiate a certain action (e.g. attack, support)
+ * which effects are undergone by the patient. Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param patient instance of QBAFArgument
+ * @return PyObject* list of QBAFArgument
+ */
+PyObject *_QBAFARelations_agents(QBAFARelationsObject *self, PyObject *patient);
 
 #endif

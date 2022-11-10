@@ -311,6 +311,52 @@ QBAFARelations___contains__(QBAFARelationsObject *self, PyObject *key)
  * initiated by the agent. Return NULL if an error has ocurred.
  * 
  * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @return PyObject* list of QBAFArgument
+ */
+PyObject *
+_QBAFARelations_patients(QBAFARelationsObject *self, PyObject *agent) {
+    PyObject *set, *list;
+    int contains = PyDict_Contains(self->agent_patients, agent);
+    if (contains < 0)
+        return NULL;
+    if (contains) {
+        set = PyDict_GetItem(self->agent_patients, agent);
+        list = PyList_New(PySet_GET_SIZE(set));
+
+        if (list == NULL)
+            return NULL;
+        
+        PyObject *iterator = PyObject_GetIter(set);
+        PyObject *item;
+
+        if (iterator == NULL) {
+            /* propagate error */
+            return NULL;
+        }
+
+        Py_ssize_t index = 0;
+        while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+            /* do something with item */
+
+            PyList_SET_ITEM(list, index, item);
+            
+            index++;
+        }
+
+        Py_DECREF(iterator);
+
+        return list;
+    }
+
+    return PyList_New(0);
+}
+
+/**
+ * @brief Return the patients that undergo the effect of a certain action (e.g. attack, support)
+ * initiated by the agent. Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
  * @param args the argument values (agent: QBAFArgument)
  * @param kwds the argument names
  * @return PyObject* list of QBAFArgument 
@@ -320,17 +366,30 @@ QBAFARelations_patients(QBAFARelationsObject *self, PyObject *args, PyObject *kw
 {
     static char *kwlist[] = {"agent", NULL};
     PyObject *agent;
-    PyObject *set, *list;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
                                      &agent))
         return NULL;
 
-    int contains = PyDict_Contains(self->agent_patients, agent);
+    return _QBAFARelations_patients(self, agent);
+}
+
+/**
+ * @brief Return the agents that initiate a certain action (e.g. attack, support)
+ * which effects are undergone by the patient. Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param patient instance of QBAFArgument
+ * @return PyObject* list of QBAFArgument
+ */
+PyObject *
+_QBAFARelations_agents(QBAFARelationsObject *self, PyObject *patient) {
+    PyObject *set, *list;
+    int contains = PyDict_Contains(self->patient_agents, patient);
     if (contains < 0)
         return NULL;
     if (contains) {
-        set = PyDict_GetItem(self->agent_patients, agent);
+        set = PyDict_GetItem(self->patient_agents, patient);
         list = PyList_New(PySet_GET_SIZE(set));
 
         if (list == NULL)
@@ -375,45 +434,12 @@ QBAFARelations_agents(QBAFARelationsObject *self, PyObject *args, PyObject *kwds
 {
     static char *kwlist[] = {"patient", NULL};
     PyObject *patient;
-    PyObject *set, *list;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
                                      &patient))
         return NULL;
 
-    int contains = PyDict_Contains(self->patient_agents, patient);
-    if (contains < 0)
-        return NULL;
-    if (contains) {
-        set = PyDict_GetItem(self->patient_agents, patient);
-        list = PyList_New(PySet_GET_SIZE(set));
-
-        if (list == NULL)
-            return NULL;
-        
-        PyObject *iterator = PyObject_GetIter(set);
-        PyObject *item;
-
-        if (iterator == NULL) {
-            /* propagate error */
-            return NULL;
-        }
-
-        Py_ssize_t index = 0;
-        while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-            /* do something with item */
-
-            PyList_SET_ITEM(list, index, item);
-            
-            index++;
-        }
-
-        Py_DECREF(iterator);
-
-        return list;
-    }
-
-    return PyList_New(0);
+    return _QBAFARelations_agents(self, patient);
 }
 
 /**
