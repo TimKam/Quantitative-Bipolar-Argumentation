@@ -445,13 +445,13 @@ class QBAFramework:
 
         Args:
             argument (QBAFArgument): a QBAFArgument
-            not_visited (set): a set of arguments that have not been visited yet (this set is modified in this fucntion)
+            not_visited (set): a set of arguments that have not been visited yet (this set is modified in this function)
             visiting (set, optional): a set of arguments that are being visited in this function. Defaults to set().
 
         Returns:
             list: list of QBAFArgument that contain at least one cycle
         """
-        # If argument is being visit, do not visit it again but return it
+        # If argument is being visited, do not visit it again but return it
         if argument in visiting:
             return [argument]
         # We add it to visiting
@@ -466,7 +466,7 @@ class QBAFramework:
         return result
 
     def isacyclic(self) -> bool:
-        """ Return whether or not the relations of the Framework are acyclic
+        """ Return whether or not the relations of the Framework are acyclic.
 
         Returns:
             bool: True if there are no cycles. False, otherwise.

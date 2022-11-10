@@ -53,3 +53,57 @@ int PySet_IsDisjoint(PyObject *set1, PyObject *set2) {
 
     return 1;   // return True
 }
+
+/**
+ * @brief Return the concatenation of two lists, NULL if an error has occurred.
+ * 
+ * @param list1 an instance of PyList (not checked)
+ * @param list2 an instance of PyList (not checked)
+ * @return PyObject* new PyList
+ */
+PyObject *
+PyList_Concat(PyObject *list1, PyObject *list2)
+{
+    PyObject *iterator1, *iterator2;
+    PyObject *item;
+
+    iterator1 = PyObject_GetIter(list1);    // New reference
+    if (iterator1 == NULL) {
+        return NULL;
+    }
+
+    iterator2 = PyObject_GetIter(list2);
+    if (iterator2 == NULL) {
+        Py_DECREF(iterator1);
+        return NULL;
+    }
+
+    PyObject *new = PyList_New(PyList_GET_SIZE(list1) + PyList_GET_SIZE(list2));
+
+    if (new == NULL) {
+        Py_DECREF(iterator1);
+        Py_DECREF(iterator2);
+        return NULL;
+    }
+
+    Py_ssize_t index = 0;
+    while ((item = PyIter_Next(iterator1))) {    // PyIter_Next returns a new reference
+
+        PyList_SET_ITEM(new, index, item);
+        
+        index++;
+    }
+
+    Py_DECREF(iterator1);
+
+    while ((item = PyIter_Next(iterator2))) {    // PyIter_Next returns a new reference
+
+        PyList_SET_ITEM(new, index, item);
+        
+        index++;
+    }
+
+    Py_DECREF(iterator2);
+
+    return new;
+}

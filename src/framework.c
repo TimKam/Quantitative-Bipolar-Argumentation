@@ -10,6 +10,7 @@
 
 #include "framework.h"
 #include "relations.h"
+#include "qbaf_utils.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -988,6 +989,184 @@ QBAFramework_copy(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
 }
 
 /**
+ * @brief Return a list with the arguments that are being attacked/supported by Argument argument (itself included)
+ * that are in a cycle, NULL if an error has occurred.
+ * 
+ * @param self an instance of QBAFramework
+ * @param argument an instance of QBAFArgument
+ * @param not_visited a PySet of QBAFArgument that have not been visited yet (this set is modified in this function)
+ * @param visiting a PySet of QBAFArgument that are being visited in this function
+ * @return PyObject* a new PyList of QBAFArgument objects that contain at least one cycle 
+ */
+static PyObject *
+_QBAFramework_incycle_arguments(QBAFrameworkObject *self, PyObject *argument, PyObject *not_visited, PyObject *visiting)
+{
+    int contains = PySet_Contains(visiting, argument);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (contains) { // If argument is being visited, do not visit it again but return it
+        PyObject *list = PyList_New(1);
+        if (list == NULL)
+            return NULL;
+        Py_INCREF(argument);
+        PyList_SET_ITEM(list, 0, argument);
+        return list;
+    }
+
+    if (PySet_Add(visiting, argument) < 0) {    // We add the argument to visiting
+        return NULL;
+    }
+    PyObject *attack_patients, *support_patients;
+    PyObject *patients, *result, *previous_result, *incycle;
+
+    attack_patients = _QBAFARelations_patients((QBAFARelationsObject*)self->attack_relations, argument);
+    if (attack_patients == NULL) {
+        return NULL;
+    }
+    support_patients = _QBAFARelations_patients((QBAFARelationsObject*)self->support_relations, argument);
+    if (support_patients == NULL) {
+        Py_DECREF(attack_patients);
+    }
+
+    patients = PyList_Concat(attack_patients, support_patients);
+    Py_DECREF(attack_patients);
+    Py_DECREF(support_patients);
+    if (patients == NULL) {
+        return NULL;
+    }
+
+    result = PyList_New(0);
+    if (result == NULL) {
+        Py_DECREF(patients);
+        return NULL;
+    }
+
+    PyObject *iterator = PyObject_GetIter(patients);
+    PyObject *item;
+
+    if (iterator == NULL) {
+        Py_DECREF(patients);
+        Py_DECREF(result);
+        return NULL;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        contains = PySet_Contains(not_visited, item);
+        if (contains < 0) {
+            Py_DECREF(patients); Py_DECREF(result);
+            Py_DECREF(iterator); Py_DECREF(item);
+            return NULL;
+        }
+
+        if (contains) {
+            previous_result = result;
+            incycle = _QBAFramework_incycle_arguments(self, item, not_visited, visiting);
+            if (incycle == NULL) {
+                Py_DECREF(patients); Py_DECREF(previous_result);
+                Py_DECREF(iterator); Py_DECREF(item);
+                return NULL;
+            }
+
+            result = PyList_Concat(previous_result, incycle);
+            Py_DECREF(previous_result);
+            Py_DECREF(incycle);
+            if (result == NULL) {
+                Py_DECREF(patients);
+                Py_DECREF(iterator); Py_DECREF(item);
+                return NULL;
+            }
+        }
+
+        Py_DECREF(item);
+    }
+
+    Py_DECREF(iterator);
+    Py_DECREF(patients);
+
+    if (PySet_Discard(not_visited, argument) < 0) { // We remove the argument from not visited
+        Py_DECREF(result);
+        return NULL;
+    }
+
+    if (PySet_Discard(visiting, argument) < 0) { // We remove the argument from visiting
+        Py_DECREF(result);
+        return NULL;
+    }
+
+    return result;
+}
+
+/**
+ * @brief Return True if the relations of the Framework are acyclic, False if not,
+ * -1 if an error has occurred.
+ * 
+ * @param self an instance of QBAFramework
+ * @return PyObject* 1 if acyclic, 0 if not acyclic, -1 if an error occurred
+ */
+static inline int
+_QBAFramework_isacyclic(QBAFrameworkObject *self)
+{
+    PyObject *not_visited, *visiting;
+
+    visiting = PySet_New(NULL); // New empty set
+    if (visiting == NULL)
+        return -1;
+
+    not_visited = PySet_New(self->arguments);   // Copy of self->arguments
+    if (not_visited == NULL) {
+        Py_DECREF(visiting);
+        return -1;
+    }
+
+    PyObject *argument, *incycle;
+
+    while (PySet_GET_SIZE(not_visited) > 0) {
+        argument = PySet_Pop(not_visited);  // New reference. Unchecked errors
+        PySet_Add(not_visited, argument);   // We return the argument to the set
+
+        incycle = _QBAFramework_incycle_arguments(self, argument, not_visited, visiting);
+        if (incycle == NULL) {
+            Py_DECREF(visiting); Py_DECREF(not_visited);
+            return -1;
+        }
+        if (PyList_GET_SIZE(incycle) > 0) { // If detected cycle
+            Py_DECREF(visiting); Py_DECREF(not_visited);
+            Py_DECREF(incycle);
+            return 0; // Return False
+        }
+        Py_DECREF(incycle);
+    }
+
+    Py_DECREF(visiting);
+    Py_DECREF(not_visited);
+
+    return 1;   // Return True
+}
+
+/**
+ * @brief Return True if the relations of the Framework are acyclic, False if not,
+ * NULL if an error has occurred.
+ * 
+ * @param self an instance of QBAFramework
+ * @param Py_UNUSED 
+ * @return PyObject* new PyBool.
+ */
+static PyObject *
+QBAFramework_isacyclic(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
+{
+    int isacyclic = _QBAFramework_isacyclic(self);
+    if (isacyclic < 0) {
+        return NULL;
+    }
+
+    if (isacyclic)
+        Py_RETURN_TRUE;
+        
+    Py_RETURN_FALSE;
+}
+
+/**
  * @brief List of functions of the class QBAFramework
  * 
  */
@@ -1030,6 +1209,9 @@ static PyMethodDef QBAFramework_methods[] = {
     },
     {"copy", (PyCFunction) QBAFramework_copy, METH_NOARGS,
     "Return shallow a copy of the instance."
+    },
+    {"isacyclic", (PyCFunction) QBAFramework_isacyclic, METH_NOARGS,
+    "Return whether or not the relations of the Framework are acyclic."
     },
     {NULL}  /* Sentinel */
 };

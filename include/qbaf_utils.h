@@ -19,4 +19,13 @@
  */
 int PySet_IsDisjoint(PyObject *set1, PyObject *set2);
 
+/**
+ * @brief Return the concatenation of two lists, NULL if an error has occurred.
+ * 
+ * @param list1 a PyList object (not NULL)
+ * @param list2 a PyList object (not NULL)
+ * @return PyObject* new PyList
+ */
+PyObject *PyList_Concat(PyObject *list1, PyObject *list2);
+
 #endif
