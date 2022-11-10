@@ -322,30 +322,7 @@ _QBAFARelations_patients(QBAFARelationsObject *self, PyObject *agent) {
         return NULL;
     if (contains) {
         set = PyDict_GetItem(self->agent_patients, agent);
-        list = PyList_New(PySet_GET_SIZE(set));
-
-        if (list == NULL)
-            return NULL;
-        
-        PyObject *iterator = PyObject_GetIter(set);
-        PyObject *item;
-
-        if (iterator == NULL) {
-            /* propagate error */
-            return NULL;
-        }
-
-        Py_ssize_t index = 0;
-        while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-            /* do something with item */
-
-            PyList_SET_ITEM(list, index, item);
-            
-            index++;
-        }
-
-        Py_DECREF(iterator);
-
+        list = PyList_Copy(set, PySet_GET_SIZE(set));
         return list;
     }
 
@@ -390,30 +367,7 @@ _QBAFARelations_agents(QBAFARelationsObject *self, PyObject *patient) {
         return NULL;
     if (contains) {
         set = PyDict_GetItem(self->patient_agents, patient);
-        list = PyList_New(PySet_GET_SIZE(set));
-
-        if (list == NULL)
-            return NULL;
-        
-        PyObject *iterator = PyObject_GetIter(set);
-        PyObject *item;
-
-        if (iterator == NULL) {
-            /* propagate error */
-            return NULL;
-        }
-
-        Py_ssize_t index = 0;
-        while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-            /* do something with item */
-
-            PyList_SET_ITEM(list, index, item);
-            
-            index++;
-        }
-
-        Py_DECREF(iterator);
-
+        list = PyList_Copy(set, PySet_GET_SIZE(set));
         return list;
     }
 

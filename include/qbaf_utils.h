@@ -20,6 +20,17 @@
 int PySet_IsDisjoint(PyObject *set1, PyObject *set2);
 
 /**
+ * @brief Return a new list containing objects returned by the iterable,
+ * NULL if an error has occurred.
+ * 
+ * @param iterable instance of an iterable PyObject
+ * @param len length of the iterable object
+ * @return PyObject* New PyList Reference
+ */
+PyObject *PyList_Copy(PyObject *iterable, Py_ssize_t len);
+
+
+/**
  * @brief Return the concatenation of two lists, NULL if an error has occurred.
  * 
  * @param list1 a PyList object (not NULL)
