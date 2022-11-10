@@ -401,22 +401,6 @@ QBAFramework_getsupport_relations(QBAFrameworkObject *self, void *closure)
 }
 
 /**
- * @brief A list with the setters and getters of the class QBAFramework
- * 
- */
-static PyGetSetDef QBAFramework_getsetters[] = {
-    {"arguments", (getter) QBAFramework_getarguments, NULL,
-     "Return a copy of the arguments of the instance.", NULL},
-    {"initial_weights", (getter) QBAFramework_getinitial_weights, NULL,
-     "Return a copy of the initial weights.", NULL},
-    {"attack_relations", (getter) QBAFramework_getattack_relations, NULL,
-     "Return the attack relations of the instance.", NULL},
-    {"support_relations", (getter) QBAFramework_getsupport_relations, NULL,
-     "Return the support relations of the instance.", NULL},
-    {NULL}  /* Sentinel */
-};
-
-/**
  * @brief Modify the initial weight of the Argument argument.
  * 
  * @param self an instance of QBAFramework
@@ -1167,6 +1151,155 @@ QBAFramework_isacyclic(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
         
     Py_RETURN_FALSE;
 }
+
+/**
+ * @brief Return the final weight of a specific argument, -1.0 if an error occurred.
+ * This function calls itself recursively. So, it only works with acyclic arguments.
+ * It stores all the calculated final weights in self.__final_weights.
+ * 
+ * @param self an instance of QBAFramework
+ * @param argument the QBAFArgument
+ * @return PyObject* borrowed PyFloat reference, -1.0 if an error has occurrred
+ */
+static double
+_QBAFramework_calculate_final_weight(QBAFrameworkObject *self, PyObject *argument)
+{
+    int contains = PyDict_Contains(self->final_weights, argument);
+    if (contains < 0) { // TODO: Remove error checks in this function (not needed since this is only used internally)
+        return -1.0;
+    }
+    if (contains) {
+        return PyFloat_AsDouble(PyDict_GetItem(self->final_weights, argument));
+    }
+
+    double final_weight = PyFloat_AsDouble(PyDict_GetItem(self->initial_weights, argument));
+
+    PyObject *attackers = _QBAFARelations_agents((QBAFARelationsObject*)self->attack_relations, argument);
+    PyObject *iterator = PyObject_GetIter(attackers);
+    PyObject *item;
+
+    if (iterator == NULL) {
+        Py_XDECREF(attackers);
+        return -1.0;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        final_weight -= _QBAFramework_calculate_final_weight(self, item);
+        Py_DECREF(item);
+    }
+
+    Py_DECREF(attackers);
+    Py_DECREF(iterator);
+
+    PyObject *supporters = _QBAFARelations_agents((QBAFARelationsObject*)self->support_relations, argument);
+    iterator = PyObject_GetIter(supporters);
+
+    if (iterator == NULL) {
+        Py_XDECREF(supporters);
+        return -1.0;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        final_weight += _QBAFramework_calculate_final_weight(self, item);
+        Py_DECREF(item);
+    }
+
+    Py_DECREF(supporters);
+    Py_DECREF(iterator);
+
+    // final_weights[argument] = final_weight
+    PyObject *pyfinal_weight = PyFloat_FromDouble(final_weight);    // New reference
+    Py_INCREF(argument);
+    if (PyDict_SetItem(self->final_weights, argument, pyfinal_weight) < 0) {
+        Py_DECREF(argument); Py_XDECREF(pyfinal_weight);
+        return -1.0;
+    }
+    Py_XDECREF(pyfinal_weight);
+
+    return final_weight;
+}
+
+/**
+ * @brief Calculate the final weights of all the arguments of the Framework.
+ * It stores all the calculated final weights in self.__final_weights.
+ * 
+ * @param self the QBAFramework
+ * @return int 0 if succesful, -1 if an error occurred
+ */
+static int
+_QBAFRamework_calculate_final_weights(QBAFrameworkObject *self)
+{
+    int isacyclic = _QBAFramework_isacyclic(self);
+    if (isacyclic < 0) {
+        return -1;
+    }
+    if (!isacyclic) {
+        PyErr_SetString(PyExc_NotImplementedError,
+                        "calculate final weights of non-acyclic framework not implemented");
+        return -1;
+    }
+
+    Py_CLEAR(self->final_weights);
+    self->final_weights = PyDict_New();
+
+    PyObject *iterator = PyObject_GetIter(self->arguments);
+    PyObject *item;
+    if (iterator == NULL) {
+        return -1;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        if (_QBAFramework_calculate_final_weight(self, item) == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(item); Py_DECREF(iterator);
+            return -1;
+        }
+        Py_DECREF(item);
+    }
+
+    Py_DECREF(iterator);
+
+    return 0;
+}
+
+/**
+ * @brief Return the final weights of arguments of the Framework, NULL if an error occurred.
+ * If the framework has been modified from the last time they were calculated
+ * they are calculated again. Otherwise, it returns the already calculated final weights.
+ * 
+ * @param self the QBAFramework
+ * @param closure 
+ * @return PyObject* a new PyDict, NULL if an error occurred
+ */
+static PyObject *
+QBAFramework_getfinal_weights(QBAFrameworkObject *self, void *closure)
+{
+    if (self->modified) {
+        if (_QBAFRamework_calculate_final_weights(self) < 0) {
+            return NULL;
+        }
+        self->modified = FALSE;
+    }
+
+    return PyDict_Copy(self->final_weights);
+}
+
+/**
+ * @brief A list with the setters and getters of the class QBAFramework
+ * 
+ */
+static PyGetSetDef QBAFramework_getsetters[] = {
+    {"arguments", (getter) QBAFramework_getarguments, NULL,
+     "Return a copy of the arguments of the instance.", NULL},
+    {"initial_weights", (getter) QBAFramework_getinitial_weights, NULL,
+     "Return a copy of the initial weights.", NULL},
+    {"attack_relations", (getter) QBAFramework_getattack_relations, NULL,
+     "Return the attack relations of the instance.", NULL},
+    {"support_relations", (getter) QBAFramework_getsupport_relations, NULL,
+     "Return the support relations of the instance.", NULL},
+    {"final_weights", (getter) QBAFramework_getfinal_weights, NULL,
+     "Return a copy of the final weights.", NULL},
+    {NULL}  /* Sentinel */
+};
 
 /**
  * @brief List of functions of the class QBAFramework

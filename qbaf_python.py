@@ -482,19 +482,19 @@ class QBAFramework:
         return True
 
     def __calculate_f_weight(self, argument: QBAFArgument) -> float:
-        """ Return the final weight of a specifi argument.
+        """ Return the final weight of a specific argument.
             This function calls itself recursively. So, it only works with acyclic arguments.
             It stores all the calculated final weights in self.__final_weights.
 
         Args:
-            argument (QBAFArgument): _description_
+            argument (QBAFArgument): the QBAFArgument
 
         Returns:
-            float: _description_
+            float: the final weight of the argument
         """
         if argument in self.__final_weights:
             return self.__final_weights[argument]
-        final_weight = self.get_initial_weight(argument)
+        final_weight = self.initial_weight(argument)
         for attacker in self.__attack_relations.agents(argument):
             final_weight -= self.__calculate_f_weight(attacker)
         for supporter in self.__support_relations.agents(argument):
@@ -509,7 +509,7 @@ class QBAFramework:
         Raises:
             NotImplementedError: The relations are not acyclic. There is no implementation for cyclic relations.
         """
-        if not self.isacyclic:
+        if not self.isacyclic():
             raise NotImplementedError
 
         self.__final_weights = dict()
@@ -530,7 +530,7 @@ class QBAFramework:
         if self.__modified:
             self.__calculate_final_weights()
             self.__modified = False
-        return self.__final_weights
+        return self.__final_weights.copy()
 
     def are_strength_consistent(self, other, arg1: QBAFArgument, arg2: QBAFArgument) -> bool:
         """ Return whether or not a pair of arguments are strength consistent between two frameworks.
