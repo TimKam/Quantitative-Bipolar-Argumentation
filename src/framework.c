@@ -1273,7 +1273,7 @@ _QBAFRamework_calculate_final_weights(QBAFrameworkObject *self)
 static PyObject *
 QBAFramework_getfinal_weights(QBAFrameworkObject *self, void *closure)
 {
-    if (self->modified) {
+    if (self->modified) {   // Calculate final weights if the framework has been modified
         if (_QBAFRamework_calculate_final_weights(self) < 0) {
             return NULL;
         }
@@ -1281,6 +1281,112 @@ QBAFramework_getfinal_weights(QBAFrameworkObject *self, void *closure)
     }
 
     return PyDict_Copy(self->final_weights);
+}
+
+/**
+ * @brief Return True if a pair of arguments are strength consistent between two frameworks,
+ * -1 if an error has occurred.
+ * 
+ * @param self instance of QBAFramework
+ * @param other another instance of QBAFramework
+ * @param arg1 an instance of QBAFArgument (must be contained in both frameworks)
+ * @param arg2 an instance of QBAFArgument (must be contained in both frameworks)
+ * @return int 1 if strength consistent, 0 if not strength consistent, -1 if an error occurred
+ */
+static inline int
+_QBAFramework_are_strength_consistent(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
+{
+    if (self->modified) {   // Calculate final weights if the framework has been modified
+        if (_QBAFRamework_calculate_final_weights(self) < 0) {
+            return NULL;
+        }
+        self->modified = FALSE;
+    }
+    if (other->modified) {   // Calculate final weights if the framework has been modified
+        if (_QBAFRamework_calculate_final_weights(other) < 0) {
+            return NULL;
+        }
+        other->modified = FALSE;
+    }
+
+    // Check that the arguments are contained in both frameworks
+    int contains = PyDict_Contains(self->final_weights, arg1);
+    if (contains < 0) {
+        return -1;
+    }
+    if (!contains) {
+        PyErr_SetString(PyExc_ValueError, "arg1 must be an argument of this QBAFramework");
+        return -1;
+    }
+    contains = PyDict_Contains(self->final_weights, arg2);
+    if (contains < 0) {
+        return -1;
+    }
+    if (!contains) {
+        PyErr_SetString(PyExc_ValueError, "arg2 must be an argument of this QBAFramework");
+        return -1;
+    }
+    contains = PyDict_Contains(other->final_weights, arg1);
+    if (contains < 0) {
+        return -1;
+    }
+    if (!contains) {
+        PyErr_SetString(PyExc_ValueError, "arg1 must be an argument of the QBAFramework other");
+        return -1;
+    }
+    contains = PyDict_Contains(other->final_weights, arg2);
+    if (contains < 0) {
+        return -1;
+    }
+    if (!contains) {
+        PyErr_SetString(PyExc_ValueError, "arg2 must be an argument of the QBAFramework other");
+        return -1;
+    }
+
+    double self_final_weight_arg1 = PyFloat_AS_DOUBLE(PyDict_GetItem(self->final_weights, arg1));
+    double self_final_weight_arg2 = PyFloat_AS_DOUBLE(PyDict_GetItem(self->final_weights, arg2));
+    double other_final_weight_arg1 = PyFloat_AS_DOUBLE(PyDict_GetItem(other->final_weights, arg1));
+    double other_final_weight_arg2 = PyFloat_AS_DOUBLE(PyDict_GetItem(other->final_weights, arg2));
+
+    if (self_final_weight_arg1 < self_final_weight_arg2)
+        return other_final_weight_arg1 < other_final_weight_arg2;
+    if (self_final_weight_arg1 > self_final_weight_arg2)
+        return other_final_weight_arg1 > other_final_weight_arg2;
+    return other_final_weight_arg1 == other_final_weight_arg2;
+}
+
+/**
+ * @brief Return True if a pair of arguments are strength consistent between two frameworks,
+ * False if not, NULL if an error has occurred.
+ * 
+ * @param self instance of QBAFramework
+ * @param args a tuple with arguments (other: QBAFramework, arg1: QBAFArgument, arg2: QBAFArgument)
+ * @param kwds name of the arguments args
+ * @return PyObject* new PyBool, NULL if an error occurred
+ */
+
+static PyObject *
+QBAFramework_are_strength_consistent(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"other", "arg1", "arg2", NULL};
+    PyObject *other, *arg1, *arg2;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|", kwlist,
+                                     &other, &arg1, &arg2))
+        return NULL;
+
+    if (!PyObject_TypeCheck(other, Py_TYPE(self))) {
+        PyErr_SetString(PyExc_TypeError, "other must be an instance of QBAFramework");
+        return NULL;
+    }
+    
+    int strength_consistent = _QBAFramework_are_strength_consistent(self, (QBAFrameworkObject*)other, arg1, arg2);
+    if (strength_consistent < 0) {
+        return NULL;
+    }
+    if (strength_consistent)
+        Py_RETURN_TRUE;
+    Py_RETURN_FALSE;
 }
 
 /**
@@ -1347,6 +1453,9 @@ static PyMethodDef QBAFramework_methods[] = {
     },
     {"isacyclic", (PyCFunction) QBAFramework_isacyclic, METH_NOARGS,
     "Return whether or not the relations of the Framework are acyclic."
+    },
+    {"are_strength_consistent", (PyCFunctionWithKeywords) QBAFramework_are_strength_consistent, METH_VARARGS | METH_KEYWORDS,
+    "Return True if a pair of arguments are strength consistent between two frameworks, False otherwise."
     },
     {NULL}  /* Sentinel */
 };
