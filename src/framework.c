@@ -1457,7 +1457,7 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
     PyObject *iterator, *attacked, *patients;
     while ((arg = PyIter_Next(set_iterator))) {    // PyIter_Next returns a new reference
         // for attacked in self.__attack_relations.patients(arg): att.remove_relation(arg, attacked)
-        patients = _QBAFARelations_agents((QBAFARelationsObject*)self->attack_relations, arg); // new reference
+        patients = _QBAFARelations_patients((QBAFARelationsObject*)self->attack_relations, arg); // new reference
         if (patients == NULL) {
             Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
             return NULL;
@@ -1479,7 +1479,7 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
         Py_DECREF(iterator);
 
         // for attacked in other.__attack_relations.patients(arg): att.add_relation(arg, attacked)
-        patients = _QBAFARelations_agents((QBAFARelationsObject*)other->attack_relations, arg); // new reference
+        patients = _QBAFARelations_patients((QBAFARelationsObject*)other->attack_relations, arg); // new reference
         if (patients == NULL) {
             Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
             return NULL;
@@ -1514,7 +1514,7 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
     PyObject *supported;
     while ((arg = PyIter_Next(set_iterator))) {    // PyIter_Next returns a new reference
         // for supported in self.__support_relations.patients(arg): att.remove_relation(arg, supported)
-        patients = _QBAFARelations_agents((QBAFARelationsObject*)self->support_relations, arg); // new reference
+        patients = _QBAFARelations_patients((QBAFARelationsObject*)self->support_relations, arg); // new reference
         if (patients == NULL) {
             Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
             return NULL;
@@ -1536,7 +1536,7 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
         Py_DECREF(iterator);
 
         // for supported in other.__support_relations.patients(arg): att.add_relation(arg, supported)
-        patients = _QBAFARelations_agents((QBAFARelationsObject*)other->support_relations, arg); // new reference
+        patients = _QBAFARelations_patients((QBAFARelationsObject*)other->support_relations, arg); // new reference
         if (patients == NULL) {
             Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
             return NULL;
