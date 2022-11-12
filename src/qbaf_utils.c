@@ -55,6 +55,157 @@ int PySet_IsDisjoint(PyObject *set1, PyObject *set2) {
 }
 
 /**
+ * @brief Return the union of two sets, NULL if an error is encountered.
+ * 
+ * @param set1 a PySet object (not NULL)
+ * @param set2 a PySet object (not NULL)
+ * @return PyObject* new PySet reference, NULL if an error occurred
+ */
+PyObject *
+PySet_Union(PyObject *set1, PyObject *set2)
+{
+    PyObject *tmp;
+    // We will iterate over set1, so we want it to be the smallest of them
+    if (PySet_GET_SIZE(set1) > PySet_GET_SIZE(set2)) {
+        tmp = set1;
+        set1 = set2;
+        set2 = tmp;
+    }
+
+    PyObject *new = PySet_New(set2); // We copy set2
+    if (new == NULL) {
+        return NULL;
+    }
+
+    PyObject *iterator = PyObject_GetIter(set1);
+    PyObject *item;
+
+    if (iterator == NULL) {
+        Py_DECREF(new);
+        return NULL;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        int contains = PySet_Contains(new, item);
+        if (contains < 0) {
+            Py_DECREF(new);
+            Py_DECREF(item); Py_DECREF(iterator);
+            return NULL;
+        }
+
+        if (!contains) {
+            if (PySet_Add(new, item) < 0) {
+                Py_DECREF(new);
+                Py_DECREF(item); Py_DECREF(iterator);
+                return NULL;
+            }
+        } else {
+            Py_DECREF(item);
+        }
+    }
+
+    Py_DECREF(iterator);
+
+    return new; 
+}
+
+/**
+ * @brief Return the intersection of two sets, NULL if an error is encountered.
+ * 
+ * @param set1 a PySet object (not NULL)
+ * @param set2 a PySet object (not NULL)
+ * @return PyObject* new PySet reference, NULL if an error occurred
+ */
+PyObject *
+PySet_Intersection(PyObject *set1, PyObject *set2)
+{
+    PyObject *tmp;
+    // We will iterate over set1, so we want it to be the smallest of them
+    if (PySet_GET_SIZE(set1) > PySet_GET_SIZE(set2)) {
+        tmp = set1;
+        set1 = set2;
+        set2 = tmp;
+    }
+
+    PyObject *new = PySet_New(NULL); // Raise TypeError if iterable is not actually iterable (not checked)
+
+    PyObject *iterator = PyObject_GetIter(set1);
+    PyObject *item;
+
+    if (iterator == NULL) {
+        Py_DECREF(new);
+        return NULL;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        int contains = PySet_Contains(set2, item);
+        if (contains < 0) {
+            Py_DECREF(new);
+            Py_DECREF(item); Py_DECREF(iterator);
+            return NULL;
+        }
+
+        if (contains) {
+            if (PySet_Add(new, item) < 0) {
+                Py_DECREF(new);
+                Py_DECREF(item); Py_DECREF(iterator);
+                return NULL;
+            }
+        } else {
+            Py_DECREF(item);
+        }
+    }
+
+    Py_DECREF(iterator);
+
+    return new; 
+}
+
+/**
+ * @brief Return the difference of two sets, NULL if an error is encountered.
+ * 
+ * @param set1 a PySet object (not NULL)
+ * @param set2 a PySet object (not NULL)
+ * @return PyObject* new PySet reference, NULL if an error occurred
+ */
+PyObject *
+PySet_Difference(PyObject *set1, PyObject *set2)
+{
+    PyObject *new = PySet_New(NULL); // Raise TypeError if iterable is not actually iterable (not checked)
+
+    PyObject *iterator = PyObject_GetIter(set1);
+    PyObject *item;
+
+    if (iterator == NULL) {
+        Py_DECREF(new);
+        return NULL;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        int contains = PySet_Contains(set2, item);
+        if (contains < 0) {
+            Py_DECREF(new);
+            Py_DECREF(item); Py_DECREF(iterator);
+            return NULL;
+        }
+
+        if (!contains) {
+            if (PySet_Add(new, item) < 0) {
+                Py_DECREF(new);
+                Py_DECREF(item); Py_DECREF(iterator);
+                return NULL;
+            }
+        } else {
+            Py_DECREF(item);
+        }
+    }
+
+    Py_DECREF(iterator);
+
+    return new; 
+}
+
+/**
  * @brief Return a new list containing objects returned by the iterable,
  * NULL if an error has occurred.
  * 

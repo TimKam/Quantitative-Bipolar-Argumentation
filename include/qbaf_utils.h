@@ -20,6 +20,33 @@
 int PySet_IsDisjoint(PyObject *set1, PyObject *set2);
 
 /**
+ * @brief Return the union of two sets, NULL if an error is encountered.
+ * 
+ * @param set1 a PySet object (not NULL)
+ * @param set2 a PySet object (not NULL)
+ * @return PyObject* new PySet reference, NULL if an error occurred
+ */
+PyObject * PySet_Union(PyObject *set1, PyObject *set2);
+
+/**
+ * @brief Return the intersection of two sets, NULL if an error is encountered.
+ * 
+ * @param set1 a PySet object (not NULL)
+ * @param set2 a PySet object (not NULL)
+ * @return PyObject* new PySet reference, NULL if an error occurred
+ */
+PyObject * PySet_Intersection(PyObject *set1, PyObject *set2);
+
+/**
+ * @brief Return the difference of two sets, NULL if an error is encountered.
+ * 
+ * @param set1 a PySet object (not NULL)
+ * @param set2 a PySet object (not NULL)
+ * @return PyObject* new PySet reference, NULL if an error occurred
+ */
+PyObject * PySet_Difference(PyObject *set1, PyObject *set2);
+
+/**
  * @brief Return a new list containing objects returned by the iterable,
  * NULL if an error has occurred.
  * 
