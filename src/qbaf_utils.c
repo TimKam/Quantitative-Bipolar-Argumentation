@@ -123,21 +123,10 @@ PySet_Union(PyObject *set1, PyObject *set2)
     }
 
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-        int contains = PySet_Contains(new, item);
-        if (contains < 0) {
+        if (PySet_Add(new, item) < 0) {
             Py_DECREF(new);
             Py_DECREF(item); Py_DECREF(iterator);
             return NULL;
-        }
-
-        if (!contains) {
-            if (PySet_Add(new, item) < 0) {
-                Py_DECREF(new);
-                Py_DECREF(item); Py_DECREF(iterator);
-                return NULL;
-            }
-        } else {
-            Py_DECREF(item);
         }
     }
 

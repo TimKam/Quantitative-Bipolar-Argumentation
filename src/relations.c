@@ -459,6 +459,7 @@ QBAFARelations_contains(QBAFARelationsObject *self, PyObject *args, PyObject *kw
 
 /**
  * @brief Add the relation (agent, patient) to this instance. Return -1 if an error has ocurred.
+ * It does not steal references from agent neither patient.
  * 
  * @param self instance of QBAFARelations
  * @param agent instance of QBAFArgument
