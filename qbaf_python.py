@@ -548,3 +548,48 @@ class QBAFramework:
         if self.final_weights[arg1] > self.final_weights[arg2]:
             return other.final_weights[arg1] > other.final_weights[arg2]
         return other.final_weights[arg1] == other.final_weights[arg2]
+
+    def reversal(self, other, set):
+        """ Return the reversal framework of QBF' (self) to QBF (other) w.r.t. set ⊆ Args'∪Args.
+
+        Args:
+            other (QBAFramework): the framework that self will be reversed to
+            set (set): a set of arguments that will be reversed
+
+        Returns:
+            QBAFramework: new instance of QBAFramework
+        """
+        if not set.issubset(self.__arguments.union(other.__arguments)):
+            raise ValueError
+
+        args = (self.__arguments.union(set)).difference(set.difference(other.__arguments))
+        
+        att = self.__attack_relations.copy()
+        for s in set:
+            for attacked in self.__attack_relations.patients(s):
+                att.remove_relation(s, attacked)
+            for attacked in other.__attack_relations.patients(s):
+                att.add_relation(s, attacked)
+        
+        supp = self.__support_relations.copy()
+        for s in set:
+            for supported in self.__support_relations.patients(s):
+                supp.remove_relation(s, supported)
+            for supported in other.__attack_relations.patients(s):
+                supp.add_relation(s, supported)
+        
+        initial_weights = dict()
+        for arg in args:
+            if arg in other.__arguments.intersection(set):
+                initial_weights[arg] = other.__initial_weights[arg]
+            else:
+                initial_weights[arg] = self.__initial_weights[arg]
+        
+        reversal = QBAFramework([],[],[],[])
+        reversal.__arguments = args
+        reversal.__attack_relations = att
+        reversal.__support_relations = supp
+        reversal.__initial_weights = initial_weights
+        reversal.__modified = True
+
+        return reversal
