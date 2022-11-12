@@ -11,13 +11,22 @@
 #include <Python.h>
 
 /**
- * @brief Return 1 if they are disjoint, 0 if they are not, and -1 if an error is encountered.
+ * @brief Return True if they are disjoint, False if they are not, and -1 if an error is encountered.
  * 
  * @param set1 a PySet object (not NULL)
  * @param set2 a PySet object (not NULL)
  * @return int 1 if they are disjoint, 0 if they are not, and -1 if an error is encountered
  */
 int PySet_IsDisjoint(PyObject *set1, PyObject *set2);
+
+/**
+ * @brief Return True if set1 is subset of set2, False if it is not, and -1 if an error is encountered.
+ * 
+ * @param set1 a PySet object (not NULL)
+ * @param set2 a PySet object (not NULL)
+ * @return int 1 if subset, 0 if not subset, and -1 if an error occurred
+ */
+int PySet_IsSubset(PyObject *set1, PyObject *set2);
 
 /**
  * @brief Return the union of two sets, NULL if an error is encountered.
