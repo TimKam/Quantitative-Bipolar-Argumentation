@@ -9,3 +9,6 @@ Requeriements for Windows:
 - Microsoft Visual C++ 14.0 or greater
 
 Adittionally, in the file qbaf_python, there will be a simple implementation of this.
+
+## Testing
+To test the package locally, first install the test requirements (`pip install -e .[dev]`) and then run `pytest` in the project's root directory.

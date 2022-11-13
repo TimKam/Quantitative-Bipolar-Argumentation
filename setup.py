@@ -15,6 +15,11 @@ def main():
         ext_modules=[Extension('qbaf', 
                         include_dirs = [include_folder],
                         sources = source_files)],
+        extras_require={
+        'dev': [
+            'pytest'
+        ]
+    }
     )
 
 if __name__ == '__main__':
