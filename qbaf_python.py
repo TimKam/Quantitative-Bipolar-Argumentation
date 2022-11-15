@@ -532,6 +532,22 @@ class QBAFramework:
             self.__modified = False
         return self.__final_weights.copy()
 
+    def final_weight(self, argument: QBAFArgument) -> float:
+        """ Return the final weights of Argument argument of the Framework.
+            If the framework has been modified from the last time the final weights were calculated
+            they are calculated again. Otherwise, it returns the already calculated final weight.
+
+        Args:
+            argument (QBAFArgument): the argument
+
+        Returns:
+            float: the final weight
+        """
+        if self.__modified:
+            self.__calculate_final_weights()
+            self.__modified = False
+        return self.__final_weights[argument]
+
     def are_strength_consistent(self, other, arg1: QBAFArgument, arg2: QBAFArgument) -> bool:
         """ Return whether or not a pair of arguments are strength consistent between two frameworks.
 
@@ -665,4 +681,44 @@ class QBAFramework:
                 break
 
         return result
+
+    def __influential_arguments(self, argument:QBAFArgument, not_visited: set, visiting=set()) -> list:
+        """ Return a list with the arguments that are attacking/supporting Argument argument directly or indirectly.
+
+        Args:
+            argument (QBAFArgument): a QBAFArgument
+            not_visited (set): a set of arguments that have not been visited yet (this set is modified in this function)
+            visiting (set, optional): a set of arguments that are being visited in this function. Defaults to set().
+
+        Returns:
+            list: list of QBAFArgument that contain at least one cycle
+        """
+        # If argument is being visited, do not visit it again but return it
+        if argument in visiting:
+            return [argument]
+        # We add it to visiting
+        visiting.add(argument)
+        parents = self.__attack_relations.agents(argument) + self.__support_relations.agents(argument)
+        result = [argument]
+        for arg in parents:
+            if arg in not_visited:
+                result += self.__influential_arguments(arg, not_visited, visiting)
+        not_visited.remove(argument)
+        visiting.remove(argument)
+        return result
+
+    def __influential_arguments_set(self, arg1: QBAFArgument, arg2: QBAFArgument) -> set:
+        """ Return a set with the arguments that are attacking/supporting Argument arg1 or Argument arg2, 
+            directly or indirectly.
+
+        Args:
+            arg1 (QBAFArgument): a QBAFArgument
+            arg2 (QBAFArgument): a QBAFArgument
+        """
+        not_visited = self.__arguments.copy()
+        visiting = set()
+        influential_arguments = self.__influential_arguments(arg1, not_visited, visiting)
+        influential_arguments += self.__influential_arguments(arg2, not_visited, visiting)
+
+        return set(influential_arguments)
 

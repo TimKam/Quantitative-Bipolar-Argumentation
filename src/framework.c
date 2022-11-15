@@ -471,7 +471,19 @@ QBAFramework_initial_weight(QBAFrameworkObject *self, PyObject *args, PyObject *
                                      &argument))
         return NULL;
 
-    return PyDict_GetItemWithError(self->initial_weights, argument);
+    int contains = PyDict_Contains(self->initial_weights, argument);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (!contains) {
+        PyErr_SetString(PyExc_ValueError,
+                        "argument must be contained in the QBAFramework");
+        return NULL;
+    }
+
+    PyObject *initial_weight = PyDict_GetItem(self->initial_weights, argument);
+    Py_INCREF(initial_weight);
+    return initial_weight;
 }
 
 /**
@@ -981,7 +993,7 @@ QBAFramework_copy(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
  * @param self an instance of QBAFramework
  * @param argument an instance of QBAFArgument
  * @param not_visited a PySet of QBAFArgument that have not been visited yet (this set is modified in this function)
- * @param visiting a PySet of QBAFArgument that are being visited in this function
+ * @param visiting a PySet of QBAFArgument that are being visited within this function
  * @return PyObject* a new PyList of QBAFArgument objects that contain at least one cycle 
  */
 static PyObject *
@@ -1000,7 +1012,9 @@ _QBAFramework_incycle_arguments(QBAFrameworkObject *self, PyObject *argument, Py
         return list;
     }
 
+    Py_INCREF(argument);
     if (PySet_Add(visiting, argument) < 0) {    // We add the argument to visiting
+        Py_DECREF(argument);
         return NULL;
     }
     PyObject *attack_patients, *support_patients;
@@ -1281,6 +1295,59 @@ QBAFramework_getfinal_weights(QBAFrameworkObject *self, void *closure)
     }
 
     return PyDict_Copy(self->final_weights);
+}
+
+/**
+ * @brief Return the final weight of the Argument argument, NULL in case of error.
+ * 
+ * @param self an instance of QBAFramework
+ * @param argument the QBAFArgument
+ * @return PyObject* borrowed PyFloat
+ */
+static PyObject *
+_QBAFramework_final_weight(QBAFrameworkObject *self, PyObject *argument)
+{
+    if (self->modified) {   // Calculate final weights if the framework has been modified
+        if (_QBAFRamework_calculate_final_weights(self) < 0) {
+            return NULL;
+        }
+        self->modified = FALSE;
+    }
+
+    int contains = PyDict_Contains(self->final_weights, argument);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (!contains) {
+        PyErr_SetString(PyExc_ValueError,
+                        "argument must be contained in the QBAFramework");
+        return NULL;
+    }
+
+    return PyDict_GetItem(self->final_weights, argument);
+}
+
+/**
+ * @brief Return the final weight of the Argument argument, NULL in case of error.
+ * 
+ * @param self an instance of QBAFramework
+ * @param args the argument values (argument: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new PyFloat
+ */
+static PyObject *
+QBAFramework_final_weight(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"argument", NULL};
+    PyObject *argument;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
+                                     &argument))
+        return NULL;
+
+    PyObject *final_weight = _QBAFramework_final_weight(self, argument); // Borrowed reference
+    Py_INCREF(final_weight);
+    return final_weight;
 }
 
 /**
@@ -1947,6 +2014,179 @@ QBAFramework_isCSIExplanation(QBAFrameworkObject *self, PyObject *args, PyObject
 }
 
 /**
+ * @brief Return a list with the arguments that are attacking/supporting Argument argument directly or indirectly,
+ * NULL if an error has occurred.
+ * 
+ * @param self an instance of QBAFramework
+ * @param argument an instance of QBAFArgument
+ * @param not_visited a PySet of QBAFArgument that have not been visited yet (this set is modified in this function)
+ * @param visiting a PySet of QBAFArgument that are being visited within this function
+ * @return PyObject* a new PyList of QBAFArgument objects 
+ */
+static PyObject *
+_QBAFramework_influential_arguments(QBAFrameworkObject *self, PyObject *argument, PyObject *not_visited, PyObject *visiting)
+{
+    int contains = PySet_Contains(visiting, argument);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (contains) { // If argument is being visited, do not visit it again but return it
+        PyObject *list = PyList_New(1);
+        if (list == NULL)
+            return NULL;
+        Py_INCREF(argument);
+        PyList_SET_ITEM(list, 0, argument);
+        return list;
+    }
+
+    Py_INCREF(argument);
+    if (PySet_Add(visiting, argument) < 0) {    // We add the argument to visiting
+        Py_DECREF(argument);
+        return NULL;
+    }
+    PyObject *attack_agents, *support_agents;
+    PyObject *agents, *result, *previous_result, *influential_arguments;
+
+    attack_agents = _QBAFARelations_agents((QBAFARelationsObject*)self->attack_relations, argument);
+    if (attack_agents == NULL) {
+        return NULL;
+    }
+    support_agents = _QBAFARelations_agents((QBAFARelationsObject*)self->support_relations, argument);
+    if (support_agents == NULL) {
+        Py_DECREF(attack_agents);
+    }
+
+    agents = PyList_Concat(attack_agents, support_agents);
+    Py_DECREF(attack_agents);
+    Py_DECREF(support_agents);
+    if (agents == NULL) {
+        return NULL;
+    }
+
+    // result = [argument]
+    result = PyList_New(1);
+    if (result == NULL) {
+        Py_DECREF(agents);
+        return NULL;
+    }
+    Py_INCREF(argument);
+    PyList_SET_ITEM(result, 0, argument);
+
+    PyObject *iterator = PyObject_GetIter(agents);
+    PyObject *item;
+
+    if (iterator == NULL) {
+        Py_DECREF(agents);
+        Py_DECREF(result);
+        return NULL;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        contains = PySet_Contains(not_visited, item);
+        if (contains < 0) {
+            Py_DECREF(agents); Py_DECREF(result);
+            Py_DECREF(iterator); Py_DECREF(item);
+            return NULL;
+        }
+
+        if (contains) {
+            previous_result = result;
+            influential_arguments = _QBAFramework_influential_arguments(self, item, not_visited, visiting);
+            if (influential_arguments == NULL) {
+                Py_DECREF(agents); Py_DECREF(previous_result);
+                Py_DECREF(iterator); Py_DECREF(item);
+                return NULL;
+            }
+
+            result = PyList_Concat(previous_result, influential_arguments);
+            Py_DECREF(previous_result);
+            Py_DECREF(influential_arguments);
+            if (result == NULL) {
+                Py_DECREF(agents);
+                Py_DECREF(iterator); Py_DECREF(item);
+                return NULL;
+            }
+        }
+
+        Py_DECREF(item);
+    }
+
+    Py_DECREF(iterator);
+    Py_DECREF(agents);
+
+    if (PySet_Discard(not_visited, argument) < 0) { // We remove the argument from not visited
+        Py_DECREF(result);
+        return NULL;
+    }
+
+    if (PySet_Discard(visiting, argument) < 0) { // We remove the argument from visiting
+        Py_DECREF(result);
+        return NULL;
+    }
+
+    return result;
+}
+
+/**
+ * @brief Return a set with the arguments that are attacking/supporting Argument arg1 or Argument arg2
+ * directly or indirectly, NULL if an error has been encountered.
+ * 
+ * @param self an instance of QBAFramework
+ * @param arg1 an instance of QBAFArgument
+ * @param arg2 an instance of QBAFArgument
+ * @return PyObject* a new PySet of QBAFArgument, NULL if an error occurred
+ */
+static inline PyObject *
+_QBAFramework_influential_arguments_set(QBAFrameworkObject *self, PyObject *arg1, PyObject *arg2)
+{
+    PyObject *not_visited = PySet_New(self->arguments); // New reference (copy)
+    if (not_visited == NULL) {
+        return NULL;
+    }
+
+    PyObject *visiting = PySet_New(NULL);
+    if (visiting == NULL) {
+        Py_DECREF(not_visited);
+        return NULL;
+    }
+
+    PyObject *influential_arg1 = _QBAFramework_influential_arguments(self, arg1, not_visited, visiting);
+    if (influential_arg1 == NULL) {
+        Py_DECREF(not_visited); Py_DECREF(visiting);
+        return NULL;
+    }
+
+    PyObject *influential_arg2 = _QBAFramework_influential_arguments(self, arg2, not_visited, visiting);
+    if (influential_arg2 == NULL) {
+        Py_DECREF(not_visited); Py_DECREF(visiting);
+        Py_DECREF(influential_arg1);
+        return NULL;
+    }
+
+    Py_DECREF(not_visited);
+    Py_DECREF(visiting);
+
+    PyObject *influential_arguments = PyList_Concat(influential_arg1, influential_arg2);
+    if (influential_arguments == NULL) {
+        Py_DECREF(influential_arg1); Py_DECREF(influential_arg2);
+        return NULL;
+    }
+
+    Py_DECREF(influential_arg1);
+    Py_DECREF(influential_arg2);
+
+    PyObject *set = PySet_New(influential_arguments);
+    if (set == NULL) {
+        Py_DECREF(influential_arguments);
+        return NULL;
+    }
+
+    Py_DECREF(influential_arguments);
+
+    return set;
+}
+
+/**
  * @brief A list with the setters and getters of the class QBAFramework
  * 
  */
@@ -1974,6 +2214,9 @@ static PyMethodDef QBAFramework_methods[] = {
     },
     {"initial_weight", (PyCFunctionWithKeywords) QBAFramework_initial_weight, METH_VARARGS | METH_KEYWORDS,
     "Return the initial weight of the Argument argument."
+    },
+    {"final_weight", (PyCFunctionWithKeywords) QBAFramework_final_weight, METH_VARARGS | METH_KEYWORDS,
+    "Return the final weight of the Argument argument."
     },
     {"add_argument", (PyCFunctionWithKeywords) QBAFramework_add_argument, METH_VARARGS | METH_KEYWORDS,
     "Add an Argument to the Framework. If it exists already it does nothing."
