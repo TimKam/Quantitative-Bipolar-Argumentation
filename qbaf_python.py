@@ -550,7 +550,7 @@ class QBAFramework:
         return other.final_weights[arg1] == other.final_weights[arg2]
 
     def reversal(self, other, set):
-        """ Return the reversal framework of QBF' (self) to QBF (other) w.r.t. set ⊆ Args'∪Args.
+        """ Return the reversal framework of self (QBF') to other (QBF) w.r.t. set ⊆ Args'∪Args.
 
         Args:
             other (QBAFramework): the framework that self will be reversed to
@@ -593,3 +593,44 @@ class QBAFramework:
         reversal.__modified = True
 
         return reversal
+
+    def isSSIExplanation(self, other, set, arg1, arg2):
+        """ Return True if a set of arguments set is Sufficient Strength Inconsistency (SSI) Explanation
+            of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF).
+
+        Args:
+            other (QBAFramework): a different instance of QBAFramework
+            set (set): a set of arguments
+            arg1 (QBAFArgument): first argument
+            arg2 (QBAFArgument): second argument
+
+        Returns:
+            bool: True if it is a SSI Explanation. False, otherwise.
+        """
+        if self.are_strength_consistent(other, arg1, arg2):
+            return len(set) == 0
+        
+        reversal = self.reversal(other, self.arguments.union(other.arguments).difference(set))
+
+        return not other.are_strength_consistent(reversal, arg1, arg2)
+
+    def isCSIExplanation(self, other, set, arg1, arg2):
+        """ Return True if a set of arguments set is Counterfactual Strength Inconsistency (CSI) Explanation
+            of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF).
+
+        Args:
+            other (QBAFramework): a different instance of QBAFramework
+            set (set): a set of arguments
+            arg1 (QBAFArgument): first argument
+            arg2 (QBAFArgument): second argument
+
+        Returns:
+            bool: True if it is a CSI Explanation. False, otherwise.
+        """
+        
+        reversal = self.reversal(other, set)
+
+        if not other.are_strength_consistent(reversal, arg1, arg2):
+            return False
+        
+        return self.isSSIExplanation(other, set, arg1, arg2)
