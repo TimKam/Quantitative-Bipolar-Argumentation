@@ -2186,6 +2186,70 @@ _QBAFramework_influential_arguments_set(QBAFrameworkObject *self, PyObject *arg1
     return set;
 }
 
+static inline int
+_QBAFramework_candidate_argument(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *argument)
+{
+    // if not (argument in self.arguments and argument in other.arguments): return True
+    int self_contains = PySet_Contains(self->arguments, argument);
+    if (self_contains < 0)
+        return -1;
+    int other_contains = PySet_Contains(other->arguments, argument);
+    if (other_contains < 0)
+        return -1;
+    if (!self_contains || !other_contains) {
+        return TRUE;
+    }
+
+    // if self.initial_weights[argument] != other.initial_weights[argument]: return True
+    PyObject *self_initial = PyDict_GetItemWithError(self->initial_weights, argument); // Borrowed reference
+    if (self_initial == NULL)
+        return -1;
+    PyObject *other_initial = PyDict_GetItemWithError(other->initial_weights, argument); // Borrowed reference
+    if (other_initial == NULL)
+        return -1;
+    int equals = PyObject_RichCompareBool(self_initial, other_initial, Py_EQ);
+    if (equals < 0)
+        return -1;
+    if (!equals) {
+        return TRUE;
+    }
+
+    // if self.final_weight(argument) != other.final_weight(argument): return True
+    PyObject *self_final = _QBAFramework_final_weight(self, argument);
+    if (self_final == NULL)
+        return -1;
+    PyObject *other_final = _QBAFramework_final_weight(other, argument);
+    if (other_final == NULL)
+        return -1;
+    equals = PyObject_RichCompareBool(self_final, other_final, Py_EQ);
+    if (equals < 0)
+        return -1;
+    if (!equals) {
+        return TRUE;
+    }
+
+    // if self.attack_relations.patients(argument) != other.attack_relations.patients(argument): return True
+    int equal_attack_patients = _QBAFARelations_equal_patients(
+        (QBAFARelationsObject*)self->attack_relations, (QBAFARelationsObject*)other->attack_relations, argument);
+    if (equal_attack_patients < 0)
+        return -1;
+    if (!equal_attack_patients) {
+        return TRUE;
+    }
+
+    // if self.support_relations.patients(argument) != other.support_relations.patients(argument): return True
+    int equal_support_patients = _QBAFARelations_equal_patients(
+        (QBAFARelationsObject*)self->support_relations, (QBAFARelationsObject*)other->support_relations, argument);
+    if (equal_support_patients < 0)
+        return -1;
+    if (!equal_support_patients) {
+        return TRUE;
+    }
+
+    // return False
+    return FALSE;
+}
+
 /**
  * @brief A list with the setters and getters of the class QBAFramework
  * 

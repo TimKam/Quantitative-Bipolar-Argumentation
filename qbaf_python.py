@@ -722,3 +722,28 @@ class QBAFramework:
 
         return set(influential_arguments)
 
+    def __candidate_argument(self, other, argument: QBAFArgument) -> bool:
+        """ Return True if the Argument argument is candidate for a CSI explanation, False if not.
+        An Argument is candidate if it is not contained by one of the frameworks or
+        it has a different initial weight or it has a different final weight between the frameworks or
+        it has different relations as attacker/supporter (as attacked/supported not checked).
+
+        Args:
+            other (QBAFramework): other instance of QBAFramework
+            argument (QBAFArgument): the argument
+
+        Returns:
+            bool: True if candidate, False if not
+        """
+        if not (argument in self.__arguments and argument in other.__arguments):
+            return True
+        if self.__initial_weights[argument] != other.__initial_weights[argument]:
+            return True
+        if self.final_weight(argument) != other.final_weight(argument):
+            return True
+        if self.__attack_relations.patients(argument) != other.__attack_relations.patients(argument):
+            return True
+        if self.__support_relations.patients(argument) != other.__support_relations.patients(argument):
+            return True
+
+        return False

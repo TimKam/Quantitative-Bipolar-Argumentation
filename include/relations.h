@@ -114,7 +114,7 @@ int _QBAFARelations_remove(QBAFARelationsObject *self, PyObject *agent, PyObject
  * 
  * @param self instance of QBAFARelations
  * @param agent instance of QBAFArgument
- * @return PyObject* list of QBAFArgument
+ * @return PyObject* new PyList of QBAFArgument, NULL if an error occurred
  */
 PyObject *_QBAFARelations_patients(QBAFARelationsObject *self, PyObject *agent);
 
@@ -124,8 +124,29 @@ PyObject *_QBAFARelations_patients(QBAFARelationsObject *self, PyObject *agent);
  * 
  * @param self instance of QBAFARelations
  * @param patient instance of QBAFArgument
- * @return PyObject* list of QBAFArgument
+ * @return PyObject* new PyList of QBAFArgument, NULL if an error occurred
  */
 PyObject *_QBAFARelations_agents(QBAFARelationsObject *self, PyObject *patient);
+
+/**
+ * @brief Return the patients that undergo the effect of a certain action (e.g. attack, support)
+ * initiated by the agent. Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @return PyObject* borrowed PySet of QBAFArgument, NULL if an error occurred
+ */
+PyObject * _QBAFARelations_patients_set(QBAFARelationsObject *self, PyObject *agent);
+
+/**
+ * @brief Return True if the Argument agent has the same patients in two Relations,
+ * False if they are not the same, and -1 if an error has been encountered.
+ * 
+ * @param self a QBAFARelations
+ * @param other another QBAFARelations
+ * @param agent a QBAFArgument
+ * @return int 1 if equal, 0 if not equal, -1 if an error occurrred
+ */
+int _QBAFARelations_equal_patients(QBAFARelationsObject *self, QBAFARelationsObject *other, PyObject *agent);
 
 #endif

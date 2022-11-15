@@ -915,3 +915,52 @@ QBAFARelations_contains_argument(QBAFARelationsObject *self, PyObject *argument)
 
     return 0;   // return False
 }
+
+/**
+ * @brief Return the patients that undergo the effect of a certain action (e.g. attack, support)
+ * initiated by the agent. Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @return PyObject* borrowed PySet of QBAFArgument, NULL if an error occurred
+ */
+PyObject *
+_QBAFARelations_patients_set(QBAFARelationsObject *self, PyObject *agent) {
+    int contains = PyDict_Contains(self->agent_patients, agent);
+    if (contains < 0)
+        return NULL;
+    if (!contains) {
+        PyObject *set = PySet_New(NULL);
+        Py_INCREF(agent);
+        if (PyDict_SetItem(self->agent_patients, agent, set) < 0) {
+            Py_DECREF(agent); Py_XDECREF(set);
+            return NULL;
+        }
+        Py_XDECREF(set);
+    }
+
+    return PyDict_GetItem(self->agent_patients, agent);
+}
+
+/**
+ * @brief Return True if the Argument agent has the same patients in two Relations,
+ * False if they are not the same, and -1 if an error has been encountered.
+ * 
+ * @param self a QBAFARelations
+ * @param other another QBAFARelations
+ * @param agent a QBAFArgument
+ * @return int 1 if equal, 0 if not equal, -1 if an error occurrred
+ */
+int
+_QBAFARelations_equal_patients(QBAFARelationsObject *self, QBAFARelationsObject *other, PyObject *agent)
+{
+    PyObject *self_patients = _QBAFARelations_patients_set(self, agent); // Borrowed reference
+    if (self_patients == NULL) {
+        return -1;
+    }
+    PyObject *other_patients = _QBAFARelations_patients_set(other, agent);  // Borrowed reference
+    if (other_patients == NULL) {
+        return -1;
+    }
+    return PyObject_RichCompareBool(self_patients, other_patients, Py_EQ);
+}
