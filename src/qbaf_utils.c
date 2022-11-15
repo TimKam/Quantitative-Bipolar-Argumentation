@@ -319,3 +319,118 @@ PyList_Concat(PyObject *list1, PyObject *list2)
 
     return new;
 }
+
+/**
+ * @brief Return a list of subsets of size size from the set set, NULL if an error has occurred.
+ * 
+ * @param set a PySet
+ * @param size the size of each subset
+ * @return PyObject* a new PyList, NULL if an error occurred
+ */
+PyObject *PySet_SubSets(PyObject *set, Py_ssize_t size)
+{
+    if (PySet_GET_SIZE(set) == 0) {
+        PyObject *new_set = PySet_New(NULL);
+        PyObject *list = PyList_New(1);
+        PyList_SET_ITEM(list, 0, new_set);
+        return list;
+    }
+    if (size <= 0) {
+        Py_ssize_t set_length = PySet_GET_SIZE(set);
+        PyObject *list = PyList_New(set_length);
+        for (Py_ssize_t index = 0; index < set_length; index++) {
+            PyList_SET_ITEM(list, index, PySet_New(NULL));
+        }
+    }
+    if (size == 1) {
+        Py_ssize_t set_length = PySet_GET_SIZE(set);
+        PyObject *list = PyList_New(set_length);
+        if (list == NULL) {
+            return NULL;
+        }
+
+        PyObject *iterator = PyObject_GetIter(set);
+        PyObject *item;
+        if (iterator == NULL) {
+            Py_DECREF(list);
+            return NULL;
+        }
+
+        Py_ssize_t index = 0;
+        while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+            PyObject *new_set = PySet_New(NULL);
+            if (PySet_Add(new_set, item) < 0) {
+                Py_DECREF(list); Py_XDECREF(new_set);
+                Py_DECREF(item); Py_DECREF(iterator);
+                return NULL;
+            }
+            PyList_SET_ITEM(list, index, new_set);
+            index++;
+        }
+        Py_DECREF(iterator);
+        
+        return list;
+    }
+
+    PyObject *list = PyList_New(0);
+    if (list == NULL) {
+        return NULL;
+    }
+
+    PyObject *myset = PySet_New(set); // Copy
+    if (myset == NULL) {
+        Py_DECREF(list);
+        return NULL;
+    }
+
+    PyObject *item, *subset_list, *iterator, *subset;
+    while(PySet_GET_SIZE(myset) > 0) {
+        item = PySet_Pop(myset); // New reference
+        if (item == NULL) {
+            Py_DECREF(list); Py_DECREF(myset);
+            return NULL;
+        }
+
+        subset_list = PySet_SubSets(myset, size-1);
+        if (subset_list == NULL) {
+            Py_DECREF(list); Py_DECREF(myset);
+            Py_DECREF(item);
+            return NULL;
+        }
+
+        iterator = PyObject_GetIter(subset_list);
+        if (iterator == NULL) {
+            Py_DECREF(list); Py_DECREF(myset);
+            Py_DECREF(item); Py_DECREF(subset_list);
+            return NULL;
+        }
+        while ((subset = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+            if (PySet_Add(subset, item) < 0) {
+                Py_DECREF(list); Py_DECREF(myset);
+                Py_DECREF(item); Py_DECREF(subset_list);
+                Py_DECREF(iterator); Py_DECREF(subset);
+                return NULL;
+            }
+            Py_INCREF(item);
+
+            if (PyList_Append(list, subset) < 0) {
+                Py_DECREF(list); Py_DECREF(myset);
+                Py_DECREF(item); Py_DECREF(subset_list);
+                Py_DECREF(iterator); Py_DECREF(subset);
+                return NULL;
+            }
+        }
+        Py_DECREF(iterator);
+
+        Py_DECREF(subset_list);
+        Py_DECREF(item);
+
+        if (PySet_GET_SIZE(myset) < size) {
+            break;
+        }
+    }
+
+    Py_DECREF(myset);
+
+    return list;
+}

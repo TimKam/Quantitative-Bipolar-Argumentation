@@ -634,3 +634,35 @@ class QBAFramework:
             return False
         
         return self.isSSIExplanation(other, set, arg1, arg2)
+
+    def __subsets(self, s: set, size: int) -> list:
+        """ Return a list of subsets of lenght size from the set s.
+
+        Args:
+            s (set): a set
+            size (int): the desired size of each subset
+
+        Returns:
+            list: the list of subsets
+        """
+        if len(s) == 0:
+            return [set()]
+        if size == 1:
+            return [{sub} for sub in s]
+        if size <= 0:
+            return [set() for _ in range(len(s))]
+
+        result = []
+        myset = s.copy()
+        for item in s:
+            myset.remove(item)
+            subsets = self.__subsets(myset, size-1)
+            for subset in subsets:
+                subset.add(item)
+                result.append(subset)
+
+            if len(myset) < size:
+                break
+
+        return result
+

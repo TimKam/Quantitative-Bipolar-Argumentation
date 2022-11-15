@@ -75,4 +75,13 @@ PyObject *PyList_Copy(PyObject *iterable, Py_ssize_t len);
  */
 PyObject *PyList_Concat(PyObject *list1, PyObject *list2);
 
+/**
+ * @brief Return a list of subsets of size size from the set set, NULL if an error has occurred.
+ * 
+ * @param set a PySet
+ * @param size the size of each subset
+ * @return PyObject* a new PyList, NULL if an error occurred
+ */
+PyObject *PySet_SubSets(PyObject *set, Py_ssize_t size);
+
 #endif
