@@ -306,7 +306,7 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
     Py_DECREF(tmp);
 
     // Check that the arguments of attack relations are in the arguments
-    int contained = QBAFARelations_ArgsContained(self->attack_relations, self->arguments);
+    int contained = QBAFARelations_ArgsContained((QBAFARelationsObject*)self->attack_relations, self->arguments);
     if (contained < 0) {
         return -1;
     }
@@ -316,7 +316,7 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
     }
 
     // Check that the arguments of support relations are in the arguments
-    contained = QBAFARelations_ArgsContained(self->support_relations, self->arguments);
+    contained = QBAFARelations_ArgsContained((QBAFARelationsObject*)self->support_relations, self->arguments);
     if (contained < 0) {
         return -1;
     }
@@ -326,7 +326,7 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
     }
 
     // Check attack and support relations are disjoint
-    int disjoint = _QBAFARelations_isDisjoint(self->attack_relations, self->support_relations);
+    int disjoint = _QBAFARelations_isDisjoint((QBAFARelationsObject*)self->attack_relations, (QBAFARelationsObject*)self->support_relations);
     if (disjoint < 0) {
         return -1;
     }
@@ -593,7 +593,7 @@ QBAFramework_remove_argument(QBAFrameworkObject *self, PyObject *args, PyObject 
     }
 
     // Check that the argument is not in attack relations
-    contains = QBAFARelations_contains_argument(self->attack_relations, argument);
+    contains = QBAFARelations_contains_argument((QBAFARelationsObject*)self->attack_relations, argument);
     if (contains < 0) {
         return NULL;
     }
@@ -604,7 +604,7 @@ QBAFramework_remove_argument(QBAFrameworkObject *self, PyObject *args, PyObject 
     }
 
     // Check that the argument is not in support relations
-    contains = QBAFARelations_contains_argument(self->support_relations, argument);
+    contains = QBAFARelations_contains_argument((QBAFARelationsObject*)self->support_relations, argument);
     if (contains < 0) {
         return NULL;
     }
@@ -937,7 +937,6 @@ QBAFramework_copy(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
 {
     PyObject *kwds = NULL;
     PyObject *args = NULL;
-    PyObject *tmp;
 
     QBAFrameworkObject *copy = (QBAFrameworkObject*) QBAFramework_new(Py_TYPE(self), args, kwds);
     if (copy == NULL) {
@@ -1365,13 +1364,13 @@ _QBAFramework_are_strength_consistent(QBAFrameworkObject *self, QBAFrameworkObje
 {
     if (self->modified) {   // Calculate final weights if the framework has been modified
         if (_QBAFRamework_calculate_final_weights(self) < 0) {
-            return NULL;
+            return -1;
         }
         self->modified = FALSE;
     }
     if (other->modified) {   // Calculate final weights if the framework has been modified
         if (_QBAFRamework_calculate_final_weights(other) < 0) {
-            return NULL;
+            return -1;
         }
         other->modified = FALSE;
     }
@@ -1488,7 +1487,7 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
     Py_DECREF(arguments_union);
 
     // Copy this framework
-    QBAFrameworkObject *reversal = QBAFramework_copy(self, NULL);
+    QBAFrameworkObject *reversal = (QBAFARelationsObject*)QBAFramework_copy(self, NULL);
     if (reversal == NULL) {
         return NULL;
     }
@@ -1717,7 +1716,7 @@ QBAFramework_reversal(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
         return NULL;
     }
 
-    PyObject *reversal = _QBAFramework_reversal(self, other, set);
+    PyObject *reversal = _QBAFramework_reversal(self, (QBAFrameworkObject*)other, set);
 
     Py_DECREF(set);
 
@@ -1763,7 +1762,7 @@ _QBAFramework_isSSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
         return -1;
     }
 
-    are_strength_consistent = _QBAFramework_are_strength_consistent(other, reversal, arg1, arg2);
+    are_strength_consistent = _QBAFramework_are_strength_consistent(other, (QBAFrameworkObject*)reversal, arg1, arg2);
     Py_DECREF(reversal);
     if (are_strength_consistent < 0) {
         return -1;
@@ -1791,7 +1790,7 @@ _QBAFramework_isCSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
         return -1;
     }
 
-    int are_strength_consistent = _QBAFramework_are_strength_consistent(other, reversal, arg1, arg2);
+    int are_strength_consistent = _QBAFramework_are_strength_consistent(other, (QBAFrameworkObject*)reversal, arg1, arg2);
     Py_DECREF(reversal);
     if (are_strength_consistent < 0) {
         return -1;
@@ -1897,7 +1896,7 @@ QBAFramework_isSSIExplanation(QBAFrameworkObject *self, PyObject *args, PyObject
     }
     Py_DECREF(self_arguments_intersection_other_arguments);
 
-    int isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, set, arg1, arg2);
+    int isSSIExplanation = _QBAFramework_isSSIExplanation(self, (QBAFrameworkObject*)other, set, arg1, arg2);
     Py_DECREF(set);
     if (isSSIExplanation < 0) {
         return NULL;
@@ -2002,7 +2001,7 @@ QBAFramework_isCSIExplanation(QBAFrameworkObject *self, PyObject *args, PyObject
     }
     Py_DECREF(self_arguments_intersection_other_arguments);
 
-    int isCSIExplanation = _QBAFramework_isCSIExplanation(self, other, set, arg1, arg2);
+    int isCSIExplanation = _QBAFramework_isCSIExplanation(self, (QBAFrameworkObject*)other, set, arg1, arg2);
     Py_DECREF(set);
     if (isCSIExplanation < 0) {
         return NULL;
