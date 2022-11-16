@@ -2445,6 +2445,189 @@ QBAFramework_minimal_CSIExplanations(QBAFrameworkObject *self, PyObject *args, P
 }
 
 /**
+ * @brief Return a list of a set of arguments that are minimal (all have the same size) SSI Explanations
+ * of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF), NULL if an error was encountered.
+ * 
+ * @param self an instance of QBAFramework
+ * @param other a different instance of QBAFramework
+ * @param arg1 a QBAFArgument
+ * @param arg2 a QBAFArgument
+ * @return PyObject* new PyList, NULL if an error occurred
+ */
+static inline PyObject *
+_QBAFramework_minimal_SSIExplanations(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
+{
+    // If empty set is a SSI Explanation return it
+    PyObject *empty_set = PySet_New(NULL);
+    if (empty_set == NULL) {
+        return NULL;
+    }
+    
+    int isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, empty_set, arg1, arg2);
+    if (isSSIExplanation < 0) {
+        Py_DECREF(empty_set);
+        return NULL;
+    }
+    if (isSSIExplanation) {
+        PyObject *list = PyList_New(1);
+        if (list == NULL) {
+            Py_DECREF(empty_set);
+            return NULL;
+        }
+        PyList_SET_ITEM(list, 0, empty_set);
+        return list;
+    }
+
+    Py_DECREF(empty_set);
+
+    // Obtain the influential arguments (arguments that attack/support arg1 or arg2, directly or indirectly)
+    PyObject *self_influential_arguments = _QBAFramework_influential_arguments_set(self, arg1, arg2);
+    if (self_influential_arguments == NULL) {
+        return NULL;
+    }
+
+    PyObject *other_influential_arguments = _QBAFramework_influential_arguments_set(other, arg1, arg2);
+    if (other_influential_arguments == NULL) {
+        Py_DECREF(self_influential_arguments);
+        return NULL;
+    }
+
+    PyObject *influential_arguments = PySet_Union(self_influential_arguments, other_influential_arguments);
+    if (influential_arguments == NULL) {
+        Py_DECREF(self_influential_arguments); Py_DECREF(other_influential_arguments);
+        return NULL;
+    }
+
+    Py_DECREF(self_influential_arguments);
+    Py_DECREF(other_influential_arguments);
+
+    // Filter the candidate arguments (arguments that are 'different' in self and other)
+    PyObject *candidate_arguments = PySet_New(NULL);
+    if (candidate_arguments == NULL) {
+        Py_DECREF(influential_arguments);
+        return NULL;
+    }
+
+    PyObject *iterator = PyObject_GetIter(influential_arguments);
+    PyObject *argument;
+    int candidate;
+
+    if (iterator == NULL) {
+        Py_DECREF(influential_arguments); Py_DECREF(candidate_arguments);
+        return NULL;
+    }
+
+    while ((argument = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        candidate = _QBAFramework_candidate_argument(self, other, argument);
+        if (candidate < 0) {
+            Py_DECREF(influential_arguments); Py_DECREF(candidate_arguments);
+            Py_DECREF(argument); Py_DECREF(iterator);
+            return NULL;
+        }
+        
+        if (candidate) {
+            if (PySet_Add(candidate_arguments, argument) < 0) {
+                Py_DECREF(influential_arguments); Py_DECREF(candidate_arguments);
+                Py_DECREF(argument); Py_DECREF(iterator);
+                return NULL;
+            }
+        } else {
+            Py_DECREF(argument);
+        }
+    }
+
+    Py_DECREF(iterator);
+    Py_DECREF(influential_arguments);
+
+    // Find SSI Explanations with trying with size from 1 to length of candidate_arguments
+    Py_ssize_t max_size = PySet_GET_SIZE(candidate_arguments);
+    PyObject *subsets, *explanations, *set;
+
+    for (Py_ssize_t size = 1; size <= max_size; size++) {
+        subsets = PySet_SubSets(candidate_arguments, size);
+        if (subsets == NULL) {
+            Py_DECREF(candidate_arguments);
+            return NULL;
+        }
+
+        explanations = PyList_New(0);
+        if (explanations == NULL) {
+            Py_DECREF(subsets); Py_DECREF(candidate_arguments);
+            return NULL;
+        }
+
+        iterator = PyObject_GetIter(subsets);
+        if (iterator == NULL) {
+            Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
+            return NULL;
+        }
+
+        while ((set = PyIter_Next(iterator))) {
+            isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, set, arg1, arg2);
+            if (isSSIExplanation < 0) {
+                Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
+                Py_DECREF(set); Py_DECREF(iterator);
+                return NULL;
+            }
+
+            if (isSSIExplanation) {
+                if (PyList_Append(explanations, set) < 0) {
+                    Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
+                    Py_DECREF(set); Py_DECREF(iterator);
+                    return NULL;
+                }
+            } else {
+                Py_DECREF(set);
+            }
+        }
+
+        Py_DECREF(iterator);
+        Py_DECREF(subsets);
+
+        if (PyList_GET_SIZE(explanations) > 0) {
+            Py_DECREF(candidate_arguments);
+            return explanations;
+        }
+
+        Py_DECREF(explanations);
+    }
+
+    Py_DECREF(candidate_arguments);
+
+    // At least one explanation should be found
+    PyErr_SetString(PyExc_RuntimeError,
+                        "Unexpected error: No SSI Explanation found");
+    return NULL;
+}
+
+/**
+ * @brief Return a list of a set of arguments that are minimal (all have the same size) SSI Explanations
+ * of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF), NULL if an error was encountered.
+ * 
+ * @param self an instance of QBAFramework
+ * @param args a tuple with arguments (other: QBAFramework, arg1: QBAFArgument, arg2: QBAFArgument)
+ * @param kwds name of the arguments args
+ * @return PyObject* new PyList, NULL if an error occurred
+ */
+static PyObject *
+QBAFramework_minimal_SSIExplanations(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"other", "arg1", "arg2", NULL};
+    PyObject *other, *arg1, *arg2;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|", kwlist,
+                                     &other, &arg1, &arg2))
+        return NULL;
+
+    if (!PyObject_TypeCheck(other, Py_TYPE(self))) {
+        PyErr_SetString(PyExc_TypeError, "other must be an instance of QBAFramework");
+        return NULL;
+    }
+
+    return _QBAFramework_minimal_SSIExplanations(self, (QBAFrameworkObject*)other, arg1, arg2);
+}
+
+/**
  * @brief A list with the setters and getters of the class QBAFramework
  * 
  */
@@ -2523,6 +2706,9 @@ static PyMethodDef QBAFramework_methods[] = {
     },
     {"isCSIExplanation", (PyCFunctionWithKeywords) QBAFramework_isCSIExplanation, METH_VARARGS | METH_KEYWORDS,
     "Return True if a set of arguments set is Counterfactual Strength Inconsistency (CSI) Explanation, False if not."
+    },
+    {"minimal_SSIExplanations", (PyCFunctionWithKeywords) QBAFramework_minimal_SSIExplanations, METH_VARARGS | METH_KEYWORDS,
+    "Return a list of a set of arguments that are minimal (all have the same size) SSI Explanations\nof arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF)."
     },
     {"minimal_CSIExplanations", (PyCFunctionWithKeywords) QBAFramework_minimal_CSIExplanations, METH_VARARGS | METH_KEYWORDS,
     "Return a list of a set of arguments that are minimal (all have the same size) CSI Explanations\nof arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF)."

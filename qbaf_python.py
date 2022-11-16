@@ -748,6 +748,40 @@ class QBAFramework:
 
         return False
 
+    def minimal_SSIExplanations(self, other, arg1: QBAFArgument, arg2: QBAFArgument) -> list:
+        """ Return a list of a set of arguments that are minimal (all have the same size) SSI Explanations
+            of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF).
+
+        Args:
+            other (QBAFramework): a QBAFramework
+            arg1 (QBAFArgument): a QBAFArgument
+            arg2 (QBAFArgument): a QBAFArgument
+
+        Returns:
+            list: list of sets of arguments
+        """
+        empty_set = set()
+        if self.isSSIExplanation(other, empty_set, arg1, arg2):
+            return [empty_set]
+
+        influential_arguments = self.__influential_arguments_set(arg1, arg2).union(other.__influential_arguments_set(arg1, arg2))
+        
+        candidate_arguments = set()
+        for argument in influential_arguments:
+            if self.__candidate_argument(other, argument):
+                candidate_arguments.add(argument)
+
+        for size in range(1, len(candidate_arguments)+1):
+            subsets = self.__subsets(candidate_arguments, size)
+            explanations = []
+            for set in subsets:
+                if self.isSSIExplanation(other, set, arg1, arg2):
+                    explanations.append(set)
+            if len(explanations > 0):
+                return explanations
+
+        raise RuntimeError # At least one explanation should be found
+
     def minimal_CSIExplanations(self, other, arg1: QBAFArgument, arg2: QBAFArgument) -> list:
         """ Return a list of a set of arguments that are minimal (all have the same size) CSI Explanations
             of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF).
