@@ -2360,7 +2360,7 @@ _QBAFramework_minimal_CSIExplanations(QBAFrameworkObject *self, QBAFrameworkObje
     Py_ssize_t max_size = PySet_GET_SIZE(candidate_arguments);
     PyObject *subsets, *explanations, *set;
 
-    for (Py_ssize_t size = 0; size <= max_size; size++) {
+    for (Py_ssize_t size = 1; size <= max_size; size++) {
         subsets = PySet_SubSets(candidate_arguments, size);
         if (subsets == NULL) {
             Py_DECREF(candidate_arguments);
