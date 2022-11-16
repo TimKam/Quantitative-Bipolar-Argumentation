@@ -434,3 +434,41 @@ PyObject *PySet_SubSets(PyObject *set, Py_ssize_t size)
 
     return list;
 }
+
+/**
+ * @brief Return True if the list contains a set that is subset of the set superset,
+ * False if it does not, -1 if an error has been encountered.
+ * 
+ * @param list a PyList of PySet
+ * @param superset a PySet
+ * @return int 1 if contained, 0 if not contained, -1 if an error occurred
+ */
+int
+PyList_ContainsSubset(PyObject *list, PyObject *superset) {
+    PyObject *iterator = PyObject_GetIter(list);
+    PyObject *set;
+    int issubset;
+
+    if (iterator == NULL) {
+        return -1;
+    }
+
+    while ((set = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        issubset = PySet_IsSubset(set, superset);
+        if (issubset < 0) {
+            Py_DECREF(set); Py_DECREF(iterator);
+            return -1;
+        }
+
+        Py_DECREF(set);
+
+        if (issubset) {
+            Py_DECREF(iterator);
+            return 1; // return True
+        }
+    }
+
+    Py_DECREF(iterator);
+
+    return 0; // return False
+}

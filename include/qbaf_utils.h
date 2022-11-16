@@ -84,4 +84,14 @@ PyObject *PyList_Concat(PyObject *list1, PyObject *list2);
  */
 PyObject *PySet_SubSets(PyObject *set, Py_ssize_t size);
 
+/**
+ * @brief Return True if the list contains a set that is subset of the set superset,
+ * False if it does not, -1 if an error has been encountered.
+ * 
+ * @param list a PyList of PySet
+ * @param superset a PySet
+ * @return int 1 if contained, 0 if not contained, -1 if an error occurred
+ */
+int PyList_ContainsSubset(PyObject *list, PyObject *superset);
+
 #endif

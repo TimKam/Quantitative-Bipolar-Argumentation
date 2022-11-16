@@ -749,7 +749,7 @@ class QBAFramework:
         return False
 
     def minimal_SSIExplanations(self, other, arg1: QBAFArgument, arg2: QBAFArgument) -> list:
-        """ Return a list of a set of arguments that are minimal (all have the same size) SSI Explanations
+        """ Return a list of all the sets of arguments that are minimal SSI Explanations
             of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF).
 
         Args:
@@ -771,19 +771,22 @@ class QBAFramework:
             if self.__candidate_argument(other, argument):
                 candidate_arguments.add(argument)
 
+        explanations = []
         for size in range(1, len(candidate_arguments)+1):
             subsets = self.__subsets(candidate_arguments, size)
-            explanations = []
             for set in subsets:
-                if self.isSSIExplanation(other, set, arg1, arg2):
+                minimal_in_explanations = False
+                for exp in explanations:
+                    if exp.issubset(set):
+                        minimal_in_explanations = True
+                        break
+                if not minimal_in_explanations and self.isSSIExplanation(other, set, arg1, arg2):
                     explanations.append(set)
-            if len(explanations > 0):
-                return explanations
-
-        raise RuntimeError # At least one explanation should be found
+        
+        return explanations
 
     def minimal_CSIExplanations(self, other, arg1: QBAFArgument, arg2: QBAFArgument) -> list:
-        """ Return a list of a set of arguments that are minimal (all have the same size) CSI Explanations
+        """ Return a list of all the sets of arguments that are minimal CSI Explanations
             of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF).
 
         Args:
@@ -805,15 +808,17 @@ class QBAFramework:
             if self.__candidate_argument(other, argument):
                 candidate_arguments.add(argument)
 
+        explanations = []
         for size in range(1, len(candidate_arguments)+1):
             subsets = self.__subsets(candidate_arguments, size)
-            explanations = []
             for set in subsets:
-                if self.isCSIExplanation(other, set, arg1, arg2):
+                minimal_in_explanations = False
+                for exp in explanations:
+                    if exp.issubset(set):
+                        minimal_in_explanations = True
+                        break
+                if not minimal_in_explanations and self.isCSIExplanation(other, set, arg1, arg2):
                     explanations.append(set)
-            if len(explanations > 0):
-                return explanations
-
-        raise RuntimeError # At least one explanation should be found
-
+        
+        return explanations
         
