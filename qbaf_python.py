@@ -808,6 +808,11 @@ class QBAFramework:
             if self.__candidate_argument(other, argument):
                 candidate_arguments.add(argument)
 
+        if self.__initial_weights[arg1] == other.__initial_weights[arg1]:
+            candidate_arguments.remove(arg1)
+        if self.__initial_weights[arg2] == other.__initial_weights[arg2]:
+            candidate_arguments.remove(arg2)
+
         explanations = []
         for size in range(1, len(candidate_arguments)+1):
             subsets = self.__subsets(candidate_arguments, size)
