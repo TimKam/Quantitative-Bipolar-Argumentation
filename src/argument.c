@@ -130,10 +130,6 @@ QBAFArgument_init(QBAFArgumentObject *self, PyObject *args, PyObject *kwds)
  * 
  */
 static PyMemberDef QBAFArgument_members[] = {
-//    {"initial_weight", T_DOUBLE, offsetof(QBAFArgumentObject, initial_weight), 0, // TOREMOVE
-//     "initial weight"},
-//    {"final_weight", T_DOUBLE, offsetof(QBAFArgumentObject, final_weight), 0,     // TOREMOVE
-//     "final weight"},
     {NULL}  /* Sentinel */
 };
 
@@ -255,9 +251,6 @@ QBAFArgument_str(QBAFArgumentObject *self, PyObject *Py_UNUSED(ignored))
  * 
  */
 static PyMethodDef QBAFArgument_methods[] = {
-//    {"str", (PyCFunction) QBAFArgument_str, METH_NOARGS,              // TOREMOVE
-//     "Return the string format of the object: QBAFArgument(<name>)"
-//    },
     {NULL}  /* Sentinel */
 };
 
