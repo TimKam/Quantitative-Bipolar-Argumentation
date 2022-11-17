@@ -21,12 +21,13 @@
  */
 typedef struct {
     PyObject_HEAD
-    PyObject *arguments;        /* a set of QBAFArgument */
-    PyObject *initial_weights;  /* a dictionary (argument: QBAFArgument, initial_weight: double) */
-    PyObject *attack_relations; /* an instance of QBAFARelations */
-    PyObject *support_relations;/* an instance of QBAFARelations */
-    PyObject *final_weights;    /* a dictionary (argument: QBAFArgument, final_weight: double) */
-    int       modified;         /* 0 if the framework has not been modified after calculating the final weights. Otherwise, 1 */
+    PyObject *arguments;            /* a set of QBAFArgument */
+    PyObject *initial_weights;      /* a dictionary (argument: QBAFArgument, initial_weight: double) */
+    PyObject *attack_relations;     /* an instance of QBAFARelations */
+    PyObject *support_relations;    /* an instance of QBAFARelations */
+    PyObject *final_weights;        /* a dictionary (argument: QBAFArgument, final_weight: double) */
+    int       modified;             /* 0 if the framework has not been modified after calculating the final weights. Otherwise, 1 */
+    int       disjoint_relations;   /* 1 if the attack/support relations must be disjoint, 0 if they do not have to */
 } QBAFrameworkObject;
 
 /**
@@ -103,6 +104,7 @@ QBAFramework_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         Py_INCREF(Py_None);
         self->final_weights = Py_None;
         self->modified = TRUE;
+        self->disjoint_relations = TRUE;
     }
     return (PyObject *) self;
 }
@@ -236,11 +238,14 @@ PyListFloat_FromPyListNumeric(PyObject *list) {
 static int
 QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 {
-    static char *kwlist[] = {"arguments", "initial_weights", "attack_relations", "support_relations", NULL};
+    static char *kwlist[] = {"arguments", "initial_weights", "attack_relations", "support_relations",
+                            "disjoint_relations", NULL};
     PyObject *arguments, *initial_weights, *attack_relations, *support_relations, *tmp;
+    int disjoint_relations = TRUE;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOOO|", kwlist,
-                                     &arguments, &initial_weights, &attack_relations, &support_relations))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOOO|p", kwlist,
+                                     &arguments, &initial_weights, &attack_relations, &support_relations,
+                                     &disjoint_relations))
         return -1;
 
     if (!PyList_Check(arguments)) {
@@ -325,14 +330,19 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
-    // Check attack and support relations are disjoint
-    int disjoint = _QBAFARelations_isDisjoint((QBAFARelationsObject*)self->attack_relations, (QBAFARelationsObject*)self->support_relations);
-    if (disjoint < 0) {
-        return -1;
-    }
-    if (!disjoint) {
-        PyErr_SetString(PyExc_ValueError, "attack_relations and support_relations must be disjoint");
-        return -1;
+    
+    self->disjoint_relations = disjoint_relations;
+
+    if (self->disjoint_relations) {
+        // Check attack and support relations are disjoint
+        int disjoint = _QBAFARelations_isDisjoint((QBAFARelationsObject*)self->attack_relations, (QBAFARelationsObject*)self->support_relations);
+        if (disjoint < 0) {
+            return -1;
+        }
+        if (!disjoint) {
+            PyErr_SetString(PyExc_ValueError, "attack_relations and support_relations must be disjoint");
+            return -1;
+        }
     }
 
     return 0;
@@ -398,6 +408,21 @@ QBAFramework_getsupport_relations(QBAFrameworkObject *self, void *closure)
 {
     Py_INCREF(self->support_relations);
     return self->support_relations;
+}
+
+/**
+ * @brief Getter of the attribute disjoint relations.
+ * 
+ * @param self the QBAFramework object
+ * @param closure 
+ * @return PyObject* a new PyBool
+ */
+static PyObject *
+QBAFramework_getdisjoint_relations(QBAFrameworkObject *self, void *closure)
+{
+    if (self->disjoint_relations)
+        Py_RETURN_TRUE;
+    Py_RETURN_FALSE;
 }
 
 /**
@@ -666,14 +691,16 @@ QBAFramework_add_attack_relation(QBAFrameworkObject *self, PyObject *args, PyObj
         return NULL;
     }
 
-    contains = _QBAFARelations_contains((QBAFARelationsObject*) self->support_relations, agent, patient);
-    if (contains < 0) {
-        return NULL;
-    }
-    if (contains) {
-        PyErr_SetString(PyExc_ValueError,
-                        "attack relation already exists as support relation");
-        return NULL;
+    if (self->disjoint_relations) {
+        contains = _QBAFARelations_contains((QBAFARelationsObject*) self->support_relations, agent, patient);
+        if (contains < 0) {
+            return NULL;
+        }
+        if (contains) {
+            PyErr_SetString(PyExc_ValueError,
+                            "attack relation already exists as support relation");
+            return NULL;
+        }
     }
 
     contains = _QBAFARelations_contains((QBAFARelationsObject*) self->attack_relations, agent, patient);
@@ -732,14 +759,16 @@ QBAFramework_add_support_relation(QBAFrameworkObject *self, PyObject *args, PyOb
         return NULL;
     }
 
-    contains = _QBAFARelations_contains((QBAFARelationsObject*) self->attack_relations, agent, patient);
-    if (contains < 0) {
-        return NULL;
-    }
-    if (contains) {
-        PyErr_SetString(PyExc_ValueError,
-                        "support relation already exists as attack relation");
-        return NULL;
+    if (self->disjoint_relations) {
+        contains = _QBAFARelations_contains((QBAFARelationsObject*) self->attack_relations, agent, patient);
+        if (contains < 0) {
+            return NULL;
+        }
+        if (contains) {
+            PyErr_SetString(PyExc_ValueError,
+                            "support relation already exists as attack relation");
+            return NULL;
+        }
     }
 
     contains = _QBAFARelations_contains((QBAFARelationsObject*) self->support_relations, agent, patient);
@@ -1487,7 +1516,7 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
     Py_DECREF(arguments_union);
 
     // Copy this framework
-    QBAFrameworkObject *reversal = (QBAFARelationsObject*)QBAFramework_copy(self, NULL);
+    QBAFrameworkObject *reversal = (QBAFrameworkObject*)QBAFramework_copy(self, NULL);
     if (reversal == NULL) {
         return NULL;
     }
@@ -2674,6 +2703,8 @@ static PyGetSetDef QBAFramework_getsetters[] = {
      "Return the support relations of the instance.", NULL},
     {"final_weights", (getter) QBAFramework_getfinal_weights, NULL,
      "Return a copy of the final weights.", NULL},
+    {"disjoint_relations", (getter) QBAFramework_getdisjoint_relations, NULL,
+     "Return True if the attack/support relations must be disjoint, False if they do not have to.", NULL},
     {NULL}  /* Sentinel */
 };
 
