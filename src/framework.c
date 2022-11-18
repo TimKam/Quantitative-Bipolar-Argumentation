@@ -2569,36 +2569,6 @@ _QBAFramework_minimal_CSIExplanations(QBAFrameworkObject *self, QBAFrameworkObje
     Py_DECREF(iterator);
     Py_DECREF(influential_arguments);
 
-    // if self.initial_weights[arg1] == other.initial_weights[arg1]: candidate_arguments.remove(arg1)
-    PyObject *self_initial_weight_arg1 = PyDict_GetItem(self->initial_weights, arg1);   // borrowed reference
-    PyObject *other_initial_weight_arg1 = PyDict_GetItem(other->initial_weights, arg1); // borrowed reference
-    int equal_inital_weight_arg1 = PyObject_RichCompareBool(self_initial_weight_arg1, other_initial_weight_arg1, Py_EQ);
-    if (equal_inital_weight_arg1 < 0) {
-        Py_DECREF(candidate_arguments);
-        return NULL;
-    }
-    if (equal_inital_weight_arg1) {
-        if (PySet_Discard(candidate_arguments, arg1) < 0) {
-            Py_DECREF(candidate_arguments);
-            return NULL;
-        }
-    }
-
-    // if self.initial_weights[arg2] == other.initial_weights[arg2]: candidate_arguments.remove(arg2)
-    PyObject *self_initial_weight_arg2 = PyDict_GetItem(self->initial_weights, arg2);   // borrowed reference
-    PyObject *other_initial_weight_arg2 = PyDict_GetItem(other->initial_weights, arg2); // borrowed reference
-    int equal_inital_weight_arg2 = PyObject_RichCompareBool(self_initial_weight_arg2, other_initial_weight_arg2, Py_EQ);
-    if (equal_inital_weight_arg2 < 0) {
-        Py_DECREF(candidate_arguments);
-        return NULL;
-    }
-    if (equal_inital_weight_arg2) {
-        if (PySet_Discard(candidate_arguments, arg2) < 0) {
-            Py_DECREF(candidate_arguments);
-            return NULL;
-        }
-    }
-
     // Find CSI Explanations trying with size from 1 to length of candidate_arguments
     Py_ssize_t max_size = PySet_GET_SIZE(candidate_arguments);
     PyObject *subsets, *explanations, *set;
