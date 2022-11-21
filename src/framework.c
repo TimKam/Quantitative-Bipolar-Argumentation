@@ -246,7 +246,7 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
     PyObject *aggregation_function = NULL, *influence_function = NULL;
     // TODO: Implement type, aggregation function and influence function
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOOO|pz", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOOO|pzOO", kwlist,
                                      &arguments, &initial_weights, &attack_relations, &support_relations,
                                      &disjoint_relations, &type, &aggregation_function, &influence_function))
         return -1;
