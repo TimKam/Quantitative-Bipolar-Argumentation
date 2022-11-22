@@ -432,6 +432,46 @@ QBAFramework_getdisjoint_relations(QBAFrameworkObject *self, void *closure)
 }
 
 /**
+ * @brief Setter of the attribute disjoint_relations.
+ * 
+ * @param self the QBAFramework object
+ * @param value PyBool value for disjoint_relations
+ * @param closure 
+ * @return int 0 if it was executed with no errors. Otherwise, -1.
+ */
+static int
+QBAFramework_setdisjoint_relations(QBAFrameworkObject *self, PyObject *value, void *closure)
+{
+    if (!PyBool_Check(value)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "disjoint_relations must be of type boolean");
+        return -1;
+    }
+    
+    int disjoint_relations = PyObject_IsTrue(value);
+
+    if (self->disjoint_relations == disjoint_relations) {
+        return 0;
+    }
+
+    self->disjoint_relations = disjoint_relations;
+
+    if (self->disjoint_relations) {
+        // Check attack and support relations are disjoint
+        int disjoint = _QBAFARelations_isDisjoint((QBAFARelationsObject*)self->attack_relations, (QBAFARelationsObject*)self->support_relations);
+        if (disjoint < 0) {
+            return -1;
+        }
+        if (!disjoint) {
+            PyErr_SetString(PyExc_ValueError, "attack_relations and support_relations are not disjoint");
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+/**
  * @brief Modify the initial weight of the Argument argument.
  * 
  * @param self an instance of QBAFramework
@@ -2679,8 +2719,9 @@ static PyGetSetDef QBAFramework_getsetters[] = {
      "Return the support relations of the instance.", NULL},
     {"final_weights", (getter) QBAFramework_getfinal_weights, NULL,
      "Return a copy of the final weights.", NULL},
-    {"disjoint_relations", (getter) QBAFramework_getdisjoint_relations, NULL,
-     "Return True if the attack/support relations must be disjoint, False if they do not have to.", NULL},
+    {"disjoint_relations", (getter) QBAFramework_getdisjoint_relations, (setter) QBAFramework_setdisjoint_relations,
+     "Return True if the attack/support relations must be disjoint, False if they do not have to.",
+     "Setter of the attribute disjoint_relations."},
     {NULL}  /* Sentinel */
 };
 
