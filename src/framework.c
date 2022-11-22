@@ -1046,7 +1046,7 @@ QBAFramework_copy(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
         return NULL;
     }
 
-    if (PyDict_Check(copy->final_weights)) {
+    if (!self->modified) {
         Py_DECREF(copy->final_weights);
         copy->final_weights = PyDict_Copy(self->final_weights);
         if (copy->final_weights == NULL) {
