@@ -15,6 +15,8 @@
 #define TRUE 1
 #define FALSE 0
 
+#define Py_RETURN_BOOL(i) if (i) Py_RETURN_TRUE; else Py_RETURN_FALSE;
+
 /**
  * @brief Struct that defines the Object Type Framework in a QBAF.
  * 
@@ -2706,6 +2708,54 @@ QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, PyObject *args, Py
 }
 
 /**
+ * @brief Return the comparison result between two QBAFramework, NULL if an error has occurred.
+ * 
+ * @param self instance of QBAFramework
+ * @param other different instance of QBAFramework
+ * @param op operation type (only Py_EQ and Py_NE are implemented)
+ * @return PyObject* new PyBool, NULL if an error occurred
+ */
+static PyObject *
+QBAFramework_richcompare(QBAFrameworkObject *self, PyObject *other, int op)
+{
+    if (!PyObject_TypeCheck(other, Py_TYPE(self))) {
+        PyErr_SetString(PyExc_TypeError, "cannot compare instance of 'QBAFramework' with instance of a different type");
+        return NULL;
+    }
+
+    if ((op != Py_EQ) && (op != Py_NE)) {
+        PyErr_SetNone(PyExc_NotImplementedError);
+        return NULL;
+    }
+
+    int equals = PyObject_RichCompareBool(self->arguments, ((QBAFrameworkObject *)other)->arguments, Py_EQ);
+    if (equals < 0)
+        return NULL;
+    if (!equals)
+        Py_RETURN_BOOL(op != Py_EQ);
+
+    equals = PyObject_RichCompareBool(self->initial_weights, ((QBAFrameworkObject *)other)->initial_weights, Py_EQ);
+    if (equals < 0)
+        return NULL;
+    if (!equals)
+        Py_RETURN_BOOL(op != Py_EQ);
+
+    equals = PyObject_RichCompareBool(self->attack_relations, ((QBAFrameworkObject *)other)->attack_relations, Py_EQ);
+    if (equals < 0)
+        return NULL;
+    if (!equals)
+        Py_RETURN_BOOL(op != Py_EQ);
+
+    equals = PyObject_RichCompareBool(self->support_relations, ((QBAFrameworkObject *)other)->support_relations, Py_EQ);
+    if (equals < 0)
+        return NULL;
+    if (!equals)
+        Py_RETURN_BOOL(op != Py_EQ);
+
+    Py_RETURN_BOOL(op == Py_EQ);
+}
+
+/**
  * @brief A list with the setters and getters of the class QBAFramework
  * 
  */
@@ -2816,6 +2866,7 @@ static PyTypeObject QBAFrameworkType = {
     .tp_members = QBAFramework_members,
     .tp_methods = QBAFramework_methods,
     .tp_getset = QBAFramework_getsetters,
+    .tp_richcompare = (richcmpfunc) QBAFramework_richcompare,   // __eq__, __ne__
 };
 
 /**

@@ -724,8 +724,8 @@ QBAFARelations_isDisjoint(QBAFARelationsObject *self, PyObject *args, PyObject *
  * 
  * @param self instance of QBAFARelations
  * @param other different instance of QBAFARelations
- * @param op operation type (only Py_EQ is implemented)
- * @return PyObject* new PyTrue if equal, new PyFalse if not equal, NULL if an error occurred
+ * @param op the operation type (Py_LT, Py_LE ,Py_EQ ,Py_NE ,Py_GT or Py_GE)
+ * @return PyObject* new PyBool, NULL if an error occurred
  */
 static PyObject *
 QBAFARelations_richcompare(QBAFARelationsObject *self, PyObject *other, int op)
@@ -796,7 +796,7 @@ static PyTypeObject QBAFARelationsType = {
     .tp_getset = QBAFARelations_getsetters,
     .tp_str = (reprfunc) QBAFARelations___str__,                // __str__
     .tp_repr = (reprfunc) QBAFARelations___str__,               // __repr__
-    .tp_richcompare = (richcmpfunc) QBAFARelations_richcompare, // __eq__
+    .tp_richcompare = (richcmpfunc) QBAFARelations_richcompare, // __lt__, __le__, __eq__, __ne__, __gt__, __ge__
     .tp_as_sequence = &QBAFARelations_sequencemethods,          // __len__, __contains__
 };
 

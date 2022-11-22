@@ -824,4 +824,10 @@ class QBAFramework:
                     explanations.append(set)
         
         return explanations
+
+    def __eq__(self, other: object) -> bool:
+        return (self.__arguments == other.__arguments
+            and self.__initial_weights == other.__initial_weights
+            and self.__attack_relations == other.__attack_relations
+            and self.__support_relations == other.__support_relations)
         
