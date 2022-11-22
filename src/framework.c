@@ -239,18 +239,18 @@ static int
 QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"arguments", "initial_weights", "attack_relations", "support_relations",
-                            "disjoint_relations", "type", "aggregation_function", "influence_function",
+                            "disjoint_relations", "semantics", "aggregation_function", "influence_function",
                             "min_weight", "max_weight", NULL};
     PyObject *arguments, *initial_weights, *attack_relations, *support_relations, *tmp;
     int disjoint_relations = TRUE;
-    char *type = NULL; // (e.g. "naive") If None it will be NULL, otherwise it is a pointer to char that is only accesible in this function.
+    char *semantics = NULL; // (e.g. "naive") If None it will be NULL, otherwise it is a pointer to char that is only accesible in this function.
     PyObject *aggregation_function = NULL, *influence_function = NULL;
     double min_weight = DBL_MIN, max_weight = DBL_MAX;
-    // TODO: Implement type, aggregation function and influence function
+    // TODO: Implement semantics, aggregation function and influence function, min_weight and max_weight
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOOO|pzOOdd", kwlist,
                                      &arguments, &initial_weights, &attack_relations, &support_relations,
-                                     &disjoint_relations, &type, &aggregation_function, &influence_function,
+                                     &disjoint_relations, &semantics, &aggregation_function, &influence_function,
                                      &min_weight, &max_weight))
         return -1;
 
