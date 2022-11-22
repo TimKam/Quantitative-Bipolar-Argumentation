@@ -2348,7 +2348,7 @@ _QBAFramework_candidate_argument(QBAFrameworkObject *self, QBAFrameworkObject *o
  * @return PyObject* new PyList, NULL if an error occurred
  */
 static inline PyObject *
-_QBAFramework_minimal_SSIExplanations(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
+_QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
 {
     // If empty set is a SSI Explanation return it
     PyObject *empty_set = PySet_New(NULL);
@@ -2504,7 +2504,7 @@ _QBAFramework_minimal_SSIExplanations(QBAFrameworkObject *self, QBAFrameworkObje
  * @return PyObject* new PyList, NULL if an error occurred
  */
 static PyObject *
-QBAFramework_minimal_SSIExplanations(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"other", "arg1", "arg2", NULL};
     PyObject *other, *arg1, *arg2;
@@ -2518,7 +2518,7 @@ QBAFramework_minimal_SSIExplanations(QBAFrameworkObject *self, PyObject *args, P
         return NULL;
     }
 
-    return _QBAFramework_minimal_SSIExplanations(self, (QBAFrameworkObject*)other, arg1, arg2);
+    return _QBAFramework_minimalSSIExplanations(self, (QBAFrameworkObject*)other, arg1, arg2);
 }
 
 /**
@@ -2532,7 +2532,7 @@ QBAFramework_minimal_SSIExplanations(QBAFrameworkObject *self, PyObject *args, P
  * @return PyObject* new PyList, NULL if an error occurred
  */
 static inline PyObject *
-_QBAFramework_minimal_CSIExplanations(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
+_QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
 {
     // If empty set is a CSI Explanation return it
     PyObject *empty_set = PySet_New(NULL);
@@ -2688,7 +2688,7 @@ _QBAFramework_minimal_CSIExplanations(QBAFrameworkObject *self, QBAFrameworkObje
  * @return PyObject* new PyList, NULL if an error occurred
  */
 static PyObject *
-QBAFramework_minimal_CSIExplanations(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"other", "arg1", "arg2", NULL};
     PyObject *other, *arg1, *arg2;
@@ -2702,7 +2702,7 @@ QBAFramework_minimal_CSIExplanations(QBAFrameworkObject *self, PyObject *args, P
         return NULL;
     }
 
-    return _QBAFramework_minimal_CSIExplanations(self, (QBAFrameworkObject*)other, arg1, arg2);
+    return _QBAFramework_minimalCSIExplanations(self, (QBAFrameworkObject*)other, arg1, arg2);
 }
 
 /**
@@ -2788,10 +2788,10 @@ static PyMethodDef QBAFramework_methods[] = {
     {"isCSIExplanation", (PyCFunctionWithKeywords) QBAFramework_isCSIExplanation, METH_VARARGS | METH_KEYWORDS,
     "Return True if a set of arguments set is Counterfactual Strength Inconsistency (CSI) Explanation, False if not."
     },
-    {"minimal_SSIExplanations", (PyCFunctionWithKeywords) QBAFramework_minimal_SSIExplanations, METH_VARARGS | METH_KEYWORDS,
+    {"minimalSSIExplanations", (PyCFunctionWithKeywords) QBAFramework_minimalSSIExplanations, METH_VARARGS | METH_KEYWORDS,
     "Return a list of a set of arguments that are minimal (all have the same size) SSI Explanations\nof arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF)."
     },
-    {"minimal_CSIExplanations", (PyCFunctionWithKeywords) QBAFramework_minimal_CSIExplanations, METH_VARARGS | METH_KEYWORDS,
+    {"minimalCSIExplanations", (PyCFunctionWithKeywords) QBAFramework_minimalCSIExplanations, METH_VARARGS | METH_KEYWORDS,
     "Return a list of a set of arguments that are minimal (all have the same size) CSI Explanations\nof arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF)."
     },
     {NULL}  /* Sentinel */

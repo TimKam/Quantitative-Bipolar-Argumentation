@@ -748,7 +748,7 @@ class QBAFramework:
 
         return False
 
-    def minimal_SSIExplanations(self, other, arg1: QBAFArgument, arg2: QBAFArgument) -> list:
+    def minimalSSIExplanations(self, other, arg1: QBAFArgument, arg2: QBAFArgument) -> list:
         """ Return a list of all the sets of arguments that are minimal SSI Explanations
             of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF).
 
@@ -785,7 +785,7 @@ class QBAFramework:
         
         return explanations
 
-    def minimal_CSIExplanations(self, other, arg1: QBAFArgument, arg2: QBAFArgument) -> list:
+    def minimalCSIExplanations(self, other, arg1: QBAFArgument, arg2: QBAFArgument) -> list:
         """ Return a list of all the sets of arguments that are minimal CSI Explanations
             of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF).
 
