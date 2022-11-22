@@ -259,7 +259,85 @@ def test_isacyclic():
     with pytest.raises(NotImplementedError):
         qbf.final_weights
 
-# TODO: TEST STRENGTH CONSISTENCY
+# TEST EQUALS
+
+def test_equals():
+    qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')])
+    copy = qbf.copy()
+    assert qbf == copy
+    assert not qbf != copy
+
+    copy.add_argument('e',3)
+    assert qbf != copy
+    assert not qbf == copy
+
+    copy = qbf.copy()
+    copy.modify_initial_weight('c', 3)
+    assert qbf != copy
+    assert not qbf == copy
+
+    copy = qbf.copy()
+    copy.add_attack_relation('c', 'a')
+    assert qbf != copy
+    assert not qbf == copy
+
+    copy = qbf.copy()
+    copy.add_support_relation('b', 'a')
+    assert qbf != copy
+    assert not qbf == copy
+
+def test_incorrect_compare():
+    qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')])
+    copy = qbf.copy()
+    with pytest.raises(TypeError):
+        qbf == 1
+    with pytest.raises(TypeError):
+        1 == qbf
+    with pytest.raises(NotImplementedError):
+        qbf < copy
+    with pytest.raises(NotImplementedError):
+        qbf <= copy
+    with pytest.raises(NotImplementedError):
+        qbf > copy
+    with pytest.raises(NotImplementedError):
+        qbf >= copy
+
+# TEST STRENGTH CONSISTENCY
+
+def test_are_strength_consistent():
+    qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+
+    assert qbf.are_strength_consistent(qbf, 'b', 'c')
+    assert qbfe.are_strength_consistent(qbfe, 'b', 'c')
+    assert qbf.are_strength_consistent(qbfe, 'b', 'b')
+    assert qbfe.are_strength_consistent(qbf, 'b', 'b')
+
+    assert qbf.are_strength_consistent(qbfe, 'a', 'b')
+    assert qbfe.are_strength_consistent(qbf, 'a', 'b')
+    assert qbf.are_strength_consistent(qbfe, 'b', 'a')
+    assert qbfe.are_strength_consistent(qbf, 'b', 'a')
+
+    assert not qbf.are_strength_consistent(qbfe, 'b', 'c')
+    assert not qbfe.are_strength_consistent(qbf, 'b', 'c')
+    assert not qbf.are_strength_consistent(qbfe, 'c', 'b')
+    assert not qbfe.are_strength_consistent(qbf, 'c', 'b')
+
+def test_are_strength_consistent_error():
+    qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+
+    with pytest.raises(TypeError):
+        qbf.are_strength_consistent([], 'b', 'c')
+
+    with pytest.raises(ValueError):
+        qbf.are_strength_consistent(qbfe, 'e', 'c')
+    with pytest.raises(ValueError):
+        qbf.are_strength_consistent(qbfe, 'b', 'e')
+    with pytest.raises(ValueError):
+        qbfe.are_strength_consistent(qbf, 'e', 'c')
+    with pytest.raises(ValueError):
+        qbfe.are_strength_consistent(qbf, 'b', 'e')
 
 # TODO: TEST REVERSAL
 
