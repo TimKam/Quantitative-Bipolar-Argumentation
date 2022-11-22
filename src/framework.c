@@ -1056,6 +1056,7 @@ QBAFramework_copy(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
     }
 
     copy->modified = self->modified;
+    copy->disjoint_relations = self->disjoint_relations;
     
     return (PyObject*)copy;
 }
