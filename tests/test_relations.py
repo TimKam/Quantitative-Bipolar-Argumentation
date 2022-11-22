@@ -318,3 +318,13 @@ def test_isdisjoint_incorrect_arg():
     relations = QBAFARelations([(a,b), (a,c)])
     with pytest.raises(TypeError):
         relations.isdisjoint(1)
+
+# TEST __EQ__
+
+def test___eq__():
+    a, b, c = Arg('a'), Arg('b'), Arg('c')
+    relations = QBAFARelations([(a,b), (a,c)])
+    copy = relations.copy()
+    assert relations == copy
+    copy.remove(a,b)
+    assert relations != copy

@@ -214,6 +214,9 @@ class QBAFARelations:
         """
         return self.__relations.isdisjoint(other.__relations)
 
+    def __eq__(self, other) -> bool:
+        return self.__relations == other.__relations
+
 class QBAFramework:
     """ This class represents a Quantitative Bipolar Argumentation Framework (QBAF).
         A QBAF is is a quadruple (Args,τ,Att,Supp) consisting of a set of arguments Args, 
