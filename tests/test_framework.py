@@ -1,6 +1,8 @@
 import pytest
 from qbaf import QBAFramework, QBAFARelations
 
+# TEST INIT
+
 def test_init_correct_args():
     args = ['a', 'b', 'c']
     initial_weights = [1, 1, 5]
@@ -77,3 +79,69 @@ def test_init_setters():
     with pytest.raises(ValueError):
         qbf.disjoint_relations = True
 
+# TEST ARGUMENTS
+
+def test_modify_arguments():
+    qbf = QBAFramework(['a', 'b', 'c', 'd'], [1, 1, 5, 3], [('a', 'c')], [('a', 'b')])
+    assert qbf.arguments == {'a', 'b', 'c', 'd'}
+    qbf.remove_argument('d')
+    assert qbf.arguments == {'a', 'b', 'c'}
+    qbf.add_argument('d', 1)
+    assert qbf.arguments == {'a', 'b', 'c', 'd'}
+    assert qbf.initial_weights['d'] == 1.0
+    with pytest.raises(ValueError):
+        qbf.remove_argument('a')
+    with pytest.raises(ValueError):
+        qbf.remove_argument('b')
+    with pytest.raises(ValueError):
+        qbf.remove_argument('c')
+    qbf.remove_argument('d')
+    assert qbf.contains_argument('a') and qbf.contains_argument('b') and qbf.contains_argument('c')
+    assert not qbf.contains_argument('d')
+
+# TEST INITIAL WEIGHTS
+
+def test_access_initial_weight():
+    qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')])
+    for argument, weight in qbf.initial_weights.items():
+        assert qbf.initial_weight(argument) == weight
+    with pytest.raises(ValueError):
+        qbf.initial_weight('d')
+
+def test_modify_initial_weight():
+    qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')])
+    initial_weights = qbf.initial_weights
+    initial_weights['a'] = 0.0
+    assert qbf.initial_weight('a') == 1.0
+
+    qbf.modify_initial_weight('c', 4)
+    assert qbf.initial_weight('c') == 4.0
+
+    qbf.add_argument('a', 0.0)
+    assert qbf.initial_weight('a') == 1.0
+
+# TEST ATTACK RELATIONS
+
+def test_access_attack_relations():
+    qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')])
+    assert qbf.attack_relations.relations == {('a', 'c')}
+    assert qbf.contains_attack_relation('a', 'c')
+    assert not qbf.contains_attack_relation('c', 'a')
+    for a, b in [('a', 'c'), ('a', 'b'), ('c', 'a'), ('b', 'a')]:
+        assert qbf.contains_attack_relation(a,b) == qbf.attack_relations.contains(a, b)
+        assert qbf.contains_attack_relation(a,b) == ((a,b) in qbf.attack_relations)
+
+def test_modify_attack_relations():
+    qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbf.remove_attack_relation('a', 'c')
+    assert ('a', 'c') not in qbf.attack_relations
+    qbf.add_attack_relation('a', 'c')
+    assert ('a', 'c') in qbf.attack_relations
+    
+    with pytest.raises(PermissionError):
+        qbf.attack_relations.add('b', 'c')
+    with pytest.raises(PermissionError):
+        qbf.attack_relations.remove('a', 'c')
+
+
+# TEST SUPPORT RELATIONS
