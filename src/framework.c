@@ -1421,7 +1421,7 @@ QBAFramework_final_weight(QBAFrameworkObject *self, PyObject *args, PyObject *kw
         return NULL;
 
     PyObject *final_weight = _QBAFramework_final_weight(self, argument); // Borrowed reference
-    Py_INCREF(final_weight);
+    Py_XINCREF(final_weight);
     return final_weight;
 }
 
