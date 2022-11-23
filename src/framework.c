@@ -11,11 +11,16 @@
 #include "framework.h"
 #include "relations.h"
 #include "qbaf_utils.h"
+#include "qbaf_functions.h"
 
 #define TRUE 1
 #define FALSE 0
 
 #define Py_RETURN_BOOL(i) if (i) Py_RETURN_TRUE; else Py_RETURN_FALSE;
+#define PyObject_IsNoneOrNULL(obj) (obj == Py_None || obj == NULL)
+#define streq(str1, str2) (stricmp(str1, str2) == 0)
+
+static const char *STR_NAIVE_MODEL = "naive_model";
 
 /**
  * @brief Struct that defines the Object Type Framework in a QBAF.
@@ -30,6 +35,9 @@ typedef struct {
     PyObject *final_weights;        /* a dictionary (argument: QBAFArgument, final_weight: double) */
     int       modified;             /* 0 if the framework has not been modified after calculating the final weights. Otherwise, 1 */
     int       disjoint_relations;   /* 1 if the attack/support relations must be disjoint, 0 if they do not have to */
+    char     *semantics;            /* name of the semantic model */
+    double  (*influence_function)(double, double);   /* influence function that is going to be used to calcualte the final weights */
+    double  (*aggregation_function)(double, double); /* aggregation function that is going to be used to calcualte the final weights */
 } QBAFrameworkObject;
 
 /**
@@ -107,6 +115,9 @@ QBAFramework_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         self->final_weights = Py_None;
         self->modified = TRUE;
         self->disjoint_relations = TRUE;
+        self->semantics = STR_NAIVE_MODEL;
+        self->influence_function = simple_influence;
+        self->aggregation_function = sum;
     }
     return (PyObject *) self;
 }
@@ -247,8 +258,7 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
     int disjoint_relations = TRUE;
     char *semantics = NULL; // (e.g. "naive") If None it will be NULL, otherwise it is a pointer to char that is only accesible in this function.
     PyObject *aggregation_function = NULL, *influence_function = NULL;
-    double min_weight = DBL_MIN, max_weight = DBL_MAX;
-    // TODO: Implement semantics, aggregation function and influence function, min_weight and max_weight
+    double min_weight = -DBL_MAX, max_weight = DBL_MAX;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOOO|pzOOdd", kwlist,
                                      &arguments, &initial_weights, &attack_relations, &support_relations,
@@ -351,6 +361,36 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
             PyErr_SetString(PyExc_ValueError, "attack_relations and support_relations must be disjoint");
             return -1;
         }
+    }
+
+    if (semantics == NULL && PyObject_IsNoneOrNULL(aggregation_function) && PyObject_IsNoneOrNULL(influence_function)) {
+        semantics = STR_NAIVE_MODEL;
+    }
+
+    // TODO: Implement aggregation_function, influence_function
+    if (!PyObject_IsNoneOrNULL(aggregation_function) || !PyObject_IsNoneOrNULL(influence_function)) {
+        PyErr_SetString(PyExc_NotImplementedError, "aggregation_function, influence_function not implemented");
+        return -1;
+    }
+
+    // Assign the influence_function and aggregation_function based on the value of semantics
+    if (semantics != NULL) {
+
+        if (streq(semantics, STR_NAIVE_MODEL)) {
+            self->semantics = STR_NAIVE_MODEL;
+            self->influence_function = simple_influence;
+            self->aggregation_function = sum;
+        } else {
+            PyErr_SetString(PyExc_ValueError, "incorrect value of semantics");
+            return -1;
+        }
+        
+    }
+
+    // TODO: Implement min_weight, max_weight
+    if (min_weight != -DBL_MAX || max_weight != DBL_MAX) {
+        PyErr_SetString(PyExc_NotImplementedError, "min_weight, max_weight not implemented");
+        return -1;
     }
 
     return 0;
@@ -1263,7 +1303,9 @@ _QBAFramework_calculate_final_weight(QBAFrameworkObject *self, PyObject *argumen
         return PyFloat_AsDouble(PyDict_GetItem(self->final_weights, argument));
     }
 
-    double final_weight = PyFloat_AsDouble(PyDict_GetItem(self->initial_weights, argument));
+    double initial_weight = PyFloat_AsDouble(PyDict_GetItem(self->initial_weights, argument));
+    double attackers_aggregation = 0;
+    double supporters_aggregation = 0;
 
     PyObject *attackers = _QBAFARelations_agents((QBAFARelationsObject*)self->attack_relations, argument);
     PyObject *iterator = PyObject_GetIter(attackers);
@@ -1275,7 +1317,8 @@ _QBAFramework_calculate_final_weight(QBAFrameworkObject *self, PyObject *argumen
     }
 
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-        final_weight -= _QBAFramework_calculate_final_weight(self, item);
+        attackers_aggregation = self->aggregation_function(attackers_aggregation,
+                                        _QBAFramework_calculate_final_weight(self, item));
         Py_DECREF(item);
     }
 
@@ -1291,12 +1334,17 @@ _QBAFramework_calculate_final_weight(QBAFrameworkObject *self, PyObject *argumen
     }
 
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-        final_weight += _QBAFramework_calculate_final_weight(self, item);
+        supporters_aggregation = self->aggregation_function(supporters_aggregation,
+                                        _QBAFramework_calculate_final_weight(self, item));
         Py_DECREF(item);
     }
 
     Py_DECREF(supporters);
     Py_DECREF(iterator);
+
+    double aggregation = supporters_aggregation - attackers_aggregation;
+
+    double final_weight = self->influence_function(initial_weight, aggregation);
 
     // final_weights[argument] = final_weight
     PyObject *pyfinal_weight = PyFloat_FromDouble(final_weight);    // New reference

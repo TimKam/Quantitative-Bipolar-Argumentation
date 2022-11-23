@@ -10,7 +10,7 @@ def test_init_correct_args():
     supp = [('a', 'b')]
     QBAFramework(args, initial_weights, att, supp,
         disjoint_relations=True,
-        semantics="naive",
+        semantics="naive_model",
         aggregation_function=None,
         influence_function=None,
         min_weight=-1.7976931348623157e+308,
