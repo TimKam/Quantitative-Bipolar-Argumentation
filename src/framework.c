@@ -21,6 +21,11 @@
 #define streq(str1, str2) (stricmp(str1, str2) == 0)
 
 static const char *STR_NAIVE_MODEL = "naive_model";
+static const char *STR_QUADRATICENERGY_MODEL = "QuadraticEnergy_model";
+static const char *STR_SQUAREDDFQUAD_MODEL = "SquaredDFQuAD_model";
+static const char *STR_EULERBASEDTOP_MODEL = "EulerBasedTop_model";
+static const char *STR_EULERBASED_MODEL = "EulerBased_model";
+static const char *STR_DFQUAD_MODEL = "DFQuAD_model";
 
 /**
  * @brief Struct that defines the Object Type Framework in a QBAF.
@@ -378,9 +383,35 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 
         if (streq(semantics, STR_NAIVE_MODEL)) {
             self->semantics = STR_NAIVE_MODEL;
-            self->influence_function = simple_influence;
             self->aggregation_function = sum;
-        } else {
+            self->influence_function = simple_influence;
+        }
+        else if (streq(semantics, STR_QUADRATICENERGY_MODEL)) {
+            self->semantics = STR_QUADRATICENERGY_MODEL;
+            self->aggregation_function = sum;
+            self->influence_function = max_2_1; // 2-Max(1)
+        }
+        else if (streq(semantics, STR_SQUAREDDFQUAD_MODEL)) {
+            self->semantics = STR_SQUAREDDFQUAD_MODEL;
+            self->aggregation_function = product;
+            self->influence_function = max_1_1; // 1-Max(1)
+        }
+        else if (streq(semantics, STR_EULERBASEDTOP_MODEL)) {
+            self->semantics = STR_EULERBASEDTOP_MODEL;
+            self->aggregation_function = top;
+            self->influence_function = euler_based;
+        }
+        else if (streq(semantics, STR_EULERBASED_MODEL)) {
+            self->semantics = STR_EULERBASED_MODEL;
+            self->aggregation_function = sum;
+            self->influence_function = euler_based;
+        }
+        else if (streq(semantics, STR_DFQUAD_MODEL)) {
+            self->semantics = STR_DFQUAD_MODEL;
+            self->aggregation_function = product;
+            self->influence_function = linear_1; // Linear(1)
+        }
+        else {
             PyErr_SetString(PyExc_ValueError, "incorrect value of semantics");
             return -1;
         }

@@ -16,6 +16,17 @@ def test_init_correct_args():
         min_weight=-1.7976931348623157e+308,
         max_weight=1.7976931348623157e+308)
 
+def test_init_semantics():
+    args,initial_weights,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
+    QBAFramework(args, initial_weights, att, supp, semantics="naive_model")
+    QBAFramework(args, initial_weights, att, supp, semantics="QuadraticEnergy_model")
+    QBAFramework(args, initial_weights, att, supp, semantics="SquaredDFQuAD_model")
+    QBAFramework(args, initial_weights, att, supp, semantics="EulerBasedTop_model")
+    QBAFramework(args, initial_weights, att, supp, semantics="EulerBased_model")
+    QBAFramework(args, initial_weights, att, supp, semantics="DFQuAD_model")
+    with pytest.raises(ValueError):
+        QBAFramework(args, initial_weights, att, supp, semantics="incorrect_model")
+
 def test_init_no_args():
     with pytest.raises(TypeError):
         QBAFramework()
