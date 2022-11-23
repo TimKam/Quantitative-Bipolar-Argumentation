@@ -384,7 +384,7 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
             PyErr_SetString(PyExc_ValueError, "incorrect value of semantics");
             return -1;
         }
-        
+
     }
 
     // TODO: Implement min_weight, max_weight
@@ -471,6 +471,19 @@ QBAFramework_getdisjoint_relations(QBAFrameworkObject *self, void *closure)
     if (self->disjoint_relations)
         Py_RETURN_TRUE;
     Py_RETURN_FALSE;
+}
+
+/**
+ * @brief Getter of the attribute semantics.
+ * 
+ * @param self the QBAFramework object
+ * @param closure 
+ * @return PyObject* new PyUnicode with the string semantics
+ */
+static PyObject *
+QBAFramework_getsemantics(QBAFrameworkObject *self, void *closure)
+{
+    PyUnicode_FromString(self->semantics);
 }
 
 /**
@@ -2821,6 +2834,8 @@ static PyGetSetDef QBAFramework_getsetters[] = {
     {"disjoint_relations", (getter) QBAFramework_getdisjoint_relations, (setter) QBAFramework_setdisjoint_relations,
      "Return True if the attack/support relations must be disjoint, False if they do not have to.",
      "Setter of the attribute disjoint_relations."},
+    {"semantics", (getter) QBAFramework_getsemantics, NULL,
+     "Return the semantics.", NULL},
     {NULL}  /* Sentinel */
 };
 
