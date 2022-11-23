@@ -339,8 +339,185 @@ def test_are_strength_consistent_error():
     with pytest.raises(ValueError):
         qbfe.are_strength_consistent(qbf, 'b', 'e')
 
-# TODO: TEST REVERSAL
+# TEST REVERSAL
 
-# TODO: TEST IS EXPLANATION
+def test_reversal_input():
+    qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
 
-# TODO: TEST MINIMAL EXPLANATIONS
+    qbfe.reversal(qbf, [])
+    qbfe.reversal(qbf, set())
+
+    with pytest.raises(TypeError):
+        qbfe.reversal(qbf, 1)
+    with pytest.raises(TypeError):
+        qbfe.reversal(1, [])
+    
+
+
+def test_reversal_output():
+    qbfa = QBAFramework(['a', 'b', 'c'], [2, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+    assert qbfa != qbfe
+    
+    assert qbfe == qbfe.reversal(qbfa, [])
+    assert qbfa == qbfa.reversal(qbfe, [])
+
+    assert qbfa == qbfe.reversal(qbfa, qbfe.arguments.union(qbfa.arguments))
+    assert qbfe == qbfa.reversal(qbfe, qbfe.arguments.union(qbfa.arguments))
+
+    assert qbfe == qbfe.reversal(qbfa, ['b', 'c'])
+    assert qbfa == qbfa.reversal(qbfe, ['b', 'c'])
+
+    assert not qbfa == qbfe.reversal(qbfa, ['e'])
+    assert not qbfe == qbfa.reversal(qbfe, ['e'])
+
+    assert not qbfa == qbfe.reversal(qbfa, ['a'])
+    assert not qbfe == qbfa.reversal(qbfe, ['a'])
+
+    assert qbfa == qbfe.reversal(qbfa, ['a', 'e'])
+    assert qbfe == qbfa.reversal(qbfe, ['a', 'e'])
+
+# TEST IS SSI EXPLANATION
+
+def test_isSSIExplanation_input():
+    qbfa = QBAFramework(['a', 'b', 'c'], [2, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+
+    qbfa.isSSIExplanation(qbfe, [], 'a', 'b')
+    qbfa.isSSIExplanation(qbfe, set(), 'a', 'b')
+
+    with pytest.raises(TypeError):
+        qbfa.isSSIExplanation(1, [], 'a', 'b')
+    with pytest.raises(TypeError):
+        qbfa.isSSIExplanation(qbfe, 1, 'a', 'b')
+    with pytest.raises(TypeError):
+        qbfa.isSSIExplanation(qbfe, [], [], 'b')
+    with pytest.raises(ValueError):
+        qbfa.isSSIExplanation(qbfe, [], 'a', 'e')
+    with pytest.raises(ValueError):
+        qbfa.isSSIExplanation(qbfe, [], 'e', 'b')
+
+def test_isSSIExplanation_output():
+    qbfa = QBAFramework(['a', 'b', 'c'], [2, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+
+    assert qbfa.isSSIExplanation(qbfa, [], 'b', 'c')
+    assert not qbfa.isSSIExplanation(qbfa, ['a'], 'b', 'c')
+
+    assert qbfa.isSSIExplanation(qbfe, [], 'b', 'b')
+    assert not qbfa.isSSIExplanation(qbfe, ['a'], 'b', 'b')
+
+    for ns in [set(),{'b'},{'c'},{'b','c'}]:
+        assert not qbfe.isSSIExplanation(qbfa, ns, 'b', 'c')
+
+    for ns in [set(),{'a'},{'b'},{'c'},{'a','b'},{'a','c'},{'b','c'},{'a','b','c'}]:
+        assert not qbfa.isSSIExplanation(qbfe, ns, 'b', 'c')
+    
+    for ns in [set(),{'b'},{'c'},{'b','c'}]:
+        for s in [{'a'},{'e'},{'a','e'}]:
+            assert qbfe.isSSIExplanation(qbfa, ns.union(s), 'b', 'c')
+    
+    for ns in [set(),{'a'},{'b'},{'c'},{'a','b'},{'a','c'},{'b','c'},{'a','b','c'}]:
+        for s in [{'e'}]:
+            assert qbfa.isSSIExplanation(qbfe, ns.union(s), 'b', 'c')
+
+# TEST IS CSI EXPLANATION
+
+def test_isCSIExplanation_input():
+    qbfa = QBAFramework(['a', 'b', 'c'], [2, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+
+    qbfa.isCSIExplanation(qbfe, [], 'a', 'b')
+    qbfa.isCSIExplanation(qbfe, set(), 'a', 'b')
+
+    with pytest.raises(TypeError):
+        qbfa.isCSIExplanation(1, [], 'a', 'b')
+    with pytest.raises(TypeError):
+        qbfa.isCSIExplanation(qbfe, 1, 'a', 'b')
+    with pytest.raises(TypeError):
+        qbfa.isCSIExplanation(qbfe, [], [], 'b')
+    with pytest.raises(ValueError):
+        qbfa.isCSIExplanation(qbfe, [], 'a', 'e')
+    with pytest.raises(ValueError):
+        qbfa.isCSIExplanation(qbfe, [], 'e', 'b')
+
+def test_isCSIExplanation_output():
+    qbfa = QBAFramework(['a', 'b', 'c'], [2, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+
+    assert qbfa.isCSIExplanation(qbfa, [], 'b', 'c')
+    assert not qbfa.isCSIExplanation(qbfa, ['a'], 'b', 'c')
+
+    assert qbfa.isCSIExplanation(qbfe, [], 'b', 'b')
+    assert not qbfa.isCSIExplanation(qbfe, ['a'], 'b', 'b')
+
+    for ns in [set(),{'a'},{'b'},{'c'},{'e'},{'a','b'},{'a','c'},{'b','c'},{'b','e'},{'c','e'},
+                {'a','b','c'}, {'b','c','e'}]:
+        assert not qbfe.isCSIExplanation(qbfa, ns, 'b', 'c')
+
+    for ns in [set(),{'a'},{'b'},{'c'},{'a','b'},{'a','c'},{'b','c'},{'a','b','c'}]:
+        assert not qbfa.isCSIExplanation(qbfe, ns, 'b', 'c')
+    
+    for ns in [set(),{'a'},{'b'},{'c'},{'e'},{'a','b'},{'a','c'},{'b','c'},{'b','e'},{'c','e'},
+                {'a','b','c'}, {'b','c','e'}]:
+        assert qbfe.isCSIExplanation(qbfa, ns.union({'a','e'}), 'b', 'c')
+
+    for ns in [set(),{'a'},{'b'},{'c'},{'a','b'},{'a','c'},{'b','c'},{'a','b','c'}]:
+        assert qbfa.isCSIExplanation(qbfe, ns.union({'e'}), 'b', 'c')
+
+# TEST MINIMAL SSI EXPLANATIONS
+
+def test_minimalSSIExplanations_input():
+    qbfa = QBAFramework(['a', 'b', 'c'], [2, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+    
+    qbfe.minimalSSIExplanations(qbfa, 'b', 'c')
+
+    with pytest.raises(TypeError):
+        qbfe.minimalSSIExplanations(1, 'b', 'c')
+    with pytest.raises(TypeError):
+        qbfe.minimalSSIExplanations(qbfe, [], 'c')
+
+    with pytest.raises(ValueError):
+        qbfe.minimalSSIExplanations(qbfe, 'x', 'c')
+    with pytest.raises(ValueError):
+        qbfe.minimalSSIExplanations(qbfe, 'b', 'x')
+
+def test_minimalSSIExplanations_output():
+    qbfa = QBAFramework(['a', 'b', 'c'], [2, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+
+    assert qbfe.minimalSSIExplanations(qbfe, 'b', 'c') == [set()]
+    assert qbfe.minimalSSIExplanations(qbfa, 'b', 'b') == [set()]
+
+    assert qbfe.minimalSSIExplanations(qbfa, 'b', 'c') in ([{'e'}, {'a'}], [{'a'}, {'e'}])
+    assert qbfa.minimalSSIExplanations(qbfe, 'b', 'c') == [{'e'}]
+
+# TEST MINIMAL CSI EXPLANATIONS
+
+def test_minimalCSIExplanations_input():
+    qbfa = QBAFramework(['a', 'b', 'c'], [2, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+    
+    qbfe.minimalCSIExplanations(qbfa, 'b', 'c')
+
+    with pytest.raises(TypeError):
+        qbfe.minimalCSIExplanations(1, 'b', 'c')
+    with pytest.raises(TypeError):
+        qbfe.minimalCSIExplanations(qbfe, [], 'c')
+
+    with pytest.raises(ValueError):
+        qbfe.minimalCSIExplanations(qbfe, 'x', 'c')
+    with pytest.raises(ValueError):
+        qbfe.minimalCSIExplanations(qbfe, 'b', 'x')
+
+def test_minimalCSIExplanations_output():
+    qbfa = QBAFramework(['a', 'b', 'c'], [2, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+
+    assert qbfe.minimalCSIExplanations(qbfe, 'b', 'c') == [set()]
+    assert qbfe.minimalCSIExplanations(qbfa, 'b', 'b') == [set()]
+
+    assert qbfe.minimalCSIExplanations(qbfa, 'b', 'c') == [{'a', 'e'}]
+    assert qbfa.minimalCSIExplanations(qbfe, 'b', 'c') == [{'e'}]
