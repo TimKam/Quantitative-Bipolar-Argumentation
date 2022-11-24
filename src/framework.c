@@ -1288,6 +1288,12 @@ QBAFramework_copy(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
 
     copy->modified = self->modified;
     copy->disjoint_relations = self->disjoint_relations;
+
+    copy->semantics = self->semantics;
+    copy->aggregation_function = self->aggregation_function;
+    copy->influence_function = self->influence_function;
+    copy->min_weight = self->min_weight;
+    copy->max_weight = self->max_weight;
     
     return (PyObject*)copy;
 }

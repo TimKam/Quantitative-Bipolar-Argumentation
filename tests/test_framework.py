@@ -280,6 +280,14 @@ def test_copy():
     assert qbf.support_relations.relations != copy.support_relations.relations
     assert qbf.disjoint_relations != copy.disjoint_relations
 
+def test_copy_semantics():
+    args,initial_weights,att,supp = ['a', 'b', 'c'], [0.1, 0.1, 0.5], [('a', 'c')], [('a', 'b')]
+    qbf = QBAFramework(args,initial_weights, att, supp, semantics="DFQuAD_model")
+    copy = qbf.copy()
+    assert qbf.semantics == copy.semantics
+    assert qbf.min_weight == copy.min_weight
+    assert qbf.max_weight == copy.max_weight
+
 # TEST ACYCLIC
 
 def test_isacyclic():
