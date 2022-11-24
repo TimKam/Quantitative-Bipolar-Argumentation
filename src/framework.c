@@ -1385,6 +1385,11 @@ QBAFramework_copy(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
     copy->influence_function = self->influence_function;
     copy->min_weight = self->min_weight;
     copy->max_weight = self->max_weight;
+
+    Py_XINCREF(self->aggregation_function_callable);
+    copy->aggregation_function_callable = self->aggregation_function_callable;
+    Py_XINCREF(self->influence_function_callable);
+    copy->influence_function_callable = self->influence_function_callable;
     
     return (PyObject*)copy;
 }

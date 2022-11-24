@@ -94,10 +94,9 @@ def test_init_setters():
         qbf.disjoint_relations = True
 
 # Test MAX MIN WEIGHTS
+
 def test_init_maxmin_weights_DFQuAD():
     args,initial_weights,att,supp = ['a', 'b', 'c'], [0.1, 0.1, 0.5], [('a', 'c')], [('a', 'b')]
-    with pytest.raises(ValueError):
-        QBAFramework(args,[0.1, 0.1, 5], att, supp, semantics="DFQuAD_model")
     qbf = QBAFramework(args,initial_weights, att, supp, semantics="DFQuAD_model")
     qbf.add_argument('a', 5) # If the arguments exists it does nothing
     qbf.add_argument('a', -5) # If the arguments exists it does nothing
@@ -110,6 +109,31 @@ def test_init_maxmin_weights_DFQuAD():
     with pytest.raises(ValueError):
         qbf.modify_initial_weight('a', -5)
 
+# TEST CUSTOM SEMANTICS
+
+def test_custom_semantics_input():
+    pass
+
+def test_custom_semantics():
+    args,initial_weights,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
+    qbf = QBAFramework(args,initial_weights, att, supp, semantics="basic_model")
+    custom = QBAFramework(args,initial_weights, att, supp,
+                                semantics=None,
+                                aggregation_function=lambda w1, w2 : w1 + w2,
+                                influence_function=lambda w, s : w + s,
+                                min_weight=-10,
+                                max_weight=10)
+    assert custom.semantics == None
+    assert qbf.final_weights == custom.final_weights
+
+    custom = QBAFramework(args,initial_weights, att, supp,
+                                semantics=None,
+                                aggregation_function=lambda w1, w2 : w1 + w2,
+                                influence_function=lambda w, s : w - s,
+                                min_weight=-10,
+                                max_weight=10)
+    assert qbf.final_weights != custom.final_weights
+    
 
 # TEST ARGUMENTS
 
