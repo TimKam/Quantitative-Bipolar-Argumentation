@@ -109,10 +109,73 @@ def test_init_maxmin_weights_DFQuAD():
     with pytest.raises(ValueError):
         qbf.modify_initial_weight('a', -5)
 
-# TEST CUSTOM SEMANTICS
+# TEST SEMANTICS
 
 def test_custom_semantics_input():
-    pass
+    args,initial_weights,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
+    QBAFramework(args,initial_weights, att, supp, semantics="basic_model")
+    QBAFramework(args,initial_weights, att, supp, semantics=None)
+
+    QBAFramework(args,initial_weights, att, supp,
+                    semantics=None,
+                    aggregation_function=lambda w1, w2 : w1 + w2,
+                    influence_function=lambda w, s : w + s,
+                    min_weight=-10,
+                    max_weight=10)
+
+    QBAFramework(args,initial_weights, att, supp,
+                    aggregation_function=lambda w1, w2 : w1 + w2,
+                    influence_function=lambda w, s : w + s,
+                    min_weight=-10,
+                    max_weight=10)
+
+    QBAFramework(args,initial_weights, att, supp,
+                    aggregation_function=lambda w1, w2 : w1 + w2,
+                    influence_function=lambda w, s : w + s)
+    
+    with pytest.raises(ValueError):
+        QBAFramework(args,initial_weights, att, supp,
+                    semantics="basic_model",
+                    aggregation_function=lambda w1, w2 : w1 + w2,
+                    influence_function=lambda w, s : w + s,
+                    min_weight=-10,
+                    max_weight=10)
+
+    with pytest.raises(ValueError):
+        QBAFramework(args,initial_weights, att, supp,
+                    semantics=None,
+                    aggregation_function=lambda w1, w2 : w1 + w2,
+                    influence_function=None,
+                    min_weight=-10,
+                    max_weight=10)
+    
+    with pytest.raises(ValueError):
+        QBAFramework(args,initial_weights, att, supp,
+                    semantics=None,
+                    aggregation_function=None,
+                    influence_function=lambda w, s : w + s,
+                    min_weight=-10,
+                    max_weight=10)
+
+    with pytest.raises(ValueError):
+        QBAFramework(args,initial_weights, att, supp,
+                    semantics=None,
+                    min_weight=-10)
+
+    with pytest.raises(ValueError):
+        QBAFramework(args,initial_weights, att, supp,
+                    semantics=None,
+                    max_weight=10)
+
+    with pytest.raises(ValueError):
+        QBAFramework(args,initial_weights, att, supp,
+                    semantics="basic_model",
+                    min_weight=-10)
+
+    with pytest.raises(ValueError):
+        QBAFramework(args,initial_weights, att, supp,
+                    semantics="basic_model",
+                    max_weight=10)
 
 def test_custom_semantics():
     args,initial_weights,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
@@ -133,7 +196,12 @@ def test_custom_semantics():
                                 min_weight=-10,
                                 max_weight=10)
     assert qbf.final_weights != custom.final_weights
-    
+
+def test_default_semantics():
+    args,initial_weights,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
+    qbf = QBAFramework(args,initial_weights, att, supp, semantics="basic_model")
+    qbf2 = QBAFramework(args,initial_weights, att, supp, semantics="QuadraticEnergy_model")
+    assert qbf.final_weights != qbf2.final_weights
 
 # TEST ARGUMENTS
 
