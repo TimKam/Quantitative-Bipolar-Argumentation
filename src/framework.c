@@ -43,6 +43,8 @@ typedef struct {
     char     *semantics;            /* name of the semantic model */
     double  (*influence_function)(double, double);   /* influence function that is going to be used to calcualte the final weights */
     double  (*aggregation_function)(double, double); /* aggregation function that is going to be used to calcualte the final weights */
+    double    min_weight;           /* min value for the initial weights */
+    double    max_weight;           /* max value for the initial weights */
 } QBAFrameworkObject;
 
 /**
@@ -123,6 +125,8 @@ QBAFramework_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         self->semantics = STR_BASIC_MODEL;
         self->influence_function = simple_influence;
         self->aggregation_function = sum;
+        self->min_weight = -DBL_MAX;
+        self->max_weight = DBL_MAX;
     }
     return (PyObject *) self;
 }
@@ -243,6 +247,68 @@ PyListFloat_FromPyListNumeric(PyObject *list) {
     Py_DECREF(iterator);
 
     return new;
+}
+
+/**
+ * @brief Return true if the double value of pyfloat is within the range (min, max),
+ * false if is not, and -1 if an error has occurred.
+ * 
+ * @param pyfloat a PyFloat
+ * @param max the maximum value of the range
+ * @param min the minimum value of the range
+ * @return int 1 if within range, 0 if not, -1 if an error occurred
+ */
+static inline int
+weight_in_minmax(PyObject *pyfloat, double min, double max)
+{
+    double weight = PyFloat_AsDouble(pyfloat);
+    if (weight == -1.0 && PyErr_Occurred()) {
+        return -1;
+    }
+
+    if (weight < min || weight > max) {
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+static inline int
+_QBAFramework_initial_weights_in_minmax(QBAFrameworkObject *self)
+{
+    PyObject *initial_weight_list = PyDict_Values(self->initial_weights);
+    if (initial_weight_list == NULL) {
+        return -1;
+    }
+
+    PyObject *iterator = PyObject_GetIter(initial_weight_list);
+    PyObject *initial_weight;
+    int in_minmax;
+
+    if (iterator == NULL) {
+        Py_DECREF(initial_weight_list);
+        return -1;
+    }
+
+    while ((initial_weight = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        in_minmax = weight_in_minmax(initial_weight, self->min_weight, self->max_weight);
+        Py_DECREF(initial_weight);
+
+        if (in_minmax < 0) {
+            Py_DECREF(iterator); Py_DECREF(initial_weight_list);
+            return -1;
+        }
+
+        if (!in_minmax) {
+            Py_DECREF(iterator); Py_DECREF(initial_weight_list);
+            return FALSE;
+        }
+    }
+
+    Py_DECREF(iterator);
+    Py_DECREF(initial_weight_list);
+
+    return TRUE;
 }
 
 /**
@@ -385,31 +451,43 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
             self->semantics = STR_BASIC_MODEL;
             self->aggregation_function = sum;
             self->influence_function = simple_influence;
+            self->min_weight = -DBL_MAX;
+            self->max_weight = DBL_MAX;
         }
         else if (streq(semantics, STR_QUADRATICENERGY_MODEL)) {
             self->semantics = STR_QUADRATICENERGY_MODEL;
             self->aggregation_function = sum;
             self->influence_function = max_2_1; // 2-Max(1)
+            self->min_weight = -DBL_MAX;
+            self->max_weight = DBL_MAX;
         }
         else if (streq(semantics, STR_SQUAREDDFQUAD_MODEL)) {
             self->semantics = STR_SQUAREDDFQUAD_MODEL;
             self->aggregation_function = product;
             self->influence_function = max_1_1; // 1-Max(1)
+            self->min_weight = -DBL_MAX;
+            self->max_weight = DBL_MAX;
         }
         else if (streq(semantics, STR_EULERBASEDTOP_MODEL)) {
             self->semantics = STR_EULERBASEDTOP_MODEL;
             self->aggregation_function = top;
             self->influence_function = euler_based;
+            self->min_weight = -DBL_MAX;
+            self->max_weight = DBL_MAX;
         }
         else if (streq(semantics, STR_EULERBASED_MODEL)) {
             self->semantics = STR_EULERBASED_MODEL;
             self->aggregation_function = sum;
             self->influence_function = euler_based;
+            self->min_weight = -DBL_MAX;
+            self->max_weight = DBL_MAX;
         }
         else if (streq(semantics, STR_DFQUAD_MODEL)) {
             self->semantics = STR_DFQUAD_MODEL;
             self->aggregation_function = product;
             self->influence_function = linear_1; // Linear(1)
+            self->min_weight = -1;
+            self->max_weight = 1;
         }
         else {
             PyErr_SetString(PyExc_ValueError, "incorrect value of semantics");
@@ -421,6 +499,18 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
     // TODO: Implement min_weight, max_weight
     if (min_weight != -DBL_MAX || max_weight != DBL_MAX) {
         PyErr_SetString(PyExc_NotImplementedError, "min_weight, max_weight not implemented");
+        return -1;
+    }
+
+    // Check all the initial weights are in range (min_weight, max_weight)
+    int initial_weights_in_minmax = _QBAFramework_initial_weights_in_minmax(self);
+    if (initial_weights_in_minmax < 0) {
+        return -1;
+    }
+    if (!initial_weights_in_minmax) {
+        char msg[100];
+        sprintf(msg, "every initial_weight must be within range (%.2f, %.2f)", self->min_weight, self->max_weight);
+        PyErr_SetString(PyExc_ValueError, msg);
         return -1;
     }
 
@@ -596,6 +686,20 @@ QBAFramework_modify_initial_weights(QBAFrameworkObject *self, PyObject *args, Py
         Py_INCREF(initial_weight);
     }
 
+    // Check initial_weight is within range
+    int in_minmax = weight_in_minmax(initial_weight, self->min_weight, self->max_weight);
+    if (in_minmax < 0) {
+        Py_DECREF(initial_weight);
+        return NULL;
+    }
+    if (!in_minmax) {
+        char msg[100];
+        sprintf(msg, "initial_weight must be within range (%.2f, %.2f)", self->min_weight, self->max_weight);
+        PyErr_SetString(PyExc_ValueError, msg);
+        Py_DECREF(initial_weight);
+        return NULL;
+    }
+
     Py_INCREF(argument);
     if (PyDict_SetItem(self->initial_weights, argument, initial_weight) < 0) {
         Py_DECREF(argument);
@@ -703,6 +807,21 @@ QBAFramework_add_argument(QBAFrameworkObject *self, PyObject *args, PyObject *kw
         Py_RETURN_NONE;
     }
 
+    // Check initial_weight is within range
+    int in_minmax = weight_in_minmax(initial_weight, self->min_weight, self->max_weight);
+    if (in_minmax < 0) {
+        Py_DECREF(initial_weight);
+        return NULL;
+    }
+    if (!in_minmax) {
+        char msg[100];
+        sprintf(msg, "initial_weight must be within range (%.2f, %.2f)", self->min_weight, self->max_weight);
+        PyErr_SetString(PyExc_ValueError, msg);
+        Py_DECREF(initial_weight);
+        return NULL;
+    }
+
+    // the new argument, initial_weight is added
     Py_INCREF(argument);
     if (PyDict_SetItem(self->initial_weights, argument, initial_weight) < 0) {
         Py_DECREF(argument);

@@ -23,7 +23,7 @@ def test_init_semantics():
     QBAFramework(args, initial_weights, att, supp, semantics="SquaredDFQuAD_model")
     QBAFramework(args, initial_weights, att, supp, semantics="EulerBasedTop_model")
     QBAFramework(args, initial_weights, att, supp, semantics="EulerBased_model")
-    QBAFramework(args, initial_weights, att, supp, semantics="DFQuAD_model")
+    QBAFramework(args,[0.1, 0.1, 0.5], att, supp, semantics="DFQuAD_model")
     with pytest.raises(ValueError):
         QBAFramework(args, initial_weights, att, supp, semantics="incorrect_model")
 
