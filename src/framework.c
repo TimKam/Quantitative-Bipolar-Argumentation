@@ -608,6 +608,32 @@ QBAFramework_getsemantics(QBAFrameworkObject *self, void *closure)
 }
 
 /**
+ * @brief Getter of the attribute min_weight.
+ * 
+ * @param self the QBAFramework object
+ * @param closure 
+ * @return PyObject* new PyFloat with the min_weight
+ */
+static PyObject *
+QBAFramework_getmin_weight(QBAFrameworkObject *self, void *closure)
+{
+    PyFloat_FromDouble(self->min_weight);
+}
+
+/**
+ * @brief Getter of the attribute max_weight.
+ * 
+ * @param self the QBAFramework object
+ * @param closure 
+ * @return PyObject* new PyFloat with the max_weight
+ */
+static PyObject *
+QBAFramework_getmax_weight(QBAFrameworkObject *self, void *closure)
+{
+    PyFloat_FromDouble(self->max_weight);
+}
+
+/**
  * @brief Setter of the attribute disjoint_relations.
  * 
  * @param self the QBAFramework object
@@ -2986,6 +3012,10 @@ static PyGetSetDef QBAFramework_getsetters[] = {
      "Setter of the attribute disjoint_relations."},
     {"semantics", (getter) QBAFramework_getsemantics, NULL,
      "Return the semantics.", NULL},
+    {"min_weight", (getter) QBAFramework_getmin_weight, NULL,
+     "Return the min value a initial_weight can have.", NULL},
+    {"max_weight", (getter) QBAFramework_getmax_weight, NULL,
+     "Return the max value a initial_weight can have.", NULL},
     {NULL}  /* Sentinel */
 };
 

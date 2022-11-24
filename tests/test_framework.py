@@ -70,6 +70,8 @@ def test_init_getters():
     assert qbf.disjoint_relations == True
     assert qbf.final_weights == {'a': 1.0, 'c': 4.0, 'b': 2.0}
     assert qbf.semantics == "basic_model"
+    assert qbf.min_weight == -1.7976931348623157e+308
+    assert qbf.max_weight ==  1.7976931348623157e+308
 
 def test_init_setters():
     qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')], disjoint_relations=True)
