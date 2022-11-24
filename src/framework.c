@@ -45,6 +45,8 @@ typedef struct {
     double  (*aggregation_function)(double, double); /* aggregation function that is going to be used to calcualte the final weights */
     double    min_weight;           /* min value for the initial weights */
     double    max_weight;           /* max value for the initial weights */
+    PyObject *influence_function_callable;   /* influence function given from python */
+    PyObject *aggregation_function_callable; /* aggregation function given from python */
 } QBAFrameworkObject;
 
 /**
@@ -63,6 +65,8 @@ QBAFramework_traverse(QBAFrameworkObject *self, visitproc visit, void *arg)
     Py_VISIT(self->attack_relations);
     Py_VISIT(self->support_relations);
     Py_VISIT(self->final_weights);
+    Py_VISIT(self->influence_function_callable);
+    Py_VISIT(self->aggregation_function_callable);
     return 0;
 }
 
@@ -80,6 +84,8 @@ QBAFramework_clear(QBAFrameworkObject *self)
     Py_CLEAR(self->attack_relations);
     Py_CLEAR(self->support_relations);
     Py_CLEAR(self->final_weights);
+    Py_CLEAR(self->influence_function_callable);
+    Py_CLEAR(self->aggregation_function_callable);
     return 0;
 }
 
@@ -127,6 +133,8 @@ QBAFramework_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         self->aggregation_function = sum;
         self->min_weight = -DBL_MAX;
         self->max_weight = DBL_MAX;
+        self->influence_function_callable = NULL;
+        self->aggregation_function = NULL;
     }
     return (PyObject *) self;
 }
@@ -438,10 +446,41 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
         semantics = STR_BASIC_MODEL;
     }
 
-    // TODO: Implement aggregation_function, influence_function
-    if (!PyObject_IsNoneOrNULL(aggregation_function) || !PyObject_IsNoneOrNULL(influence_function)) {
-        PyErr_SetString(PyExc_NotImplementedError, "aggregation_function, influence_function not implemented");
+    if (semantics != NULL && (min_weight != -DBL_MAX || max_weight != DBL_MAX)) {
+        PyErr_SetString(PyExc_ValueError,
+                        "cannot modify min_weight or max_weight without implementing your own aggregation function and influence function");
         return -1;
+    }
+
+    // Implement aggregation_function, influence_function
+    if (!PyObject_IsNoneOrNULL(aggregation_function) || !PyObject_IsNoneOrNULL(influence_function)) {
+        if (semantics != NULL) {
+            PyErr_SetString(PyExc_ValueError,
+                            "cannot modify the aggregation_function and influence_function of the semantics");
+            return -1;
+        }
+
+        if (!PyCallable_Check(aggregation_function) || !PyCallable_Check(influence_function)) {
+            PyErr_SetString(PyExc_NotImplementedError,
+            "aggregation_function and influence_function must be callable");
+            return -1;
+        }
+
+        self->semantics = NULL;
+        self->influence_function = NULL;
+        self->aggregation_function = NULL;
+
+        Py_XDECREF(self->influence_function_callable);
+        Py_INCREF(influence_function);
+        self->influence_function_callable = influence_function;
+
+        Py_XDECREF(self->aggregation_function_callable);
+        Py_INCREF(aggregation_function);
+        self->aggregation_function_callable = aggregation_function;
+
+        self->min_weight = min_weight;
+        self->max_weight = max_weight;
+
     }
 
     // Assign the influence_function and aggregation_function based on the value of semantics
@@ -496,12 +535,6 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 
     }
 
-    // TODO: Implement min_weight, max_weight
-    if (min_weight != -DBL_MAX || max_weight != DBL_MAX) {
-        PyErr_SetString(PyExc_NotImplementedError, "min_weight, max_weight not implemented");
-        return -1;
-    }
-
     // Check all the initial weights are in range (min_weight, max_weight)
     int initial_weights_in_minmax = _QBAFramework_initial_weights_in_minmax(self);
     if (initial_weights_in_minmax < 0) {
@@ -515,6 +548,62 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
     }
 
     return 0;
+}
+
+/**
+ * @brief Return the result of aggregating the weights w1 and w2 in the Framework self,
+ * -1.0 in an error has occurred.
+ * 
+ * @param self a QBAFramework
+ * @param w1 a double
+ * @param w2 another double
+ * @return double result of the aggregation of w1 and w2, -1.0 if an error occurred
+ */
+static inline
+double _QBAFramework_aggregation_function(QBAFrameworkObject *self, double w1, double w2)
+{
+    if (self->aggregation_function != NULL)
+        return self->aggregation_function(w1, w2);
+    
+    if (self->aggregation_function_callable != NULL) {
+        PyObject *pyfloat = PyObject_CallFunction(self->aggregation_function_callable, "dd", w1, w2);
+        if (pyfloat == NULL)
+            return -1;
+        double aggregation = PyFloat_AsDouble(pyfloat);
+        Py_DECREF(pyfloat);
+        return aggregation;
+    }
+
+    PyErr_BadArgument();
+    return -1.0;
+}
+
+/**
+ * @brief Return the result of the influence function of the Framework self,
+ * -1.0 in an error has occurred.
+ * 
+ * @param self a QBAFramework
+ * @param w the initial weight
+ * @param s the result of applying the aggregation function to all attackers and supporters
+ * @return double the result, -1.0 if an error occurred
+ */
+static inline
+double _QBAFramework_influence_function(QBAFrameworkObject *self, double w, double s)
+{
+    if (self->influence_function != NULL)
+        return self->influence_function(w, s);
+    
+    if (self->influence_function_callable != NULL) {
+        PyObject *pyfloat = PyObject_CallFunction(self->influence_function_callable, "dd", w, s);
+        if (pyfloat == NULL)
+            return -1;
+        double influence = PyFloat_AsDouble(pyfloat);
+        Py_DECREF(pyfloat);
+        return influence;
+    }
+
+    PyErr_BadArgument();
+    return -1.0;
 }
 
 /**
@@ -599,12 +688,14 @@ QBAFramework_getdisjoint_relations(QBAFrameworkObject *self, void *closure)
  * 
  * @param self the QBAFramework object
  * @param closure 
- * @return PyObject* new PyUnicode with the string semantics
+ * @return PyObject* new PyUnicode with the string semantics, new PyNone if semantics is NULL
  */
 static PyObject *
 QBAFramework_getsemantics(QBAFrameworkObject *self, void *closure)
 {
-    PyUnicode_FromString(self->semantics);
+    if (self->semantics != NULL)
+        return PyUnicode_FromString(self->semantics);
+    Py_RETURN_NONE;
 }
 
 /**
@@ -1512,9 +1603,17 @@ _QBAFramework_calculate_final_weight(QBAFrameworkObject *self, PyObject *argumen
     }
 
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-        attackers_aggregation = self->aggregation_function(attackers_aggregation,
-                                        _QBAFramework_calculate_final_weight(self, item));
+        double item_final_weight = _QBAFramework_calculate_final_weight(self, item);
         Py_DECREF(item);
+        if (item_final_weight == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(attackers); Py_DECREF(iterator);
+            return -1.0;
+        }
+        attackers_aggregation = _QBAFramework_aggregation_function(self, attackers_aggregation, item_final_weight);
+        if (attackers_aggregation == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(attackers); Py_DECREF(iterator);
+            return -1.0;
+        }
     }
 
     Py_DECREF(attackers);
@@ -1529,9 +1628,17 @@ _QBAFramework_calculate_final_weight(QBAFrameworkObject *self, PyObject *argumen
     }
 
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-        supporters_aggregation = self->aggregation_function(supporters_aggregation,
-                                        _QBAFramework_calculate_final_weight(self, item));
+        double item_final_weight = _QBAFramework_calculate_final_weight(self, item);
         Py_DECREF(item);
+        if (item_final_weight == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(supporters); Py_DECREF(iterator);
+            return -1.0;
+        }
+        supporters_aggregation = _QBAFramework_aggregation_function(self, supporters_aggregation, item_final_weight);
+        if (supporters_aggregation == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(supporters); Py_DECREF(iterator);
+            return -1.0;
+        }
     }
 
     Py_DECREF(supporters);
@@ -1539,7 +1646,10 @@ _QBAFramework_calculate_final_weight(QBAFrameworkObject *self, PyObject *argumen
 
     double aggregation = supporters_aggregation - attackers_aggregation;
 
-    double final_weight = self->influence_function(initial_weight, aggregation);
+    double final_weight = _QBAFramework_aggregation_function(self, initial_weight, aggregation);
+    if (final_weight == -1.0 && PyErr_Occurred()) {
+        return -1.0;
+    }
 
     // final_weights[argument] = final_weight
     PyObject *pyfinal_weight = PyFloat_FromDouble(final_weight);    // New reference
