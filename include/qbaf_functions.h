@@ -38,7 +38,7 @@ double product(double w1, double w2);
 double top(double w1, double w2);
 
 /**
- * @brief Return the influence result of the naive model.
+ * @brief Return the influence result of the basic model.
  * 
  * @param w the initial weight
  * @param s the result of applying the aggregation function to all attackers and supporters

@@ -10,7 +10,7 @@ def test_init_correct_args():
     supp = [('a', 'b')]
     QBAFramework(args, initial_weights, att, supp,
         disjoint_relations=True,
-        semantics="naive_model",
+        semantics="basic_model",
         aggregation_function=None,
         influence_function=None,
         min_weight=-1.7976931348623157e+308,
@@ -18,7 +18,7 @@ def test_init_correct_args():
 
 def test_init_semantics():
     args,initial_weights,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
-    QBAFramework(args, initial_weights, att, supp, semantics="naive_model")
+    QBAFramework(args, initial_weights, att, supp, semantics="basic_model")
     QBAFramework(args, initial_weights, att, supp, semantics="QuadraticEnergy_model")
     QBAFramework(args, initial_weights, att, supp, semantics="SquaredDFQuAD_model")
     QBAFramework(args, initial_weights, att, supp, semantics="EulerBasedTop_model")
@@ -69,7 +69,7 @@ def test_init_getters():
     assert qbf.support_relations.relations == {('a', 'b')}
     assert qbf.disjoint_relations == True
     assert qbf.final_weights == {'a': 1.0, 'c': 4.0, 'b': 2.0}
-    assert qbf.semantics == "naive_model"
+    assert qbf.semantics == "basic_model"
 
 def test_init_setters():
     qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')], disjoint_relations=True)

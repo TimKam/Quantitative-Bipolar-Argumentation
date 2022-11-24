@@ -20,7 +20,7 @@
 #define PyObject_IsNoneOrNULL(obj) (obj == Py_None || obj == NULL)
 #define streq(str1, str2) (stricmp(str1, str2) == 0)
 
-static const char *STR_NAIVE_MODEL = "naive_model";
+static const char *STR_BASIC_MODEL = "basic_model";
 static const char *STR_QUADRATICENERGY_MODEL = "QuadraticEnergy_model";
 static const char *STR_SQUAREDDFQUAD_MODEL = "SquaredDFQuAD_model";
 static const char *STR_EULERBASEDTOP_MODEL = "EulerBasedTop_model";
@@ -120,7 +120,7 @@ QBAFramework_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         self->final_weights = Py_None;
         self->modified = TRUE;
         self->disjoint_relations = TRUE;
-        self->semantics = STR_NAIVE_MODEL;
+        self->semantics = STR_BASIC_MODEL;
         self->influence_function = simple_influence;
         self->aggregation_function = sum;
     }
@@ -261,7 +261,7 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
                             "min_weight", "max_weight", NULL};
     PyObject *arguments, *initial_weights, *attack_relations, *support_relations, *tmp;
     int disjoint_relations = TRUE;
-    char *semantics = NULL; // (e.g. "naive") If None it will be NULL, otherwise it is a pointer to char that is only accesible in this function.
+    char *semantics = NULL; // (e.g. "basic_model") If None it will be NULL, otherwise it is a pointer to char that is only accesible in this function.
     PyObject *aggregation_function = NULL, *influence_function = NULL;
     double min_weight = -DBL_MAX, max_weight = DBL_MAX;
 
@@ -369,7 +369,7 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
     }
 
     if (semantics == NULL && PyObject_IsNoneOrNULL(aggregation_function) && PyObject_IsNoneOrNULL(influence_function)) {
-        semantics = STR_NAIVE_MODEL;
+        semantics = STR_BASIC_MODEL;
     }
 
     // TODO: Implement aggregation_function, influence_function
@@ -381,8 +381,8 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
     // Assign the influence_function and aggregation_function based on the value of semantics
     if (semantics != NULL) {
 
-        if (streq(semantics, STR_NAIVE_MODEL)) {
-            self->semantics = STR_NAIVE_MODEL;
+        if (streq(semantics, STR_BASIC_MODEL)) {
+            self->semantics = STR_BASIC_MODEL;
             self->aggregation_function = sum;
             self->influence_function = simple_influence;
         }
