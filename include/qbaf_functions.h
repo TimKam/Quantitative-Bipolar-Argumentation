@@ -40,46 +40,46 @@ double top(double w1, double w2);
 /**
  * @brief Return the influence result of the naive model.
  * 
- * @param initial_weight the initial weight
- * @param aggregation the result of applying the aggregation function to all attackers and supporters
+ * @param w the initial weight
+ * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result of the influence function
  */
-double simple_influence(double initial_weight, double aggregation);
+double simple_influence(double w, double s);
 
 /**
  * @brief Return the influence function linear(1).
  * 
- * @param initial_weight the initial weight
- * @param aggregation the result of applying the aggregation function to all attackers and supporters
+ * @param w the initial weight
+ * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result
  */
-double linear_1(double initial_weight, double aggregation);
+double linear_1(double w, double s);
 
 /**
  * @brief Return the influence function Euler-based.
  * 
- * @param initial_weight the initial weight
- * @param aggregation the result of applying the aggregation function to all attackers and supporters
+ * @param w the initial weight
+ * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result
  */
-double euler_based(double initial_weight, double aggregation);
+double euler_based(double w, double s);
 
 /**
  * @brief Return the influence function 2-Max(1).
  * 
- * @param initial_weight the initial weight
- * @param aggregation the result of applying the aggregation function to all attackers and supporters
+ * @param w the initial weight
+ * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result
  */
-double max_2_1(double initial_weight, double aggregation);
+double max_2_1(double w, double s);
 
 /**
  * @brief Return the influence function 1-Max(1).
  * 
- * @param initial_weight the initial weight
- * @param aggregation the result of applying the aggregation function to all attackers and supporters
+ * @param w the initial weight
+ * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result
  */
-double max_1_1(double initial_weight, double aggregation);
+double max_1_1(double w, double s);
 
 #endif

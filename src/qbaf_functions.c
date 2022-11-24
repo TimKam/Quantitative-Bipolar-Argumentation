@@ -48,55 +48,51 @@ double top(double w1, double w2)
 /**
  * @brief Return the influence result of the naive model.
  * 
- * @param initial_weight the initial weight
- * @param aggregation the result of applying the aggregation function to all attackers and supporters
+ * @param w the initial weight
+ * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result of the influence function
  */
-double simple_influence(double initial_weight, double aggregation)
+double simple_influence(double w, double s)
 {
-    return initial_weight + aggregation;
+    return w + s;
 }
 
 /**
  * @brief Return the influence function linear(k).
  * 
- * @param initial_weight the initial weight
- * @param aggregation the result of applying the aggregation function to all attackers and supporters
+ * @param w the initial weight
+ * @param s the result of applying the aggregation function to all attackers and supporters
  * @param k a double
  * @return double the result
  */
 static inline
-double linear_k(double initial_weight, double aggregation, double k)
-{
-    double s = aggregation >= 0 ? 1.0 : -1.0;
-    
-    return initial_weight - (initial_weight/k) * max(0,-s) + ((1-initial_weight)/k) * max(0, s);
+double linear_k(double w, double s, double k)
+{   
+    return w - (w/k) * max(0,-s) + ((1-w)/k) * max(0, s);
 }
 
 /**
  * @brief Return the influence function linear(1).
  * 
- * @param initial_weight the initial weight
- * @param aggregation the result of applying the aggregation function to all attackers and supporters
+ * @param w the initial weight
+ * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result
  */
-double linear_1(double initial_weight, double aggregation)
+double linear_1(double w, double s)
 {
-    return linear_k(initial_weight, aggregation, 1);
+    return linear_k(w, s, 1);
 }
 
 /**
  * @brief Return the influence function Euler-based.
  * 
- * @param initial_weight the initial weight
- * @param aggregation the result of applying the aggregation function to all attackers and supporters
+ * @param w the initial weight
+ * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result
  */
-double euler_based(double initial_weight, double aggregation)
+double euler_based(double w, double s)
 {
-    double s = aggregation >= 0 ? 1.0 : -1.0;
-
-    return 1 - (1-pow(initial_weight, 2)) / (1+initial_weight*exp(s));
+    return 1 - (1-pow(w, 2)) / (1+w*exp(s));
 }
 
 /**
@@ -115,40 +111,38 @@ double h(double x, uint32_t p)
 /**
  * @brief Return the influence function p-Max(k).
  * 
- * @param initial_weight the initial weight
- * @param aggregation the result of applying the aggregation function to all attackers and supporters
+ * @param w the initial weight
+ * @param s the result of applying the aggregation function to all attackers and supporters
  * @param p a natural number
  * @param k a double
  * @return double the result
  */
 static inline
-double p_max_k(double initial_weight, double aggregation, uint32_t p, double k)
+double p_max_k(double w, double s, uint32_t p, double k)
 {
-    double s = aggregation >= 0 ? 1.0 : -1.0;
-
-    return initial_weight - initial_weight * h(-s/k, p) + (1-initial_weight) * h(s/k, p);
+    return w - w * h(-s/k, p) + (1-w) * h(s/k, p);
 }
 
 /**
  * @brief Return the influence function 2-Max(1).
  * 
- * @param initial_weight the initial weight
- * @param aggregation the result of applying the aggregation function to all attackers and supporters
+ * @param w the initial weight
+ * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result
  */
-double max_2_1(double initial_weight, double aggregation)
+double max_2_1(double w, double s)
 {
-    return p_max_k(initial_weight, aggregation, 2, 1);
+    return p_max_k(w, s, 2, 1);
 }
 
 /**
  * @brief Return the influence function 1-Max(1).
  * 
- * @param initial_weight the initial weight
- * @param aggregation the result of applying the aggregation function to all attackers and supporters
+ * @param w the initial weight
+ * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result
  */
-double max_1_1(double initial_weight, double aggregation)
+double max_1_1(double w, double s)
 {
-    return p_max_k(initial_weight, aggregation, 1, 1);
+    return p_max_k(w, s, 1, 1);
 }
