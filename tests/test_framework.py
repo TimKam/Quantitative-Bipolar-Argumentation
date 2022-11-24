@@ -91,6 +91,24 @@ def test_init_setters():
     with pytest.raises(ValueError):
         qbf.disjoint_relations = True
 
+# Test MAX MIN WEIGHTS
+def test_init_maxmin_weights_DFQuAD():
+    args,initial_weights,att,supp = ['a', 'b', 'c'], [0.1, 0.1, 0.5], [('a', 'c')], [('a', 'b')]
+    with pytest.raises(ValueError):
+        QBAFramework(args,[0.1, 0.1, 5], att, supp, semantics="DFQuAD_model")
+    qbf = QBAFramework(args,initial_weights, att, supp, semantics="DFQuAD_model")
+    qbf.add_argument('a', 5) # If the arguments exists it does nothing
+    qbf.add_argument('a', -5) # If the arguments exists it does nothing
+    with pytest.raises(ValueError):
+        qbf.add_argument('e', 5)
+    with pytest.raises(ValueError):
+        qbf.add_argument('e', -5)
+    with pytest.raises(ValueError):
+        qbf.modify_initial_weight('a', 5)
+    with pytest.raises(ValueError):
+        qbf.modify_initial_weight('a', -5)
+
+
 # TEST ARGUMENTS
 
 def test_modify_arguments():
