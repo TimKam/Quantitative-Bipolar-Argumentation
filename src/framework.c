@@ -461,7 +461,7 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
         }
 
         if (!PyCallable_Check(aggregation_function) || !PyCallable_Check(influence_function)) {
-            PyErr_SetString(PyExc_NotImplementedError,
+            PyErr_SetString(PyExc_ValueError,
             "aggregation_function and influence_function must be callable");
             return -1;
         }
@@ -1646,7 +1646,7 @@ _QBAFramework_calculate_final_weight(QBAFrameworkObject *self, PyObject *argumen
 
     double aggregation = supporters_aggregation - attackers_aggregation;
 
-    double final_weight = _QBAFramework_aggregation_function(self, initial_weight, aggregation);
+    double final_weight = _QBAFramework_influence_function(self, initial_weight, aggregation);
     if (final_weight == -1.0 && PyErr_Occurred()) {
         return -1.0;
     }
