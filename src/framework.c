@@ -1892,6 +1892,68 @@ QBAFramework_are_strength_consistent(QBAFrameworkObject *self, PyObject *args, P
 }
 
 /**
+ * @brief Return a new QBAFramework copying the settings of self (disjoint_relations and semantics).
+ * 
+ * @param self instance of QBAFramework
+ * @return PyObject* new instance of QBAFramework, NULL if an error has occurred
+ */
+static inline PyObject *
+_QBAFramework_copy_settings(QBAFrameworkObject *self)
+{
+    PyObject *kwds = NULL;
+    PyObject *args = NULL;
+
+    QBAFrameworkObject *copy = (QBAFrameworkObject*) QBAFramework_new(Py_TYPE(self), args, kwds);
+    if (copy == NULL) {
+        return NULL;
+    }
+
+    Py_DECREF(copy->arguments);
+    copy->arguments = PySet_New(NULL);
+    if (copy->arguments == NULL) {
+        Py_DECREF(copy);
+        return NULL;
+    }
+
+    Py_DECREF(copy->initial_weights);
+    copy->initial_weights = PyDict_New();
+    if (copy->initial_weights == NULL) {
+        Py_DECREF(copy);
+        return NULL;
+    }
+
+    Py_DECREF(copy->attack_relations);
+    copy->attack_relations = QBAFARelations_Create(NULL);
+    if (copy->attack_relations == NULL) {
+        Py_DECREF(copy);
+        return NULL;
+    }
+
+    Py_DECREF(copy->support_relations);
+    copy->support_relations = QBAFARelations_Create(NULL);
+    if (copy->support_relations == NULL) {
+        Py_DECREF(copy);
+        return NULL;
+    }
+
+    copy->modified = TRUE;
+    copy->disjoint_relations = self->disjoint_relations;
+
+    copy->semantics = self->semantics;
+    copy->aggregation_function = self->aggregation_function;
+    copy->influence_function = self->influence_function;
+    copy->min_weight = self->min_weight;
+    copy->max_weight = self->max_weight;
+
+    Py_XINCREF(self->aggregation_function_callable);
+    copy->aggregation_function_callable = self->aggregation_function_callable;
+    Py_XINCREF(self->influence_function_callable);
+    copy->influence_function_callable = self->influence_function_callable;
+    
+    return (PyObject*)copy;
+}
+
+/**
  * @brief Return the reversal framework of self to other w.r.t. set, NULL if an error is encountered.
  * The Set set must be a subset of self->arguments UNION other->arguments.
  * 
@@ -1922,8 +1984,8 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
     }
     Py_DECREF(arguments_union);
 
-    // Copy this framework
-    QBAFrameworkObject *reversal = (QBAFrameworkObject*)QBAFramework_copy(self, NULL);
+    // Copy this framework settings
+    QBAFrameworkObject *reversal = (QBAFrameworkObject*)_QBAFramework_copy_settings(self);
     if (reversal == NULL) {
         return NULL;
     }
@@ -1940,7 +2002,7 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
         Py_DECREF(self_arguments_union_set);
         return NULL;
     }
-    Py_CLEAR(reversal->arguments);
+    Py_DECREF(reversal->arguments);
     reversal->arguments = PySet_Difference(self_arguments_union_set, set_difference_other_arguments);
     Py_DECREF(self_arguments_union_set);
     Py_DECREF(set_difference_other_arguments);
@@ -1949,29 +2011,37 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
         return NULL;
     }
 
-    // Modify attack relations
-    PyObject *set_iterator = PyObject_GetIter(set);
-    PyObject *arg;  // item
-    if (set_iterator == NULL) {
+    PyObject *reversal_arguments_difference_set = PySet_Difference(reversal->arguments, set);
+    if (reversal_arguments_difference_set == NULL) {
         Py_DECREF(reversal);
         return NULL;
     }
-    PyObject *iterator, *attacked, *patients;
-    while ((arg = PyIter_Next(set_iterator))) {    // PyIter_Next returns a new reference
-        // for attacked in self.__attack_relations.patients(arg): att.remove_relation(arg, attacked)
+    PyObject *args_iterator, *set_iterator;
+    PyObject *arg; // item
+    PyObject *iterator, *attacked, *supported, *patients;
+
+    // Modify attack relations
+    args_iterator = PyObject_GetIter(reversal_arguments_difference_set);
+    if (args_iterator == NULL) {
+        Py_DECREF(reversal); Py_DECREF(reversal_arguments_difference_set);
+        return NULL;
+    }
+    while ((arg = PyIter_Next(args_iterator))) {    // PyIter_Next returns a new reference
+
+        // for attacked in self.__attack_relations.patients(arg): att.add_relation(arg, attacked)
         patients = _QBAFARelations_patients((QBAFARelationsObject*)self->attack_relations, arg); // new reference
         if (patients == NULL) {
-            Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
+            Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(args_iterator); Py_DECREF(reversal_arguments_difference_set);
             return NULL;
         }
         iterator = PyObject_GetIter(patients);
         if (iterator == NULL) {
-            Py_DECREF(patients); Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
+            Py_DECREF(patients); Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(args_iterator); Py_DECREF(reversal_arguments_difference_set);
             return NULL;
         }
         while ((attacked = PyIter_Next(iterator))) {
-            if (_QBAFARelations_remove((QBAFARelationsObject*)reversal->attack_relations, arg, attacked) < 0) {
-                Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
+            if (_QBAFARelations_add((QBAFARelationsObject*)reversal->attack_relations, arg, attacked) < 0) {
+                Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(args_iterator); Py_DECREF(reversal_arguments_difference_set);
                 Py_DECREF(attacked); Py_DECREF(iterator); Py_DECREF(patients);
                 return NULL;
             }
@@ -1979,21 +2049,33 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
         }
         Py_DECREF(patients);
         Py_DECREF(iterator);
+        
+        // Decref arg
+        Py_DECREF(arg);
+    }
+    Py_DECREF(args_iterator);
+
+    set_iterator = PyObject_GetIter(set);
+    if (set_iterator == NULL) {
+        Py_DECREF(reversal); Py_DECREF(reversal_arguments_difference_set);
+        return NULL;
+    }
+    while ((arg = PyIter_Next(set_iterator))) {    // PyIter_Next returns a new reference
 
         // for attacked in other.__attack_relations.patients(arg): att.add_relation(arg, attacked)
         patients = _QBAFARelations_patients((QBAFARelationsObject*)other->attack_relations, arg); // new reference
         if (patients == NULL) {
-            Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
+            Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator); Py_DECREF(reversal_arguments_difference_set);
             return NULL;
         }
         iterator = PyObject_GetIter(patients);
         if (iterator == NULL) {
-            Py_DECREF(patients); Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
+            Py_DECREF(patients); Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator); Py_DECREF(reversal_arguments_difference_set);
             return NULL;
         }
         while ((attacked = PyIter_Next(iterator))) {
             if (_QBAFARelations_add((QBAFARelationsObject*)reversal->attack_relations, arg, attacked) < 0) {
-                Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
+                Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator); Py_DECREF(reversal_arguments_difference_set);
                 Py_DECREF(attacked); Py_DECREF(iterator); Py_DECREF(patients);
                 return NULL;
             }
@@ -2008,27 +2090,27 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
     Py_DECREF(set_iterator);
 
     // Modify support relations
-    set_iterator = PyObject_GetIter(set);
-    if (set_iterator == NULL) {
-        Py_DECREF(reversal);
+    args_iterator = PyObject_GetIter(reversal_arguments_difference_set);
+    if (args_iterator == NULL) {
+        Py_DECREF(reversal); Py_DECREF(reversal_arguments_difference_set);
         return NULL;
     }
-    PyObject *supported;
-    while ((arg = PyIter_Next(set_iterator))) {    // PyIter_Next returns a new reference
-        // for supported in self.__support_relations.patients(arg): att.remove_relation(arg, supported)
+    while ((arg = PyIter_Next(args_iterator))) {    // PyIter_Next returns a new reference
+
+        // for supported in self.__support_relations.patients(arg): att.add_relation(arg, supported)
         patients = _QBAFARelations_patients((QBAFARelationsObject*)self->support_relations, arg); // new reference
         if (patients == NULL) {
-            Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
+            Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(args_iterator); Py_DECREF(reversal_arguments_difference_set);
             return NULL;
         }
         iterator = PyObject_GetIter(patients);
         if (iterator == NULL) {
-            Py_DECREF(patients); Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
+            Py_DECREF(patients); Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(args_iterator); Py_DECREF(reversal_arguments_difference_set);
             return NULL;
         }
         while ((supported = PyIter_Next(iterator))) {
-            if (_QBAFARelations_remove((QBAFARelationsObject*)reversal->support_relations, arg, supported) < 0) {
-                Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
+            if (_QBAFARelations_add((QBAFARelationsObject*)reversal->support_relations, arg, supported) < 0) {
+                Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(args_iterator); Py_DECREF(reversal_arguments_difference_set);
                 Py_DECREF(supported); Py_DECREF(iterator); Py_DECREF(patients);
                 return NULL;
             }
@@ -2036,21 +2118,33 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
         }
         Py_DECREF(patients);
         Py_DECREF(iterator);
+        
+        // Decref arg
+        Py_DECREF(arg);
+    }
+    Py_DECREF(args_iterator);
+
+    set_iterator = PyObject_GetIter(set);
+    if (set_iterator == NULL) {
+        Py_DECREF(reversal); Py_DECREF(reversal_arguments_difference_set);
+        return NULL;
+    }
+    while ((arg = PyIter_Next(set_iterator))) {    // PyIter_Next returns a new reference
 
         // for supported in other.__support_relations.patients(arg): att.add_relation(arg, supported)
         patients = _QBAFARelations_patients((QBAFARelationsObject*)other->support_relations, arg); // new reference
         if (patients == NULL) {
-            Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
+            Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator); Py_DECREF(reversal_arguments_difference_set);
             return NULL;
         }
         iterator = PyObject_GetIter(patients);
         if (iterator == NULL) {
-            Py_DECREF(patients); Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
+            Py_DECREF(patients); Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator); Py_DECREF(reversal_arguments_difference_set);
             return NULL;
         }
         while ((supported = PyIter_Next(iterator))) {
             if (_QBAFARelations_add((QBAFARelationsObject*)reversal->support_relations, arg, supported) < 0) {
-                Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator);
+                Py_DECREF(reversal); Py_DECREF(arg); Py_DECREF(set_iterator); Py_DECREF(reversal_arguments_difference_set);
                 Py_DECREF(supported); Py_DECREF(iterator); Py_DECREF(patients);
                 return NULL;
             }
@@ -2064,10 +2158,10 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
     }
     Py_DECREF(set_iterator);
 
+    Py_DECREF(reversal_arguments_difference_set);
+
     // Modify initial weights
-    Py_CLEAR(reversal->initial_weights);
-    reversal->initial_weights = PyDict_New();
-    if (reversal->initial_weights == NULL) {
+    if (reversal->initial_weights == NULL) { // It should be an empty PyDict
         return NULL;
     }
     iterator = PyObject_GetIter(reversal->arguments);

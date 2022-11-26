@@ -583,17 +583,19 @@ class QBAFramework:
 
         args = (self.__arguments.union(set)).difference(set.difference(other.__arguments))
         
-        att = self.__attack_relations.copy()
-        for arg in set:
+        att = QBAFARelations([])
+        for arg in args.difference(set):
             for attacked in self.__attack_relations.patients(arg):
-                att.remove(arg, attacked)
+                att.add(arg, attacked)
+        for arg in set:
             for attacked in other.__attack_relations.patients(arg):
                 att.add(arg, attacked)
         
-        supp = self.__support_relations.copy()
-        for arg in set:
+        supp = QBAFARelations([])
+        for arg in args.difference(set):
             for supported in self.__support_relations.patients(arg):
-                supp.remove(arg, supported)
+                supp.add(arg, supported)
+        for arg in set:
             for supported in other.__support_relations.patients(arg):
                 supp.add(arg, supported)
         

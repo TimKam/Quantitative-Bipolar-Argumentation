@@ -818,8 +818,14 @@ PyTypeObject *get_QBAFARelationsType() {
 PyObject *
 QBAFARelations_Create(PyObject *relations)
 {
+    if (relations == NULL) {
+        relations = PyList_New(0);
+    } else {
+        Py_INCREF(relations);
+    }
     PyObject *kwds = NULL;
     PyObject *args = PyTuple_Pack(1, relations);
+    Py_DECREF(relations);
     if (args == NULL)
         return NULL;
 
