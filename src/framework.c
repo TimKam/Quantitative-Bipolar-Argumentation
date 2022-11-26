@@ -8,6 +8,7 @@
 #include <Python.h>
 #include "structmember.h"
 #include <float.h>
+#include <string.h>
 
 #include "framework.h"
 #include "relations.h"
