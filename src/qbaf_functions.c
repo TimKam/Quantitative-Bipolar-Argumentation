@@ -9,6 +9,8 @@
 
 #include "qbaf_functions.h"
 
+#define max(a,b) (((a)>(b))?(a):(b))
+
 /**
  * @brief Given two weights w1 and w2 return their sum.
  * 
