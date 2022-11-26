@@ -9,17 +9,19 @@
 #include "structmember.h"
 
 #include "relations.h"
+#include "qbaf_utils.h"
 
 /**
  * @brief Struct that defines the Object Type ARelations in a QBAF.
  * 
  */
-typedef struct {
-    PyObject_HEAD
-    PyObject *relations;        /* set of tuples (Agent: QBAFArgument, Patient: QBAFArgument) */
-    PyObject *agent_patients;   /* dictonary of (key, value) = (Agent, set of Patients) */
-    PyObject *patient_agents;   /* dictonary of (key, value) = (Patient, set of Agents) */
-} QBAFARelationsObject;
+//typedef struct {
+//    PyObject_HEAD
+//    PyObject *relations;        /* set of tuples (Agent: QBAFArgument, Patient: QBAFArgument) */
+//    PyObject *agent_patients;   /* dictonary of (key, value) = (Agent, set of Patients) */
+//    PyObject *patient_agents;   /* dictonary of (key, value) = (Patient, set of Agents) */
+//    int modifiable;             /* 1 if this object can be modified through python, 0 otherwise */
+//} QBAFARelationsObject;
 
 /**
  * @brief This function is used by the garbage collector to detect reference cycles.
@@ -98,6 +100,7 @@ QBAFARelations_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
             Py_DECREF(self);
             return NULL;
         }
+        self->modifiable = 1;
     }
     return (PyObject *) self;
 }
@@ -136,7 +139,7 @@ PyDict_GetItemDefaultPySet_New(PyObject *dict, PyObject *key)
  * @brief Initializer of a QBAFARelations. It is called right after the constructor by the python interpreter.
  * 
  * @param self the Object 
- * @param args the argument values that might be used by the constructor
+ * @param args the argument values that might be used by the initializator
  * @param kwds the names of the argument values
  * @return int 0 if it was executed with no errors. Otherwise, -1.
  */
@@ -266,11 +269,10 @@ static PyGetSetDef QBAFARelations_getsetters[] = {
  * @brief Return the string format of a QBAFARelations object
  * 
  * @param self the QBAFARelations instance
- * @param Py_UNUSED 
  * @return PyObject* the string representing the object
  */
 static PyObject *
-QBAFARelations___str__(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
+QBAFARelations___str__(QBAFARelationsObject *self)
 {
     return PyUnicode_FromFormat("QBAFARelations%S", self->relations);
 }
@@ -311,6 +313,29 @@ QBAFARelations___contains__(QBAFARelationsObject *self, PyObject *key)
  * initiated by the agent. Return NULL if an error has ocurred.
  * 
  * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @return PyObject* list of QBAFArgument
+ */
+PyObject *
+_QBAFARelations_patients(QBAFARelationsObject *self, PyObject *agent) {
+    PyObject *set, *list;
+    int contains = PyDict_Contains(self->agent_patients, agent);
+    if (contains < 0)
+        return NULL;
+    if (contains) {
+        set = PyDict_GetItem(self->agent_patients, agent);
+        list = PyList_Copy(set, PySet_GET_SIZE(set));
+        return list;
+    }
+
+    return PyList_New(0);
+}
+
+/**
+ * @brief Return the patients that undergo the effect of a certain action (e.g. attack, support)
+ * initiated by the agent. Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
  * @param args the argument values (agent: QBAFArgument)
  * @param kwds the argument names
  * @return PyObject* list of QBAFArgument 
@@ -320,41 +345,31 @@ QBAFARelations_patients(QBAFARelationsObject *self, PyObject *args, PyObject *kw
 {
     static char *kwlist[] = {"agent", NULL};
     PyObject *agent;
-    PyObject *set, *list;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
                                      &agent))
         return NULL;
 
-    int contains = PyDict_Contains(self->agent_patients, agent);
+    return _QBAFARelations_patients(self, agent);
+}
+
+/**
+ * @brief Return the agents that initiate a certain action (e.g. attack, support)
+ * which effects are undergone by the patient. Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param patient instance of QBAFArgument
+ * @return PyObject* list of QBAFArgument
+ */
+PyObject *
+_QBAFARelations_agents(QBAFARelationsObject *self, PyObject *patient) {
+    PyObject *set, *list;
+    int contains = PyDict_Contains(self->patient_agents, patient);
     if (contains < 0)
         return NULL;
     if (contains) {
-        set = PyDict_GetItem(self->agent_patients, agent);
-        list = PyList_New(PySet_GET_SIZE(set));
-
-        if (list == NULL)
-            return NULL;
-        
-        PyObject *iterator = PyObject_GetIter(set);
-        PyObject *item;
-
-        if (iterator == NULL) {
-            /* propagate error */
-            return NULL;
-        }
-
-        Py_ssize_t index = 0;
-        while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-            /* do something with item */
-
-            PyList_SET_ITEM(list, index, item);
-            
-            index++;
-        }
-
-        Py_DECREF(iterator);
-
+        set = PyDict_GetItem(self->patient_agents, patient);
+        list = PyList_Copy(set, PySet_GET_SIZE(set));
         return list;
     }
 
@@ -375,45 +390,42 @@ QBAFARelations_agents(QBAFARelationsObject *self, PyObject *args, PyObject *kwds
 {
     static char *kwlist[] = {"patient", NULL};
     PyObject *patient;
-    PyObject *set, *list;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
                                      &patient))
         return NULL;
 
-    int contains = PyDict_Contains(self->patient_agents, patient);
-    if (contains < 0)
+    return _QBAFARelations_agents(self, patient);
+}
+
+/**
+ * @brief Return whether or not exists the relation (agent, patient) in this instance.
+ * Return -1 if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @param patient instance of QBAFArgument
+ * @return PyObject* 1 if is contained, 0 if not contained, -1 if an error has occurred
+ */
+int
+_QBAFARelations_contains(QBAFARelationsObject *self, PyObject *agent, PyObject *patient)
+{
+    PyObject *tuple;
+
+    Py_INCREF(agent);
+    Py_INCREF(patient);
+    tuple = PyTuple_Pack(2, agent, patient);    // new reference
+    if (tuple == NULL) {
+        Py_DECREF(agent);
+        Py_DECREF(patient);
         return NULL;
-    if (contains) {
-        set = PyDict_GetItem(self->patient_agents, patient);
-        list = PyList_New(PySet_GET_SIZE(set));
-
-        if (list == NULL)
-            return NULL;
-        
-        PyObject *iterator = PyObject_GetIter(set);
-        PyObject *item;
-
-        if (iterator == NULL) {
-            /* propagate error */
-            return NULL;
-        }
-
-        Py_ssize_t index = 0;
-        while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-            /* do something with item */
-
-            PyList_SET_ITEM(list, index, item);
-            
-            index++;
-        }
-
-        Py_DECREF(iterator);
-
-        return list;
     }
+    
+    int contains = PySet_Contains(self->relations, tuple); // QBAFARelations___contains__(self, tuple);
 
-    return PyList_New(0);
+    Py_DECREF(tuple);
+
+    return contains;
 }
 
 /**
@@ -430,11 +442,34 @@ QBAFARelations_contains(QBAFARelationsObject *self, PyObject *args, PyObject *kw
 {
     static char *kwlist[] = {"agent", "patient", NULL};
     PyObject *agent, *patient;
-    PyObject *tuple;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
                                      &agent, &patient))
         return NULL;
+
+    int contains = _QBAFARelations_contains(self, agent, patient);
+    if (contains < 0) {
+        return NULL;
+    }
+
+    if (contains)
+        Py_RETURN_TRUE;
+    Py_RETURN_FALSE;
+}
+
+/**
+ * @brief Add the relation (agent, patient) to this instance. Return -1 if an error has ocurred.
+ * It does not steal references from agent neither patient.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @param patient instance of QBAFArgument
+ * @return int 0 if success, -1 in case of error
+ */
+int
+_QBAFARelations_add(QBAFARelationsObject *self, PyObject *agent, PyObject *patient)
+{
+    PyObject *tuple, *set;
 
     Py_INCREF(agent);
     Py_INCREF(patient);
@@ -442,17 +477,49 @@ QBAFARelations_contains(QBAFARelationsObject *self, PyObject *args, PyObject *kw
     if (tuple == NULL) {
         Py_DECREF(agent);
         Py_DECREF(patient);
-        return NULL;
+        return -1;
     }
-    
-    int contains = QBAFARelations___contains__(self, tuple);
+
+    int contains = PySet_Contains(self->relations, tuple);
     if (contains < 0) {
         Py_DECREF(tuple);
-        return NULL;
+        return -1;
     }
-    if (contains)
-        Py_RETURN_TRUE;
-    Py_RETURN_FALSE;
+    if (contains) {
+        Py_DECREF(tuple);
+        return 0;
+    }
+
+    // If not contains it is inserted
+
+    if (PySet_Add(self->relations, tuple) < 0) {
+        Py_DECREF(tuple);
+        return -1;
+    }
+
+    set = PyDict_GetItemDefaultPySet_New(self->agent_patients, agent);  // Return borrowed reference
+    if (set == NULL) {
+        return -1;
+    }
+    Py_INCREF(patient);
+    // Add patient to the set
+    if (PySet_Add(set, patient) < 0) {
+        Py_DECREF(patient);
+        return -1;
+    }
+
+    set = PyDict_GetItemDefaultPySet_New(self->patient_agents, patient);  // Return borrowed reference
+    if (set == NULL) {
+        return -1;
+    }
+    Py_INCREF(agent);
+    // Add agent to the set
+    if (PySet_Add(set, agent) < 0) {
+        Py_DECREF(agent);
+        return -1;
+    }
+
+    return 0;
 }
 
 /**
@@ -461,18 +528,43 @@ QBAFARelations_contains(QBAFARelationsObject *self, PyObject *args, PyObject *kw
  * @param self instance of QBAFARelations
  * @param args the argument values (agent: QBAFArgument, patient: QBAFArgument)
  * @param kwds the argument names
- * @return PyObject* new Py_NONE
+ * @return PyObject* new Py_NONE if success, NULL if error occurred
  */
 static PyObject *
 QBAFARelations_add(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
 {
+    if (!self->modifiable) {
+        PyErr_SetString(PyExc_PermissionError,
+                        "cannot modify directly a QBAFARelation that belongs to a QBAFramework");
+        return NULL;
+    }
+
     static char *kwlist[] = {"agent", "patient", NULL};
     PyObject *agent, *patient;
-    PyObject *tuple, *set;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
                                      &agent, &patient))
         return NULL;
+
+    if (_QBAFARelations_add(self, agent, patient) < 0) {
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
+}
+
+/**
+ * @brief Remove the relation (agent, patient) to this instance. Return -1 if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @param patient instance of QBAFArgument
+ * @return int 0 if success, -1 in case of error
+ */
+int
+_QBAFARelations_remove(QBAFARelationsObject *self, PyObject *agent, PyObject *patient)
+{
+    PyObject *tuple, *set;
 
     Py_INCREF(agent);
     Py_INCREF(patient);
@@ -480,49 +572,47 @@ QBAFARelations_add(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
     if (tuple == NULL) {
         Py_DECREF(agent);
         Py_DECREF(patient);
-        return NULL;
+        return -1;
     }
 
     int contains = PySet_Contains(self->relations, tuple);
     if (contains < 0) {
         Py_DECREF(tuple);
-        return NULL;
+        return -1;
     }
-    if (contains) {
+    if (!contains) {
         Py_DECREF(tuple);
-        Py_RETURN_NONE;
+        return 0;
     }
 
-    // If not contains it is inserted
+    // If contains it is removed
 
-    if (PySet_Add(self->relations, tuple) < 0) {
+    if (PySet_Discard(self->relations, tuple) < 0) {
         Py_DECREF(tuple);
-        return NULL;
+        return -1;
     }
 
-    set = PyDict_GetItemDefaultPySet_New(self->agent_patients, agent);  // Return borrowed reference
+    Py_DECREF(tuple);
+
+    set = PyDict_GetItem(self->agent_patients, agent);  // Return borrowed reference
     if (set == NULL) {
-        return NULL;
+        return -1;
     }
-    Py_INCREF(patient);
-    // Add patient to the set
-    if (PySet_Add(set, patient) < 0) {
-        Py_DECREF(patient);
-        return NULL;
+    // Remove patient from the set
+    if (PySet_Discard(set, patient) < 0) {
+        return -1;
     }
 
-    set = PyDict_GetItemDefaultPySet_New(self->patient_agents, patient);  // Return borrowed reference
+    set = PyDict_GetItem(self->patient_agents, patient);  // Return borrowed reference
     if (set == NULL) {
-        return NULL;
+        return -1;
     }
-    Py_INCREF(agent);
-    // Add agent to the set
-    if (PySet_Add(set, agent) < 0) {
-        Py_DECREF(agent);
-        return NULL;
+    // Remove agent from the set
+    if (PySet_Discard(set, agent) < 0) {
+        return -1;
     }
 
-    Py_RETURN_NONE;
+    return 0;
 }
 
 /**
@@ -536,57 +626,20 @@ QBAFARelations_add(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
 static PyObject *
 QBAFARelations_remove(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
 {
+    if (!self->modifiable) {
+        PyErr_SetString(PyExc_PermissionError,
+                        "cannot modify directly a QBAFARelation that belongs to a QBAFramework");
+        return NULL;
+    }
+
     static char *kwlist[] = {"agent", "patient", NULL};
     PyObject *agent, *patient;
-    PyObject *tuple, *set;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
                                      &agent, &patient))
         return NULL;
 
-    Py_INCREF(agent);
-    Py_INCREF(patient);
-    tuple = PyTuple_Pack(2, agent, patient);    // new reference
-    if (tuple == NULL) {
-        Py_DECREF(agent);
-        Py_DECREF(patient);
-        return NULL;
-    }
-
-    int contains = PySet_Contains(self->relations, tuple);
-    if (contains < 0) {
-        Py_DECREF(tuple);
-        return NULL;
-    }
-    if (!contains) {
-        Py_DECREF(tuple);
-        Py_RETURN_NONE;
-    }
-
-    // If contains it is removed
-
-    if (PySet_Discard(self->relations, tuple) < 0) {
-        Py_DECREF(tuple);
-        return NULL;
-    }
-
-    Py_DECREF(tuple);
-
-    set = PyDict_GetItem(self->agent_patients, agent);  // Return borrowed reference
-    if (set == NULL) {
-        return NULL;
-    }
-    // Remove patient from the set
-    if (PySet_Discard(set, patient) < 0) {
-        return NULL;
-    }
-
-    set = PyDict_GetItem(self->patient_agents, patient);  // Return borrowed reference
-    if (set == NULL) {
-        return NULL;
-    }
-    // Add agent to the set
-    if (PySet_Discard(set, agent) < 0) {
+    if (_QBAFARelations_remove(self, agent, patient) < 0) {
         return NULL;
     }
 
@@ -598,22 +651,91 @@ QBAFARelations_remove(QBAFARelationsObject *self, PyObject *args, PyObject *kwds
  * New references are created for the copy, except for the QBAFArgument objects.
  * 
  * @param self instance of QBAFARelations
+ * @param Py_UNUSED 
  * @return PyObject* new instance of QBAFARelations
  */
-static PyObject *
+PyObject *
 QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
 {
-    static char *kwds[] = {"relations", NULL};
-    PyObject *args[] = {self->relations, NULL};
-
-    QBAFARelationsObject *copy = QBAFARelations_new(NULL, NULL, NULL);
-    if (copy == NULL)
+    PyObject *kwds = NULL;
+    PyObject *args = PyTuple_Pack(1, self->relations);
+    if (args == NULL)
         return NULL;
-    if (QBAFARelations_init(copy, args, kwds) < 0) {
-        Py_DECREF(copy);
+
+    QBAFARelationsObject *copy = QBAFARelations_new(Py_TYPE(self), args, kwds);
+    if (copy == NULL) {
+        Py_DECREF(args);
         return NULL;
     }
+    if (QBAFARelations_init(copy, args, kwds) < 0) {
+        Py_DECREF(copy);
+        Py_DECREF(args);
+        return NULL;
+    }
+    Py_DECREF(args);
     return copy;
+}
+
+/**
+ * @brief Return 1 if their relations are disjoint, 0 if they are not, and -1 if an error is encountered.
+ * 
+ * @param self a QBAFARelations instance (not NULL)
+ * @param other a different QBAFARelations instance (not NULL)
+ * @return int 1 if they are disjoint, 0 if they are not, and -1 if an error is encountered
+ */
+int
+_QBAFARelations_isDisjoint(QBAFARelationsObject *self, QBAFARelationsObject *other) {
+    return PySet_IsDisjoint(self->relations, other->relations);
+}
+
+/**
+ * @brief Return True if their relations are disjoint, False if they are not, and NULL if an error is encountered.
+ * 
+ * @param self a QBAFARelations instance (not NULL)
+ * @param other a different QBAFARelations instance (not NULL)
+ * @return PyObject* Py_True if they are disjoint, Py_False if they are not, and NULL if an error is encountered
+ */
+static PyObject *
+QBAFARelations_isDisjoint(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"other", NULL};
+    PyObject * other;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
+                                     &other))
+        return NULL;
+
+    if (!PyObject_TypeCheck(other, Py_TYPE(self))) {
+        PyErr_SetString(PyExc_TypeError, "Disjoint operation of 'QBAFARelations' with instance of a different type not supported");
+        return NULL;
+    }
+
+    int disjoint = _QBAFARelations_isDisjoint(self, (QBAFARelationsObject*) other);
+    if (disjoint < 0)
+        return NULL;
+    
+    if (disjoint)
+        Py_RETURN_TRUE;
+    Py_RETURN_FALSE;
+}
+
+/**
+ * @brief Return the comparison result between two QBAFARelations, NULL if an error has occurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param other different instance of QBAFARelations
+ * @param op the operation type (Py_LT, Py_LE ,Py_EQ ,Py_NE ,Py_GT or Py_GE)
+ * @return PyObject* new PyBool, NULL if an error occurred
+ */
+static PyObject *
+QBAFARelations_richcompare(QBAFARelationsObject *self, PyObject *other, int op)
+{
+    if (!PyObject_TypeCheck(other, Py_TYPE(self))) {
+        PyErr_SetString(PyExc_TypeError, "cannot compare instance of 'QBAFARelations' with instance of a different type");
+        return NULL;
+    }
+
+    return PyObject_RichCompare(self->relations, ((QBAFARelationsObject *)other)->relations, op);
 }
 
 /**
@@ -621,23 +743,29 @@ QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
  * 
  */
 static PyMethodDef QBAFARelations_methods[] = {
-    {"patients", (PyCFunction) QBAFARelations_patients, METH_VARARGS | METH_KEYWORDS,
+    {"patients", (PyCFunctionWithKeywords) QBAFARelations_patients, METH_VARARGS | METH_KEYWORDS,
     "Return the patients that undergo the effect of a certain action (e.g. attack, support) initiated by the agent."
     },
-    {"agents", (PyCFunction) QBAFARelations_agents, METH_VARARGS | METH_KEYWORDS,
+    {"agents", (PyCFunctionWithKeywords) QBAFARelations_agents, METH_VARARGS | METH_KEYWORDS,
     "Return the agents that initiate a certain action (e.g. attack, support) which effects are undergone by the patient."
     },
-    {"contains", (PyCFunction) QBAFARelations_contains, METH_VARARGS | METH_KEYWORDS,
+    {"contains", (PyCFunctionWithKeywords) QBAFARelations_contains, METH_VARARGS | METH_KEYWORDS,
     "Return whether or not exists the relation (agent, patient) in this instance."
     },
-    {"add", (PyCFunction) QBAFARelations_add, METH_VARARGS | METH_KEYWORDS,
+    {"add", (PyCFunctionWithKeywords) QBAFARelations_add, METH_VARARGS | METH_KEYWORDS,
     "Add the relation (agent, patient) to the instance."
     },
-    {"remove", (PyCFunction) QBAFARelations_remove, METH_VARARGS | METH_KEYWORDS,
+    {"remove", (PyCFunctionWithKeywords) QBAFARelations_remove, METH_VARARGS | METH_KEYWORDS, 
     "Remove the relation (agent, patient) from the instance."
+    },
+    {"__copy__", (PyCFunction) QBAFARelations_copy, METH_NOARGS,
+    "Return a copy of the instance."
     },
     {"copy", (PyCFunction) QBAFARelations_copy, METH_NOARGS,
     "Return a copy of the instance."
+    },
+    {"isdisjoint", (PyCFunctionWithKeywords) QBAFARelations_isDisjoint, METH_VARARGS | METH_KEYWORDS, 
+    "Return True if their relations are disjoint, False if they are not."
     },
     {NULL}  /* Sentinel */
 };
@@ -668,6 +796,7 @@ static PyTypeObject QBAFARelationsType = {
     .tp_getset = QBAFARelations_getsetters,
     .tp_str = (reprfunc) QBAFARelations___str__,                // __str__
     .tp_repr = (reprfunc) QBAFARelations___str__,               // __repr__
+    .tp_richcompare = (richcmpfunc) QBAFARelations_richcompare, // __lt__, __le__, __eq__, __ne__, __gt__, __ge__
     .tp_as_sequence = &QBAFARelations_sequencemethods,          // __len__, __contains__
 };
 
@@ -678,4 +807,186 @@ static PyTypeObject QBAFARelationsType = {
  */
 PyTypeObject *get_QBAFARelationsType() {
     return &QBAFARelationsType;
+}
+
+/**
+ * @brief Create a new object QBAFARelations. It cannot be modified from python.
+ * 
+ * @param relations a set/list of tuples (Agent: QBAFArgument, Patient QBAFArgument)
+ * @return PyObject* New reference
+ */
+PyObject *
+QBAFARelations_Create(PyObject *relations)
+{
+    if (relations == NULL) {
+        relations = PyList_New(0);
+    } else {
+        Py_INCREF(relations);
+    }
+    PyObject *kwds = NULL;
+    PyObject *args = PyTuple_Pack(1, relations);
+    Py_DECREF(relations);
+    if (args == NULL)
+        return NULL;
+
+    QBAFARelationsObject *new = QBAFARelations_new(&QBAFARelationsType, args, kwds);
+    if (new == NULL) {
+        Py_DECREF(args);
+        return NULL;
+    }
+
+    if (QBAFARelations_init(new, args, kwds) < 0) {
+        Py_DECREF(new);
+        Py_DECREF(args);
+        return NULL;
+    }
+
+    new->modifiable = 0;    // This instance cannot be modified from python
+
+    Py_DECREF(args);
+    return (PyObject*) new;
+}
+
+/**
+ * @brief Return True if all the arguments of self are contained in arguments, if not False,
+ *        and -1 if there is an error.
+ * 
+ * @param self an instance of QBAFARelations
+ * @param arguments a set of QBAFArgument
+ * @return int 1 if contained, 0 if not contained, and -1 if an error is encountered
+ */
+int
+QBAFARelations_ArgsContained(QBAFARelationsObject *self, PyObject *arguments) {
+    PyObject *iterator = PyObject_GetIter(self->relations);
+    PyObject *item;
+    PyObject *agent, *patient;
+    int contains;
+
+    if (iterator == NULL) {
+        /* propagate error */
+        return -1;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        agent = PyTuple_GetItem(item, 0);       // Returns borrowed reference. NULL if the index is wrong.
+        patient = PyTuple_GetItem(item, 1);     // Returns borrowed reference. NULL if the index is wrong.
+        Py_DECREF(item);
+
+        if (agent == NULL || patient == NULL) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+
+        contains = PySet_Contains(arguments, agent);
+        if (contains < 0) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+        if (!contains) {
+            Py_DECREF(iterator);
+            return 0;   // return False
+        }
+
+        contains = PySet_Contains(arguments, patient);
+        if (contains < 0) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+        if (!contains) {
+            Py_DECREF(iterator);
+            return 0;   // return False
+        }
+    }
+
+    Py_DECREF(iterator);
+
+    return 1;   // return True
+}
+
+/**
+ * @brief Return True if if the argument is contained, False if not contained, and -1 if an error is encountered.
+ * 
+ * @param self an instance of QBAFARelations
+ * @param argument an instance of QBAFArgument
+ * @return int 1 if contained, 0 if not contained, and -1 if an error is encountered
+ */
+int
+QBAFARelations_contains_argument(QBAFARelationsObject *self, PyObject *argument) {
+    PyObject *tuple, *list;
+
+    tuple = PyTuple_Pack(1, argument); // New reference
+
+    list = QBAFARelations_agents(self, tuple, NULL);
+    if (list == NULL) {
+        Py_DECREF(tuple);
+        return -1;
+    }
+    if (PyList_GET_SIZE(list) > 0) {
+        Py_DECREF(tuple);
+        return 1;   // return True
+    }
+
+    list = QBAFARelations_patients(self, tuple, NULL);
+    if (list == NULL) {
+        Py_DECREF(tuple);
+        return -1;
+    }
+
+    if (PyList_GET_SIZE(list) > 0) {
+        Py_DECREF(tuple);
+        return 1;   // return True
+    }
+
+    Py_DECREF(tuple);
+
+    return 0;   // return False
+}
+
+/**
+ * @brief Return the patients that undergo the effect of a certain action (e.g. attack, support)
+ * initiated by the agent. Return NULL if an error has ocurred.
+ * 
+ * @param self instance of QBAFARelations
+ * @param agent instance of QBAFArgument
+ * @return PyObject* borrowed PySet of QBAFArgument, NULL if an error occurred
+ */
+PyObject *
+_QBAFARelations_patients_set(QBAFARelationsObject *self, PyObject *agent) {
+    int contains = PyDict_Contains(self->agent_patients, agent);
+    if (contains < 0)
+        return NULL;
+    if (!contains) {
+        PyObject *set = PySet_New(NULL);
+        Py_INCREF(agent);
+        if (PyDict_SetItem(self->agent_patients, agent, set) < 0) {
+            Py_DECREF(agent); Py_XDECREF(set);
+            return NULL;
+        }
+        Py_XDECREF(set);
+    }
+
+    return PyDict_GetItem(self->agent_patients, agent);
+}
+
+/**
+ * @brief Return True if the Argument agent has the same patients in two Relations,
+ * False if they are not the same, and -1 if an error has been encountered.
+ * 
+ * @param self a QBAFARelations
+ * @param other another QBAFARelations
+ * @param agent a QBAFArgument
+ * @return int 1 if equal, 0 if not equal, -1 if an error occurrred
+ */
+int
+_QBAFARelations_equal_patients(QBAFARelationsObject *self, QBAFARelationsObject *other, PyObject *agent)
+{
+    PyObject *self_patients = _QBAFARelations_patients_set(self, agent); // Borrowed reference
+    if (self_patients == NULL) {
+        return -1;
+    }
+    PyObject *other_patients = _QBAFARelations_patients_set(other, agent);  // Borrowed reference
+    if (other_patients == NULL) {
+        return -1;
+    }
+    return PyObject_RichCompareBool(self_patients, other_patients, Py_EQ);
 }

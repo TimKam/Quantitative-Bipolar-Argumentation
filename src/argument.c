@@ -130,10 +130,6 @@ QBAFArgument_init(QBAFArgumentObject *self, PyObject *args, PyObject *kwds)
  * 
  */
 static PyMemberDef QBAFArgument_members[] = {
-//    {"initial_weight", T_DOUBLE, offsetof(QBAFArgumentObject, initial_weight), 0, // TOREMOVE
-//     "initial weight"},
-//    {"final_weight", T_DOUBLE, offsetof(QBAFArgumentObject, final_weight), 0,     // TOREMOVE
-//     "final weight"},
     {NULL}  /* Sentinel */
 };
 
@@ -247,7 +243,20 @@ QBAFArgument_hashfunc(QBAFArgumentObject *self)
 static PyObject *
 QBAFArgument_str(QBAFArgumentObject *self, PyObject *Py_UNUSED(ignored))
 {
-    return PyUnicode_FromFormat("QBAFArgument(%S)", self->name);
+    return PyUnicode_FromFormat("Arg('%S')", self->name);
+}
+
+/**
+ * @brief Return the string format of a QBAFArgument object
+ * 
+ * @param self the QBAFArgument object
+ * @param Py_UNUSED 
+ * @return PyObject* the string representing the object
+ */
+static PyObject *
+QBAFArgument_repr(QBAFArgumentObject *self, PyObject *Py_UNUSED(ignored))
+{
+    return PyUnicode_FromFormat("'%S'", self->name);
 }
 
 /**
@@ -255,9 +264,6 @@ QBAFArgument_str(QBAFArgumentObject *self, PyObject *Py_UNUSED(ignored))
  * 
  */
 static PyMethodDef QBAFArgument_methods[] = {
-//    {"str", (PyCFunction) QBAFArgument_str, METH_NOARGS,              // TOREMOVE
-//     "Return the string format of the object: QBAFArgument(<name>)"
-//    },
     {NULL}  /* Sentinel */
 };
 
@@ -281,7 +287,7 @@ static PyTypeObject QBAFArgumentType = {
     .tp_methods = QBAFArgument_methods,
     .tp_getset = QBAFArgument_getsetters,
     .tp_str = (reprfunc) QBAFArgument_str,                      // __str__
-    .tp_repr = (reprfunc) QBAFArgument_str,                     // __repr__
+    .tp_repr = (reprfunc) QBAFArgument_repr,                    // __repr__
     .tp_richcompare = (richcmpfunc) QBAFArgument_richcompare,   // __lt__, __le__, __eq__, __ne__, __gt__, __ge__
     .tp_hash = (hashfunc) QBAFArgument_hashfunc,                // __hash__
 };
