@@ -11,6 +11,7 @@ def main():
 
     setup(
         name='qbaf-lib',
+        python_requires='>=3.8',
         version='0.1',
         ext_modules=[Extension('qbaf', 
                         include_dirs = [include_folder],
