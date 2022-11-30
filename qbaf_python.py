@@ -583,20 +583,18 @@ class QBAFramework:
 
         args = (self.__arguments.union(set)).difference(set.difference(other.__arguments))
         
-        att = QBAFARelations([])
-        for arg in args.difference(set):
-            for attacked in self.__attack_relations.patients(arg):
-                att.add(arg, attacked)
+        att = self.__attack_relations.copy()
         for arg in set:
-            for attacked in other.__attack_relations.patients(arg):
+            for attacked in self.__attack_relations.patients(arg).intersection(other):
+                att.remove(arg, attacked)
+            for attacked in other.__attack_relations.patients(arg).intersection(args):
                 att.add(arg, attacked)
         
-        supp = QBAFARelations([])
-        for arg in args.difference(set):
-            for supported in self.__support_relations.patients(arg):
-                supp.add(arg, supported)
+        supp = self.__support_relations.copy()
         for arg in set:
-            for supported in other.__support_relations.patients(arg):
+            for supported in self.__support_relations.patients(arg).intersection(other):
+                supp.remove(arg, supported)
+            for supported in other.__support_relations.patients(arg).intersection(args):
                 supp.add(arg, supported)
         
         initial_weights = dict()
