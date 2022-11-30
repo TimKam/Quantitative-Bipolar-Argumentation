@@ -49,17 +49,17 @@ static const char *STR_DFQUAD_MODEL = "DFQuAD_model";
 typedef struct {
     PyObject_HEAD
     PyObject *arguments;            /* a set of QBAFArgument */
-    PyObject *initial_weights;      /* a dictionary (argument: QBAFArgument, initial_weight: double) */
+    PyObject *initial_strengths;      /* a dictionary (argument: QBAFArgument, initial_strength: double) */
     PyObject *attack_relations;     /* an instance of QBAFARelations */
     PyObject *support_relations;    /* an instance of QBAFARelations */
-    PyObject *final_weights;        /* a dictionary (argument: QBAFArgument, final_weight: double) */
-    int       modified;             /* 0 if the framework has not been modified after calculating the final weights. Otherwise, 1 */
+    PyObject *final_strengths;        /* a dictionary (argument: QBAFArgument, final_strength: double) */
+    int       modified;             /* 0 if the framework has not been modified after calculating the final strengths. Otherwise, 1 */
     int       disjoint_relations;   /* 1 if the attack/support relations must be disjoint, 0 if they do not have to */
     char     *semantics;            /* name of the semantic model */
-    double  (*influence_function)(double, double);   /* influence function that is going to be used to calcualte the final weights */
-    double  (*aggregation_function)(double, double); /* aggregation function that is going to be used to calcualte the final weights */
-    double    min_weight;           /* min value for the initial weights */
-    double    max_weight;           /* max value for the initial weights */
+    double  (*influence_function)(double, double);   /* influence function that is going to be used to calcualte the final strengths */
+    double  (*aggregation_function)(double, double); /* aggregation function that is going to be used to calcualte the final strengths */
+    double    min_strength;           /* min value for the initial strengths */
+    double    max_strength;           /* max value for the initial strengths */
     PyObject *influence_function_callable;   /* influence function given from python */
     PyObject *aggregation_function_callable; /* aggregation function given from python */
 } QBAFrameworkObject;
@@ -76,10 +76,10 @@ static int
 QBAFramework_traverse(QBAFrameworkObject *self, visitproc visit, void *arg)
 {
     Py_VISIT(self->arguments);
-    Py_VISIT(self->initial_weights);
+    Py_VISIT(self->initial_strengths);
     Py_VISIT(self->attack_relations);
     Py_VISIT(self->support_relations);
-    Py_VISIT(self->final_weights);
+    Py_VISIT(self->final_strengths);
     Py_VISIT(self->influence_function_callable);
     Py_VISIT(self->aggregation_function_callable);
     return 0;
@@ -95,10 +95,10 @@ static int
 QBAFramework_clear(QBAFrameworkObject *self)
 {
     Py_CLEAR(self->arguments);
-    Py_CLEAR(self->initial_weights);
+    Py_CLEAR(self->initial_strengths);
     Py_CLEAR(self->attack_relations);
     Py_CLEAR(self->support_relations);
-    Py_CLEAR(self->final_weights);
+    Py_CLEAR(self->final_strengths);
     Py_CLEAR(self->influence_function_callable);
     Py_CLEAR(self->aggregation_function_callable);
     return 0;
@@ -134,20 +134,20 @@ QBAFramework_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         Py_INCREF(Py_None);
         self->arguments = Py_None;
         Py_INCREF(Py_None);
-        self->initial_weights = Py_None;
+        self->initial_strengths = Py_None;
         Py_INCREF(Py_None);
         self->attack_relations = Py_None;
         Py_INCREF(Py_None);
         self->support_relations = Py_None;
         Py_INCREF(Py_None);
-        self->final_weights = Py_None;
+        self->final_strengths = Py_None;
         self->modified = TRUE;
         self->disjoint_relations = TRUE;
         self->semantics = STR_BASIC_MODEL;
         self->influence_function = simple_influence;
         self->aggregation_function = sum;
-        self->min_weight = -DBL_MAX;
-        self->max_weight = DBL_MAX;
+        self->min_strength = -DBL_MAX;
+        self->max_strength = DBL_MAX;
         self->influence_function_callable = NULL;
         self->aggregation_function = NULL;
     }
@@ -236,7 +236,7 @@ PyListFloat_FromPyListNumeric(PyObject *list) {
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
 
         if (!PyFloat_Check(item) && !PyLong_Check(item)) {
-            PyErr_SetString(PyExc_TypeError, "all items of initial_weights must be of a numeric type (int, float)");
+            PyErr_SetString(PyExc_TypeError, "all items of initial_strengths must be of a numeric type (int, float)");
             Py_DECREF(item);
             Py_DECREF(iterator);
             Py_DECREF(new);
@@ -245,15 +245,15 @@ PyListFloat_FromPyListNumeric(PyObject *list) {
 
         if (PyLong_Check(item)) {
             // Transform the PyLong to PyFloat
-            double weight = PyLong_AsDouble(item);
+            double strength = PyLong_AsDouble(item);
             Py_DECREF(item);
-            if (weight == -1.0 && PyErr_Occurred()) {
+            if (strength == -1.0 && PyErr_Occurred()) {
                 Py_DECREF(iterator);
                 Py_DECREF(new);
                 return NULL;
             }
 
-            item = PyFloat_FromDouble(weight);  // New reference
+            item = PyFloat_FromDouble(strength);  // New reference
             if (item == NULL) {
                 PyErr_SetString(PyExc_ValueError, "float could not be created");
                 Py_DECREF(iterator);
@@ -282,14 +282,14 @@ PyListFloat_FromPyListNumeric(PyObject *list) {
  * @return int 1 if within range, 0 if not, -1 if an error occurred
  */
 static inline int
-weight_in_minmax(PyObject *pyfloat, double min, double max)
+strength_in_minmax(PyObject *pyfloat, double min, double max)
 {
-    double weight = PyFloat_AsDouble(pyfloat);
-    if (weight == -1.0 && PyErr_Occurred()) {
+    double strength = PyFloat_AsDouble(pyfloat);
+    if (strength == -1.0 && PyErr_Occurred()) {
         return -1;
     }
 
-    if (weight < min || weight > max) {
+    if (strength < min || strength > max) {
         return FALSE;
     }
 
@@ -297,39 +297,39 @@ weight_in_minmax(PyObject *pyfloat, double min, double max)
 }
 
 static inline int
-_QBAFramework_initial_weights_in_minmax(QBAFrameworkObject *self)
+_QBAFramework_initial_strengths_in_minmax(QBAFrameworkObject *self)
 {
-    PyObject *initial_weight_list = PyDict_Values(self->initial_weights);
-    if (initial_weight_list == NULL) {
+    PyObject *initial_strength_list = PyDict_Values(self->initial_strengths);
+    if (initial_strength_list == NULL) {
         return -1;
     }
 
-    PyObject *iterator = PyObject_GetIter(initial_weight_list);
-    PyObject *initial_weight;
+    PyObject *iterator = PyObject_GetIter(initial_strength_list);
+    PyObject *initial_strength;
     int in_minmax;
 
     if (iterator == NULL) {
-        Py_DECREF(initial_weight_list);
+        Py_DECREF(initial_strength_list);
         return -1;
     }
 
-    while ((initial_weight = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-        in_minmax = weight_in_minmax(initial_weight, self->min_weight, self->max_weight);
-        Py_DECREF(initial_weight);
+    while ((initial_strength = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        in_minmax = strength_in_minmax(initial_strength, self->min_strength, self->max_strength);
+        Py_DECREF(initial_strength);
 
         if (in_minmax < 0) {
-            Py_DECREF(iterator); Py_DECREF(initial_weight_list);
+            Py_DECREF(iterator); Py_DECREF(initial_strength_list);
             return -1;
         }
 
         if (!in_minmax) {
-            Py_DECREF(iterator); Py_DECREF(initial_weight_list);
+            Py_DECREF(iterator); Py_DECREF(initial_strength_list);
             return FALSE;
         }
     }
 
     Py_DECREF(iterator);
-    Py_DECREF(initial_weight_list);
+    Py_DECREF(initial_strength_list);
 
     return TRUE;
 }
@@ -345,19 +345,19 @@ _QBAFramework_initial_weights_in_minmax(QBAFrameworkObject *self)
 static int
 QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 {
-    static char *kwlist[] = {"arguments", "initial_weights", "attack_relations", "support_relations",
+    static char *kwlist[] = {"arguments", "initial_strengths", "attack_relations", "support_relations",
                             "disjoint_relations", "semantics", "aggregation_function", "influence_function",
-                            "min_weight", "max_weight", NULL};
-    PyObject *arguments, *initial_weights, *attack_relations, *support_relations, *tmp;
+                            "min_strength", "max_strength", NULL};
+    PyObject *arguments, *initial_strengths, *attack_relations, *support_relations, *tmp;
     int disjoint_relations = TRUE;
     char *semantics = NULL; // (e.g. "basic_model") If None it will be NULL, otherwise it is a pointer to char that is only accesible in this function.
     PyObject *aggregation_function = NULL, *influence_function = NULL;
-    double min_weight = -DBL_MAX, max_weight = DBL_MAX;
+    double min_strength = -DBL_MAX, max_strength = DBL_MAX;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOOO|pzOOdd", kwlist,
-                                     &arguments, &initial_weights, &attack_relations, &support_relations,
+                                     &arguments, &initial_strengths, &attack_relations, &support_relations,
                                      &disjoint_relations, &semantics, &aggregation_function, &influence_function,
-                                     &min_weight, &max_weight))
+                                     &min_strength, &max_strength))
         return -1;
 
     if (!PyList_Check(arguments)) {
@@ -365,13 +365,13 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
-    if (!PyList_Check(initial_weights)) {
-        PyErr_SetString(PyExc_TypeError, "initial_weights must be of type list");
+    if (!PyList_Check(initial_strengths)) {
+        PyErr_SetString(PyExc_TypeError, "initial_strengths must be of type list");
         return -1;
     }
 
-    if (PyList_GET_SIZE(arguments) != PyList_GET_SIZE(initial_weights)) {
-        PyErr_SetString(PyExc_ValueError, "the lengths of arguments and initial_weights must be equal");
+    if (PyList_GET_SIZE(arguments) != PyList_GET_SIZE(initial_strengths)) {
+        PyErr_SetString(PyExc_ValueError, "the lengths of arguments and initial_strengths must be equal");
         return -1;
     }
     
@@ -385,19 +385,19 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
     }
     Py_DECREF(tmp);
 
-    // Check that all init weights are numerical values
-    initial_weights = PyListFloat_FromPyListNumeric(initial_weights);   // New reference
-    if (initial_weights == NULL) {
+    // Check that all init strengths are numerical values
+    initial_strengths = PyListFloat_FromPyListNumeric(initial_strengths);   // New reference
+    if (initial_strengths == NULL) {
         return -1;
     }
 
-    // Initialize initial_weights
-    tmp = self->initial_weights;
-    self->initial_weights = PyDict_FromLists(arguments, initial_weights);
-    Py_DECREF(initial_weights);
-    if (self->initial_weights == NULL) {
+    // Initialize initial_strengths
+    tmp = self->initial_strengths;
+    self->initial_strengths = PyDict_FromLists(arguments, initial_strengths);
+    Py_DECREF(initial_strengths);
+    if (self->initial_strengths == NULL) {
         /* propagate error*/
-        self->initial_weights = tmp;
+        self->initial_strengths = tmp;
         return -1;
     }
     Py_DECREF(tmp);
@@ -461,9 +461,9 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
         semantics = STR_BASIC_MODEL;
     }
 
-    if (semantics != NULL && (min_weight != -DBL_MAX || max_weight != DBL_MAX)) {
+    if (semantics != NULL && (min_strength != -DBL_MAX || max_strength != DBL_MAX)) {
         PyErr_SetString(PyExc_ValueError,
-                        "cannot modify min_weight or max_weight without implementing your own aggregation function and influence function");
+                        "cannot modify min_strength or max_strength without implementing your own aggregation function and influence function");
         return -1;
     }
 
@@ -493,8 +493,8 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
         Py_INCREF(aggregation_function);
         self->aggregation_function_callable = aggregation_function;
 
-        self->min_weight = min_weight;
-        self->max_weight = max_weight;
+        self->min_strength = min_strength;
+        self->max_strength = max_strength;
 
     }
 
@@ -505,43 +505,43 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
             self->semantics = STR_BASIC_MODEL;
             self->aggregation_function = sum;
             self->influence_function = simple_influence;
-            self->min_weight = -DBL_MAX;
-            self->max_weight = DBL_MAX;
+            self->min_strength = -DBL_MAX;
+            self->max_strength = DBL_MAX;
         }
         else if (streq(semantics, STR_QUADRATICENERGY_MODEL)) {
             self->semantics = STR_QUADRATICENERGY_MODEL;
             self->aggregation_function = sum;
             self->influence_function = max_2_1; // 2-Max(1)
-            self->min_weight = -DBL_MAX;
-            self->max_weight = DBL_MAX;
+            self->min_strength = -DBL_MAX;
+            self->max_strength = DBL_MAX;
         }
         else if (streq(semantics, STR_SQUAREDDFQUAD_MODEL)) {
             self->semantics = STR_SQUAREDDFQUAD_MODEL;
             self->aggregation_function = product;
             self->influence_function = max_1_1; // 1-Max(1)
-            self->min_weight = -DBL_MAX;
-            self->max_weight = DBL_MAX;
+            self->min_strength = -DBL_MAX;
+            self->max_strength = DBL_MAX;
         }
         else if (streq(semantics, STR_EULERBASEDTOP_MODEL)) {
             self->semantics = STR_EULERBASEDTOP_MODEL;
             self->aggregation_function = top;
             self->influence_function = euler_based;
-            self->min_weight = -DBL_MAX;
-            self->max_weight = DBL_MAX;
+            self->min_strength = -DBL_MAX;
+            self->max_strength = DBL_MAX;
         }
         else if (streq(semantics, STR_EULERBASED_MODEL)) {
             self->semantics = STR_EULERBASED_MODEL;
             self->aggregation_function = sum;
             self->influence_function = euler_based;
-            self->min_weight = -DBL_MAX;
-            self->max_weight = DBL_MAX;
+            self->min_strength = -DBL_MAX;
+            self->max_strength = DBL_MAX;
         }
         else if (streq(semantics, STR_DFQUAD_MODEL)) {
             self->semantics = STR_DFQUAD_MODEL;
             self->aggregation_function = product;
             self->influence_function = linear_1; // Linear(1)
-            self->min_weight = -1;
-            self->max_weight = 1;
+            self->min_strength = -1;
+            self->max_strength = 1;
         }
         else {
             PyErr_SetString(PyExc_ValueError, "incorrect value of semantics");
@@ -550,14 +550,14 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 
     }
 
-    // Check all the initial weights are in range (min_weight, max_weight)
-    int initial_weights_in_minmax = _QBAFramework_initial_weights_in_minmax(self);
-    if (initial_weights_in_minmax < 0) {
+    // Check all the initial strengths are in range (min_strength, max_strength)
+    int initial_strengths_in_minmax = _QBAFramework_initial_strengths_in_minmax(self);
+    if (initial_strengths_in_minmax < 0) {
         return -1;
     }
-    if (!initial_weights_in_minmax) {
+    if (!initial_strengths_in_minmax) {
         char msg[100];
-        sprintf(msg, "every initial_weight must be within range (%.2f, %.2f)", self->min_weight, self->max_weight);
+        sprintf(msg, "every initial_strength must be within range (%.2f, %.2f)", self->min_strength, self->max_strength);
         PyErr_SetString(PyExc_ValueError, msg);
         return -1;
     }
@@ -566,7 +566,7 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 }
 
 /**
- * @brief Return the result of aggregating the weights w1 and w2 in the Framework self,
+ * @brief Return the result of aggregating the strengths w1 and w2 in the Framework self,
  * -1.0 in an error has occurred.
  * 
  * @param self a QBAFramework
@@ -598,7 +598,7 @@ double _QBAFramework_aggregation_function(QBAFrameworkObject *self, double w1, d
  * -1.0 in an error has occurred.
  * 
  * @param self a QBAFramework
- * @param w the initial weight
+ * @param w the initial strength
  * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result, -1.0 if an error occurred
  */
@@ -643,16 +643,16 @@ QBAFramework_getarguments(QBAFrameworkObject *self, void *closure)
 }
 
 /**
- * @brief Getter of the attribute initial_weights.
+ * @brief Getter of the attribute initial_strengths.
  * 
  * @param self the QBAFramework object
  * @param closure 
- * @return PyObject* copy of a dict of (argument: QBAFArgument, initial_weight: float)
+ * @return PyObject* copy of a dict of (argument: QBAFArgument, initial_strength: float)
  */
 static PyObject *
-QBAFramework_getinitial_weights(QBAFrameworkObject *self, void *closure)
+QBAFramework_getinitial_strengths(QBAFrameworkObject *self, void *closure)
 {
-    return PyDict_Copy(self->initial_weights);
+    return PyDict_Copy(self->initial_strengths);
 }
 
 /**
@@ -714,29 +714,29 @@ QBAFramework_getsemantics(QBAFrameworkObject *self, void *closure)
 }
 
 /**
- * @brief Getter of the attribute min_weight.
+ * @brief Getter of the attribute min_strength.
  * 
  * @param self the QBAFramework object
  * @param closure 
- * @return PyObject* new PyFloat with the min_weight
+ * @return PyObject* new PyFloat with the min_strength
  */
 static PyObject *
-QBAFramework_getmin_weight(QBAFrameworkObject *self, void *closure)
+QBAFramework_getmin_strength(QBAFrameworkObject *self, void *closure)
 {
-    PyFloat_FromDouble(self->min_weight);
+    PyFloat_FromDouble(self->min_strength);
 }
 
 /**
- * @brief Getter of the attribute max_weight.
+ * @brief Getter of the attribute max_strength.
  * 
  * @param self the QBAFramework object
  * @param closure 
- * @return PyObject* new PyFloat with the max_weight
+ * @return PyObject* new PyFloat with the max_strength
  */
 static PyObject *
-QBAFramework_getmax_weight(QBAFrameworkObject *self, void *closure)
+QBAFramework_getmax_strength(QBAFrameworkObject *self, void *closure)
 {
-    PyFloat_FromDouble(self->max_weight);
+    PyFloat_FromDouble(self->max_strength);
 }
 
 /**
@@ -780,66 +780,66 @@ QBAFramework_setdisjoint_relations(QBAFrameworkObject *self, PyObject *value, vo
 }
 
 /**
- * @brief Modify the initial weight of the Argument argument.
+ * @brief Modify the initial strength of the Argument argument.
  * 
  * @param self an instance of QBAFramework
- * @param args the argument values (argument: QBAFArgument, initial_weight: float)
+ * @param args the argument values (argument: QBAFArgument, initial_strength: float)
  * @param kwds the argument names
  * @return PyObject* new Py_None, NULL in case of error
  */
 static PyObject *
-QBAFramework_modify_initial_weights(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+QBAFramework_modify_initial_strengths(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 {
-    static char *kwlist[] = {"argument", "initial_weight", NULL};
-    PyObject *argument, *initial_weight;
+    static char *kwlist[] = {"argument", "initial_strength", NULL};
+    PyObject *argument, *initial_strength;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
-                                     &argument, &initial_weight))
+                                     &argument, &initial_strength))
         return NULL;
 
-    if (!PyFloat_Check(initial_weight) && !PyLong_Check(initial_weight)) {
-        PyErr_SetString(PyExc_TypeError, "initial_weight must be of a numeric type");
+    if (!PyFloat_Check(initial_strength) && !PyLong_Check(initial_strength)) {
+        PyErr_SetString(PyExc_TypeError, "initial_strength must be of a numeric type");
         return NULL;
     }
 
-    if (PyLong_Check(initial_weight)) {
+    if (PyLong_Check(initial_strength)) {
         // Transform the PyLong to PyFloat
-        double weight = PyLong_AsDouble(initial_weight);
-        if (weight == -1.0 && PyErr_Occurred()) {
+        double strength = PyLong_AsDouble(initial_strength);
+        if (strength == -1.0 && PyErr_Occurred()) {
             return NULL;
         }
 
-        initial_weight = PyFloat_FromDouble(weight);    // New reference
-        if (initial_weight == NULL) {
-            PyErr_SetString(PyExc_ValueError, "initial_weight could not be transformed to float");
+        initial_strength = PyFloat_FromDouble(strength);    // New reference
+        if (initial_strength == NULL) {
+            PyErr_SetString(PyExc_ValueError, "initial_strength could not be transformed to float");
             return NULL;
         }
     } else {  
-        Py_INCREF(initial_weight);
+        Py_INCREF(initial_strength);
     }
 
-    // Check initial_weight is within range
-    int in_minmax = weight_in_minmax(initial_weight, self->min_weight, self->max_weight);
+    // Check initial_strength is within range
+    int in_minmax = strength_in_minmax(initial_strength, self->min_strength, self->max_strength);
     if (in_minmax < 0) {
-        Py_DECREF(initial_weight);
+        Py_DECREF(initial_strength);
         return NULL;
     }
     if (!in_minmax) {
         char msg[100];
-        sprintf(msg, "initial_weight must be within range (%.2f, %.2f)", self->min_weight, self->max_weight);
+        sprintf(msg, "initial_strength must be within range (%.2f, %.2f)", self->min_strength, self->max_strength);
         PyErr_SetString(PyExc_ValueError, msg);
-        Py_DECREF(initial_weight);
+        Py_DECREF(initial_strength);
         return NULL;
     }
 
     Py_INCREF(argument);
-    if (PyDict_SetItem(self->initial_weights, argument, initial_weight) < 0) {
+    if (PyDict_SetItem(self->initial_strengths, argument, initial_strength) < 0) {
         Py_DECREF(argument);
-        Py_DECREF(initial_weight);
+        Py_DECREF(initial_strength);
         return NULL;
     }
 
-    Py_DECREF(initial_weight);
+    Py_DECREF(initial_strength);
 
     self->modified = TRUE;
 
@@ -847,7 +847,7 @@ QBAFramework_modify_initial_weights(QBAFrameworkObject *self, PyObject *args, Py
 }
 
 /**
- * @brief Return the initial weight of the Argument argument, NULL in case of error.
+ * @brief Return the initial strength of the Argument argument, NULL in case of error.
  * 
  * @param self an instance of QBAFramework
  * @param args the argument values (argument: QBAFArgument)
@@ -855,7 +855,7 @@ QBAFramework_modify_initial_weights(QBAFrameworkObject *self, PyObject *args, Py
  * @return PyObject* new PyFloat
  */
 static PyObject *
-QBAFramework_initial_weight(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+QBAFramework_initial_strength(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"argument", NULL};
     PyObject *argument;
@@ -864,7 +864,7 @@ QBAFramework_initial_weight(QBAFrameworkObject *self, PyObject *args, PyObject *
                                      &argument))
         return NULL;
 
-    int contains = PyDict_Contains(self->initial_weights, argument);
+    int contains = PyDict_Contains(self->initial_strengths, argument);
     if (contains < 0) {
         return NULL;
     }
@@ -874,94 +874,94 @@ QBAFramework_initial_weight(QBAFrameworkObject *self, PyObject *args, PyObject *
         return NULL;
     }
 
-    PyObject *initial_weight = PyDict_GetItem(self->initial_weights, argument);
-    Py_INCREF(initial_weight);
-    return initial_weight;
+    PyObject *initial_strength = PyDict_GetItem(self->initial_strengths, argument);
+    Py_INCREF(initial_strength);
+    return initial_strength;
 }
 
 /**
  * @brief Add an Argument to the Framework. If it exists already it does nothing.
  * 
  * @param self an instance of QBAFramework
- * @param args the argument values (argument: QBAFArgument, initial_weight: float)
+ * @param args the argument values (argument: QBAFArgument, initial_strength: float)
  * @param kwds the argument names
  * @return PyObject* new Py_None, NULL in case of error
  */
 static PyObject *
 QBAFramework_add_argument(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 {
-    static char *kwlist[] = {"argument", "initial_weight", NULL};
-    PyObject *argument, *initial_weight = NULL;
+    static char *kwlist[] = {"argument", "initial_strength", NULL};
+    PyObject *argument, *initial_strength = NULL;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|O", kwlist,
-                                     &argument, &initial_weight))
+                                     &argument, &initial_strength))
         return NULL;
 
-    double default_initial_weight = 0.0;
+    double default_initial_strength = 0.0;
 
-    if (initial_weight == NULL) {
+    if (initial_strength == NULL) {
 
-        initial_weight = PyFloat_FromDouble(default_initial_weight);    // New reference
-        if (initial_weight == NULL)
+        initial_strength = PyFloat_FromDouble(default_initial_strength);    // New reference
+        if (initial_strength == NULL)
             return NULL;
 
     } else {
 
-        if (!PyFloat_Check(initial_weight) && !PyLong_Check(initial_weight)) {
-            PyErr_SetString(PyExc_TypeError, "initial_weight must be of a numeric type");
+        if (!PyFloat_Check(initial_strength) && !PyLong_Check(initial_strength)) {
+            PyErr_SetString(PyExc_TypeError, "initial_strength must be of a numeric type");
             return NULL;
         }
 
-        if (PyLong_Check(initial_weight)) {
+        if (PyLong_Check(initial_strength)) {
             // Transform the PyLong to PyFloat
-            double weight = PyLong_AsDouble(initial_weight);
-            if (weight == -1.0 && PyErr_Occurred()) {
+            double strength = PyLong_AsDouble(initial_strength);
+            if (strength == -1.0 && PyErr_Occurred()) {
                 return NULL;
             }
 
-            initial_weight = PyFloat_FromDouble(weight);    // New reference
-            if (initial_weight == NULL) {
-                PyErr_SetString(PyExc_ValueError, "initial_weight could not be transformed to float");
+            initial_strength = PyFloat_FromDouble(strength);    // New reference
+            if (initial_strength == NULL) {
+                PyErr_SetString(PyExc_ValueError, "initial_strength could not be transformed to float");
                 return NULL;
             }
         } else {  
-            Py_INCREF(initial_weight);
+            Py_INCREF(initial_strength);
         }
 
     }
 
     int contains = PySet_Contains(self->arguments, argument);
     if (contains < 0) {
-        Py_DECREF(initial_weight);
+        Py_DECREF(initial_strength);
         return NULL;
     }
     if (contains) { // If the argument already exists it does nothing
         Py_RETURN_NONE;
     }
 
-    // Check initial_weight is within range
-    int in_minmax = weight_in_minmax(initial_weight, self->min_weight, self->max_weight);
+    // Check initial_strength is within range
+    int in_minmax = strength_in_minmax(initial_strength, self->min_strength, self->max_strength);
     if (in_minmax < 0) {
-        Py_DECREF(initial_weight);
+        Py_DECREF(initial_strength);
         return NULL;
     }
     if (!in_minmax) {
         char msg[100];
-        sprintf(msg, "initial_weight must be within range (%.2f, %.2f)", self->min_weight, self->max_weight);
+        sprintf(msg, "initial_strength must be within range (%.2f, %.2f)", self->min_strength, self->max_strength);
         PyErr_SetString(PyExc_ValueError, msg);
-        Py_DECREF(initial_weight);
+        Py_DECREF(initial_strength);
         return NULL;
     }
 
-    // the new argument, initial_weight is added
+    // the new argument, initial_strength is added
     Py_INCREF(argument);
-    if (PyDict_SetItem(self->initial_weights, argument, initial_weight) < 0) {
+    if (PyDict_SetItem(self->initial_strengths, argument, initial_strength) < 0) {
         Py_DECREF(argument);
-        Py_DECREF(initial_weight);
+        Py_DECREF(initial_strength);
         return NULL;
     }
 
-    Py_DECREF(initial_weight);
+    Py_DECREF(initial_strength);
 
     Py_INCREF(argument);
     if (PySet_Add(self->arguments, argument) < 0) {
@@ -1026,7 +1026,7 @@ QBAFramework_remove_argument(QBAFrameworkObject *self, PyObject *args, PyObject 
         return NULL;
     }
 
-    if (PyDict_DelItem(self->initial_weights, argument) < 0) {
+    if (PyDict_DelItem(self->initial_strengths, argument) < 0) {
         return NULL;
     }
 
@@ -1362,9 +1362,9 @@ QBAFramework_copy(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
         return NULL;
     }
 
-    Py_DECREF(copy->initial_weights);
-    copy->initial_weights = PyDict_Copy(self->initial_weights);
-    if (copy->initial_weights == NULL) {
+    Py_DECREF(copy->initial_strengths);
+    copy->initial_strengths = PyDict_Copy(self->initial_strengths);
+    if (copy->initial_strengths == NULL) {
         Py_DECREF(copy);
         return NULL;
     }
@@ -1384,9 +1384,9 @@ QBAFramework_copy(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
     }
 
     if (!self->modified) {
-        Py_DECREF(copy->final_weights);
-        copy->final_weights = PyDict_Copy(self->final_weights);
-        if (copy->final_weights == NULL) {
+        Py_DECREF(copy->final_strengths);
+        copy->final_strengths = PyDict_Copy(self->final_strengths);
+        if (copy->final_strengths == NULL) {
             Py_DECREF(copy);
             return NULL;
         }
@@ -1398,8 +1398,8 @@ QBAFramework_copy(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
     copy->semantics = self->semantics;
     copy->aggregation_function = self->aggregation_function;
     copy->influence_function = self->influence_function;
-    copy->min_weight = self->min_weight;
-    copy->max_weight = self->max_weight;
+    copy->min_strength = self->min_strength;
+    copy->max_strength = self->max_strength;
 
     Py_XINCREF(self->aggregation_function_callable);
     copy->aggregation_function_callable = self->aggregation_function_callable;
@@ -1590,26 +1590,26 @@ QBAFramework_isacyclic(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
 }
 
 /**
- * @brief Return the final weight of a specific argument, -1.0 if an error occurred.
+ * @brief Return the final strength of a specific argument, -1.0 if an error occurred.
  * This function calls itself recursively. So, it only works with acyclic arguments.
- * It stores all the calculated final weights in self.__final_weights.
+ * It stores all the calculated final strengths in self.__final_strengths.
  * 
  * @param self an instance of QBAFramework
  * @param argument the QBAFArgument
  * @return PyObject* borrowed PyFloat reference, -1.0 if an error has occurrred
  */
 static double
-_QBAFramework_calculate_final_weight(QBAFrameworkObject *self, PyObject *argument)
+_QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argument)
 {
-    int contains = PyDict_Contains(self->final_weights, argument);
+    int contains = PyDict_Contains(self->final_strengths, argument);
     if (contains < 0) { // TODO: Remove error checks in this function (not needed since this is only used internally)
         return -1.0;
     }
     if (contains) {
-        return PyFloat_AsDouble(PyDict_GetItem(self->final_weights, argument));
+        return PyFloat_AsDouble(PyDict_GetItem(self->final_strengths, argument));
     }
 
-    double initial_weight = PyFloat_AsDouble(PyDict_GetItem(self->initial_weights, argument));
+    double initial_strength = PyFloat_AsDouble(PyDict_GetItem(self->initial_strengths, argument));
     double attackers_aggregation = 0;
     double supporters_aggregation = 0;
 
@@ -1623,13 +1623,13 @@ _QBAFramework_calculate_final_weight(QBAFrameworkObject *self, PyObject *argumen
     }
 
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-        double item_final_weight = _QBAFramework_calculate_final_weight(self, item);
+        double item_final_strength = _QBAFramework_calculate_final_strength(self, item);
         Py_DECREF(item);
-        if (item_final_weight == -1.0 && PyErr_Occurred()) {
+        if (item_final_strength == -1.0 && PyErr_Occurred()) {
             Py_DECREF(attackers); Py_DECREF(iterator);
             return -1.0;
         }
-        attackers_aggregation = _QBAFramework_aggregation_function(self, attackers_aggregation, item_final_weight);
+        attackers_aggregation = _QBAFramework_aggregation_function(self, attackers_aggregation, item_final_strength);
         if (attackers_aggregation == -1.0 && PyErr_Occurred()) {
             Py_DECREF(attackers); Py_DECREF(iterator);
             return -1.0;
@@ -1648,13 +1648,13 @@ _QBAFramework_calculate_final_weight(QBAFrameworkObject *self, PyObject *argumen
     }
 
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-        double item_final_weight = _QBAFramework_calculate_final_weight(self, item);
+        double item_final_strength = _QBAFramework_calculate_final_strength(self, item);
         Py_DECREF(item);
-        if (item_final_weight == -1.0 && PyErr_Occurred()) {
+        if (item_final_strength == -1.0 && PyErr_Occurred()) {
             Py_DECREF(supporters); Py_DECREF(iterator);
             return -1.0;
         }
-        supporters_aggregation = _QBAFramework_aggregation_function(self, supporters_aggregation, item_final_weight);
+        supporters_aggregation = _QBAFramework_aggregation_function(self, supporters_aggregation, item_final_strength);
         if (supporters_aggregation == -1.0 && PyErr_Occurred()) {
             Py_DECREF(supporters); Py_DECREF(iterator);
             return -1.0;
@@ -1666,32 +1666,32 @@ _QBAFramework_calculate_final_weight(QBAFrameworkObject *self, PyObject *argumen
 
     double aggregation = supporters_aggregation - attackers_aggregation;
 
-    double final_weight = _QBAFramework_influence_function(self, initial_weight, aggregation);
-    if (final_weight == -1.0 && PyErr_Occurred()) {
+    double final_strength = _QBAFramework_influence_function(self, initial_strength, aggregation);
+    if (final_strength == -1.0 && PyErr_Occurred()) {
         return -1.0;
     }
 
-    // final_weights[argument] = final_weight
-    PyObject *pyfinal_weight = PyFloat_FromDouble(final_weight);    // New reference
+    // final_strengths[argument] = final_strength
+    PyObject *pyfinal_strength = PyFloat_FromDouble(final_strength);    // New reference
     Py_INCREF(argument);
-    if (PyDict_SetItem(self->final_weights, argument, pyfinal_weight) < 0) {
-        Py_DECREF(argument); Py_XDECREF(pyfinal_weight);
+    if (PyDict_SetItem(self->final_strengths, argument, pyfinal_strength) < 0) {
+        Py_DECREF(argument); Py_XDECREF(pyfinal_strength);
         return -1.0;
     }
-    Py_XDECREF(pyfinal_weight);
+    Py_XDECREF(pyfinal_strength);
 
-    return final_weight;
+    return final_strength;
 }
 
 /**
- * @brief Calculate the final weights of all the arguments of the Framework.
- * It stores all the calculated final weights in self.__final_weights.
+ * @brief Calculate the final strengths of all the arguments of the Framework.
+ * It stores all the calculated final strengths in self.__final_strengths.
  * 
  * @param self the QBAFramework
  * @return int 0 if succesful, -1 if an error occurred
  */
 static int
-_QBAFRamework_calculate_final_weights(QBAFrameworkObject *self)
+_QBAFRamework_calculate_final_strengths(QBAFrameworkObject *self)
 {
     int isacyclic = _QBAFramework_isacyclic(self);
     if (isacyclic < 0) {
@@ -1699,12 +1699,12 @@ _QBAFRamework_calculate_final_weights(QBAFrameworkObject *self)
     }
     if (!isacyclic) {
         PyErr_SetString(PyExc_NotImplementedError,
-                        "calculate final weights of non-acyclic framework not implemented");
+                        "calculate final strengths of non-acyclic framework not implemented");
         return -1;
     }
 
-    Py_CLEAR(self->final_weights);
-    self->final_weights = PyDict_New();
+    Py_CLEAR(self->final_strengths);
+    self->final_strengths = PyDict_New();
 
     PyObject *iterator = PyObject_GetIter(self->arguments);
     PyObject *item;
@@ -1713,7 +1713,7 @@ _QBAFRamework_calculate_final_weights(QBAFrameworkObject *self)
     }
 
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-        if (_QBAFramework_calculate_final_weight(self, item) == -1.0 && PyErr_Occurred()) {
+        if (_QBAFramework_calculate_final_strength(self, item) == -1.0 && PyErr_Occurred()) {
             Py_DECREF(item); Py_DECREF(iterator);
             return -1;
         }
@@ -1726,45 +1726,45 @@ _QBAFRamework_calculate_final_weights(QBAFrameworkObject *self)
 }
 
 /**
- * @brief Return the final weights of arguments of the Framework, NULL if an error occurred.
+ * @brief Return the final strengths of arguments of the Framework, NULL if an error occurred.
  * If the framework has been modified from the last time they were calculated
- * they are calculated again. Otherwise, it returns the already calculated final weights.
+ * they are calculated again. Otherwise, it returns the already calculated final strengths.
  * 
  * @param self the QBAFramework
  * @param closure 
  * @return PyObject* a new PyDict, NULL if an error occurred
  */
 static PyObject *
-QBAFramework_getfinal_weights(QBAFrameworkObject *self, void *closure)
+QBAFramework_getfinal_strengths(QBAFrameworkObject *self, void *closure)
 {
-    if (self->modified) {   // Calculate final weights if the framework has been modified
-        if (_QBAFRamework_calculate_final_weights(self) < 0) {
+    if (self->modified) {   // Calculate final strengths if the framework has been modified
+        if (_QBAFRamework_calculate_final_strengths(self) < 0) {
             return NULL;
         }
         self->modified = FALSE;
     }
 
-    return PyDict_Copy(self->final_weights);
+    return PyDict_Copy(self->final_strengths);
 }
 
 /**
- * @brief Return the final weight of the Argument argument, NULL in case of error.
+ * @brief Return the final strength of the Argument argument, NULL in case of error.
  * 
  * @param self an instance of QBAFramework
  * @param argument the QBAFArgument
  * @return PyObject* borrowed PyFloat
  */
 static PyObject *
-_QBAFramework_final_weight(QBAFrameworkObject *self, PyObject *argument)
+_QBAFramework_final_strength(QBAFrameworkObject *self, PyObject *argument)
 {
-    if (self->modified) {   // Calculate final weights if the framework has been modified
-        if (_QBAFRamework_calculate_final_weights(self) < 0) {
+    if (self->modified) {   // Calculate final strengths if the framework has been modified
+        if (_QBAFRamework_calculate_final_strengths(self) < 0) {
             return NULL;
         }
         self->modified = FALSE;
     }
 
-    int contains = PyDict_Contains(self->final_weights, argument);
+    int contains = PyDict_Contains(self->final_strengths, argument);
     if (contains < 0) {
         return NULL;
     }
@@ -1774,11 +1774,11 @@ _QBAFramework_final_weight(QBAFrameworkObject *self, PyObject *argument)
         return NULL;
     }
 
-    return PyDict_GetItem(self->final_weights, argument);
+    return PyDict_GetItem(self->final_strengths, argument);
 }
 
 /**
- * @brief Return the final weight of the Argument argument, NULL in case of error.
+ * @brief Return the final strength of the Argument argument, NULL in case of error.
  * 
  * @param self an instance of QBAFramework
  * @param args the argument values (argument: QBAFArgument)
@@ -1786,7 +1786,7 @@ _QBAFramework_final_weight(QBAFrameworkObject *self, PyObject *argument)
  * @return PyObject* new PyFloat
  */
 static PyObject *
-QBAFramework_final_weight(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+QBAFramework_final_strength(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"argument", NULL};
     PyObject *argument;
@@ -1795,9 +1795,9 @@ QBAFramework_final_weight(QBAFrameworkObject *self, PyObject *args, PyObject *kw
                                      &argument))
         return NULL;
 
-    PyObject *final_weight = _QBAFramework_final_weight(self, argument); // Borrowed reference
-    Py_XINCREF(final_weight);
-    return final_weight;
+    PyObject *final_strength = _QBAFramework_final_strength(self, argument); // Borrowed reference
+    Py_XINCREF(final_strength);
+    return final_strength;
 }
 
 /**
@@ -1813,21 +1813,21 @@ QBAFramework_final_weight(QBAFrameworkObject *self, PyObject *args, PyObject *kw
 static inline int
 _QBAFramework_are_strength_consistent(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
 {
-    if (self->modified) {   // Calculate final weights if the framework has been modified
-        if (_QBAFRamework_calculate_final_weights(self) < 0) {
+    if (self->modified) {   // Calculate final strengths if the framework has been modified
+        if (_QBAFRamework_calculate_final_strengths(self) < 0) {
             return -1;
         }
         self->modified = FALSE;
     }
-    if (other->modified) {   // Calculate final weights if the framework has been modified
-        if (_QBAFRamework_calculate_final_weights(other) < 0) {
+    if (other->modified) {   // Calculate final strengths if the framework has been modified
+        if (_QBAFRamework_calculate_final_strengths(other) < 0) {
             return -1;
         }
         other->modified = FALSE;
     }
 
     // Check that the arguments are contained in both frameworks
-    int contains = PyDict_Contains(self->final_weights, arg1);
+    int contains = PyDict_Contains(self->final_strengths, arg1);
     if (contains < 0) {
         return -1;
     }
@@ -1835,7 +1835,7 @@ _QBAFramework_are_strength_consistent(QBAFrameworkObject *self, QBAFrameworkObje
         PyErr_SetString(PyExc_ValueError, "arg1 must be an argument of this QBAFramework");
         return -1;
     }
-    contains = PyDict_Contains(self->final_weights, arg2);
+    contains = PyDict_Contains(self->final_strengths, arg2);
     if (contains < 0) {
         return -1;
     }
@@ -1843,7 +1843,7 @@ _QBAFramework_are_strength_consistent(QBAFrameworkObject *self, QBAFrameworkObje
         PyErr_SetString(PyExc_ValueError, "arg2 must be an argument of this QBAFramework");
         return -1;
     }
-    contains = PyDict_Contains(other->final_weights, arg1);
+    contains = PyDict_Contains(other->final_strengths, arg1);
     if (contains < 0) {
         return -1;
     }
@@ -1851,7 +1851,7 @@ _QBAFramework_are_strength_consistent(QBAFrameworkObject *self, QBAFrameworkObje
         PyErr_SetString(PyExc_ValueError, "arg1 must be an argument of the QBAFramework other");
         return -1;
     }
-    contains = PyDict_Contains(other->final_weights, arg2);
+    contains = PyDict_Contains(other->final_strengths, arg2);
     if (contains < 0) {
         return -1;
     }
@@ -1860,16 +1860,16 @@ _QBAFramework_are_strength_consistent(QBAFrameworkObject *self, QBAFrameworkObje
         return -1;
     }
 
-    double self_final_weight_arg1 = PyFloat_AS_DOUBLE(PyDict_GetItem(self->final_weights, arg1));
-    double self_final_weight_arg2 = PyFloat_AS_DOUBLE(PyDict_GetItem(self->final_weights, arg2));
-    double other_final_weight_arg1 = PyFloat_AS_DOUBLE(PyDict_GetItem(other->final_weights, arg1));
-    double other_final_weight_arg2 = PyFloat_AS_DOUBLE(PyDict_GetItem(other->final_weights, arg2));
+    double self_final_strength_arg1 = PyFloat_AS_DOUBLE(PyDict_GetItem(self->final_strengths, arg1));
+    double self_final_strength_arg2 = PyFloat_AS_DOUBLE(PyDict_GetItem(self->final_strengths, arg2));
+    double other_final_strength_arg1 = PyFloat_AS_DOUBLE(PyDict_GetItem(other->final_strengths, arg1));
+    double other_final_strength_arg2 = PyFloat_AS_DOUBLE(PyDict_GetItem(other->final_strengths, arg2));
 
-    if (self_final_weight_arg1 < self_final_weight_arg2)
-        return other_final_weight_arg1 < other_final_weight_arg2;
-    if (self_final_weight_arg1 > self_final_weight_arg2)
-        return other_final_weight_arg1 > other_final_weight_arg2;
-    return other_final_weight_arg1 == other_final_weight_arg2;
+    if (self_final_strength_arg1 < self_final_strength_arg2)
+        return other_final_strength_arg1 < other_final_strength_arg2;
+    if (self_final_strength_arg1 > self_final_strength_arg2)
+        return other_final_strength_arg1 > other_final_strength_arg2;
+    return other_final_strength_arg1 == other_final_strength_arg2;
 }
 
 /**
@@ -1930,9 +1930,9 @@ _QBAFramework_copy_settings(QBAFrameworkObject *self)
         return NULL;
     }
 
-    Py_DECREF(copy->initial_weights);
-    copy->initial_weights = PyDict_New();
-    if (copy->initial_weights == NULL) {
+    Py_DECREF(copy->initial_strengths);
+    copy->initial_strengths = PyDict_New();
+    if (copy->initial_strengths == NULL) {
         Py_DECREF(copy);
         return NULL;
     }
@@ -1957,8 +1957,8 @@ _QBAFramework_copy_settings(QBAFrameworkObject *self)
     copy->semantics = self->semantics;
     copy->aggregation_function = self->aggregation_function;
     copy->influence_function = self->influence_function;
-    copy->min_weight = self->min_weight;
-    copy->max_weight = self->max_weight;
+    copy->min_strength = self->min_strength;
+    copy->max_strength = self->max_strength;
 
     Py_XINCREF(self->aggregation_function_callable);
     copy->aggregation_function_callable = self->aggregation_function_callable;
@@ -2176,8 +2176,8 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
     }
     Py_DECREF(set_iterator);
 
-    // Modify initial weights
-    if (reversal->initial_weights == NULL) { // It should be an empty PyDict
+    // Modify initial strengths
+    if (reversal->initial_strengths == NULL) { // It should be an empty PyDict
         return NULL;
     }
     iterator = PyObject_GetIter(reversal->arguments);
@@ -2190,7 +2190,7 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
         Py_DECREF(reversal); Py_DECREF(iterator);
         return NULL;
     }
-    PyObject *initial_weight;
+    PyObject *initial_strength;
     while ((arg = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
         int contains = PySet_Contains(other_arguments_intersection_set, arg);
         if (contains < 0) {
@@ -2199,16 +2199,16 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
             return NULL;
         }
         if (contains) {
-            initial_weight = PyDict_GetItem(other->initial_weights, arg);
+            initial_strength = PyDict_GetItem(other->initial_strengths, arg);
         } else {
-            initial_weight = PyDict_GetItem(self->initial_weights, arg);
+            initial_strength = PyDict_GetItem(self->initial_strengths, arg);
         }
-        if (initial_weight == NULL) {
+        if (initial_strength == NULL) {
             Py_DECREF(reversal); Py_DECREF(iterator);
             Py_DECREF(arg); Py_DECREF(other_arguments_intersection_set);
             return NULL;
         }
-        if (PyDict_SetItem(reversal->initial_weights, arg, initial_weight) < 0) {
+        if (PyDict_SetItem(reversal->initial_strengths, arg, initial_strength) < 0) {
             Py_DECREF(reversal); Py_DECREF(iterator);
             Py_DECREF(arg); Py_DECREF(other_arguments_intersection_set);
             return NULL;
@@ -2217,9 +2217,9 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
     Py_DECREF(iterator);
     Py_DECREF(other_arguments_intersection_set);
 
-    // Remove calculated final weights
-    Py_CLEAR(reversal->final_weights);
-    reversal->final_weights = PyDict_New();
+    // Remove calculated final strengths
+    Py_CLEAR(reversal->final_strengths);
+    reversal->final_strengths = PyDict_New();
     reversal->modified = TRUE;
 
     // Return
@@ -2735,7 +2735,7 @@ _QBAFramework_influential_arguments_set(QBAFrameworkObject *self, PyObject *arg1
  * @brief Return True if the Argument argument is candidate for a CSI explanation, False if not,
  * -1 if an error has occurred
  * An Argument is candidate if it is not contained by one of the frameworks or
- * it has a different initial weight or it has a different final weight between the frameworks or
+ * it has a different initial strength or it has a different final strength between the frameworks or
  * it has different relations as attacker/supporter (as attacked/supported not checked).
  * 
  * @param self an instance of QBAFramework
@@ -2757,11 +2757,11 @@ _QBAFramework_candidate_argument(QBAFrameworkObject *self, QBAFrameworkObject *o
         return TRUE;
     }
 
-    // if self.initial_weights[argument] != other.initial_weights[argument]: return True
-    PyObject *self_initial = PyDict_GetItemWithError(self->initial_weights, argument); // Borrowed reference
+    // if self.initial_strengths[argument] != other.initial_strengths[argument]: return True
+    PyObject *self_initial = PyDict_GetItemWithError(self->initial_strengths, argument); // Borrowed reference
     if (self_initial == NULL)
         return -1;
-    PyObject *other_initial = PyDict_GetItemWithError(other->initial_weights, argument); // Borrowed reference
+    PyObject *other_initial = PyDict_GetItemWithError(other->initial_strengths, argument); // Borrowed reference
     if (other_initial == NULL)
         return -1;
     int equals = PyObject_RichCompareBool(self_initial, other_initial, Py_EQ);
@@ -2771,11 +2771,11 @@ _QBAFramework_candidate_argument(QBAFrameworkObject *self, QBAFrameworkObject *o
         return TRUE;
     }
 
-    // if self.final_weight(argument) != other.final_weight(argument): return True
-    PyObject *self_final = _QBAFramework_final_weight(self, argument);
+    // if self.final_strength(argument) != other.final_strength(argument): return True
+    PyObject *self_final = _QBAFramework_final_strength(self, argument);
     if (self_final == NULL)
         return -1;
-    PyObject *other_final = _QBAFramework_final_weight(other, argument);
+    PyObject *other_final = _QBAFramework_final_strength(other, argument);
     if (other_final == NULL)
         return -1;
     equals = PyObject_RichCompareBool(self_final, other_final, Py_EQ);
@@ -3202,7 +3202,7 @@ QBAFramework_richcompare(QBAFrameworkObject *self, PyObject *other, int op)
     if (!equals)
         Py_RETURN_BOOL(op != Py_EQ);
 
-    equals = PyObject_RichCompareBool(self->initial_weights, ((QBAFrameworkObject *)other)->initial_weights, Py_EQ);
+    equals = PyObject_RichCompareBool(self->initial_strengths, ((QBAFrameworkObject *)other)->initial_strengths, Py_EQ);
     if (equals < 0)
         return NULL;
     if (!equals)
@@ -3230,23 +3230,23 @@ QBAFramework_richcompare(QBAFrameworkObject *self, PyObject *other, int op)
 static PyGetSetDef QBAFramework_getsetters[] = {
     {"arguments", (getter) QBAFramework_getarguments, NULL,
      "Return a copy of the arguments of the instance.", NULL},
-    {"initial_weights", (getter) QBAFramework_getinitial_weights, NULL,
-     "Return a copy of the initial weights.", NULL},
+    {"initial_strengths", (getter) QBAFramework_getinitial_strengths, NULL,
+     "Return a copy of the initial strengths.", NULL},
     {"attack_relations", (getter) QBAFramework_getattack_relations, NULL,
      "Return the attack relations of the instance.", NULL},
     {"support_relations", (getter) QBAFramework_getsupport_relations, NULL,
      "Return the support relations of the instance.", NULL},
-    {"final_weights", (getter) QBAFramework_getfinal_weights, NULL,
-     "Return a copy of the final weights.", NULL},
+    {"final_strengths", (getter) QBAFramework_getfinal_strengths, NULL,
+     "Return a copy of the final strengths.", NULL},
     {"disjoint_relations", (getter) QBAFramework_getdisjoint_relations, (setter) QBAFramework_setdisjoint_relations,
      "Return True if the attack/support relations must be disjoint, False if they do not have to.",
      "Setter of the attribute disjoint_relations."},
     {"semantics", (getter) QBAFramework_getsemantics, NULL,
      "Return the semantics.", NULL},
-    {"min_weight", (getter) QBAFramework_getmin_weight, NULL,
-     "Return the min value a initial_weight can have.", NULL},
-    {"max_weight", (getter) QBAFramework_getmax_weight, NULL,
-     "Return the max value a initial_weight can have.", NULL},
+    {"min_strength", (getter) QBAFramework_getmin_strength, NULL,
+     "Return the min value a initial_strength can have.", NULL},
+    {"max_strength", (getter) QBAFramework_getmax_strength, NULL,
+     "Return the max value a initial_strength can have.", NULL},
     {NULL}  /* Sentinel */
 };
 
@@ -3255,14 +3255,14 @@ static PyGetSetDef QBAFramework_getsetters[] = {
  * 
  */
 static PyMethodDef QBAFramework_methods[] = {
-    {"modify_initial_weight", (PyCFunctionWithKeywords) QBAFramework_modify_initial_weights, METH_VARARGS | METH_KEYWORDS,
-    "Modify the initial weight of the Argument argument."
+    {"modify_initial_strength", (PyCFunctionWithKeywords) QBAFramework_modify_initial_strengths, METH_VARARGS | METH_KEYWORDS,
+    "Modify the initial strength of the Argument argument."
     },
-    {"initial_weight", (PyCFunctionWithKeywords) QBAFramework_initial_weight, METH_VARARGS | METH_KEYWORDS,
-    "Return the initial weight of the Argument argument."
+    {"initial_strength", (PyCFunctionWithKeywords) QBAFramework_initial_strength, METH_VARARGS | METH_KEYWORDS,
+    "Return the initial strength of the Argument argument."
     },
-    {"final_weight", (PyCFunctionWithKeywords) QBAFramework_final_weight, METH_VARARGS | METH_KEYWORDS,
-    "Return the final weight of the Argument argument."
+    {"final_strength", (PyCFunctionWithKeywords) QBAFramework_final_strength, METH_VARARGS | METH_KEYWORDS,
+    "Return the final strength of the Argument argument."
     },
     {"add_argument", (PyCFunctionWithKeywords) QBAFramework_add_argument, METH_VARARGS | METH_KEYWORDS,
     "Add an Argument to the Framework. If it exists already it does nothing."

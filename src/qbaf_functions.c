@@ -12,7 +12,7 @@
 #define max(a,b) (((a)>(b))?(a):(b))
 
 /**
- * @brief Given two weights w1 and w2 return their sum.
+ * @brief Given two strengths w1 and w2 return their sum.
  * 
  * @param w1 a double
  * @param w2 another double
@@ -24,7 +24,7 @@ double sum(double w1, double w2)
 }
 
 /**
- * @brief Given two weights w1 and w2 return their product.
+ * @brief Given two strengths w1 and w2 return their product.
  * 
  * @param w1 a double
  * @param w2 another double
@@ -36,7 +36,7 @@ double product(double w1, double w2)
 }
 
 /**
- * @brief Given two weights w1 and w2 return the maximum.
+ * @brief Given two strengths w1 and w2 return the maximum.
  * 
  * @param w1 a double
  * @param w2 another double
@@ -50,7 +50,7 @@ double top(double w1, double w2)
 /**
  * @brief Return the influence result of the basic model.
  * 
- * @param w the initial weight
+ * @param w the initial strength
  * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result of the influence function
  */
@@ -62,7 +62,7 @@ double simple_influence(double w, double s)
 /**
  * @brief Return the influence function linear(k).
  * 
- * @param w the initial weight
+ * @param w the initial strength
  * @param s the result of applying the aggregation function to all attackers and supporters
  * @param k a double
  * @return double the result
@@ -76,7 +76,7 @@ double linear_k(double w, double s, double k)
 /**
  * @brief Return the influence function linear(1).
  * 
- * @param w the initial weight
+ * @param w the initial strength
  * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result
  */
@@ -88,7 +88,7 @@ double linear_1(double w, double s)
 /**
  * @brief Return the influence function Euler-based.
  * 
- * @param w the initial weight
+ * @param w the initial strength
  * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result
  */
@@ -113,7 +113,7 @@ double h(double x, uint32_t p)
 /**
  * @brief Return the influence function p-Max(k).
  * 
- * @param w the initial weight
+ * @param w the initial strength
  * @param s the result of applying the aggregation function to all attackers and supporters
  * @param p a natural number
  * @param k a double
@@ -128,7 +128,7 @@ double p_max_k(double w, double s, uint32_t p, double k)
 /**
  * @brief Return the influence function 2-Max(1).
  * 
- * @param w the initial weight
+ * @param w the initial strength
  * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result
  */
@@ -140,7 +140,7 @@ double max_2_1(double w, double s)
 /**
  * @brief Return the influence function 1-Max(1).
  * 
- * @param w the initial weight
+ * @param w the initial strength
  * @param s the result of applying the aggregation function to all attackers and supporters
  * @return double the result
  */
