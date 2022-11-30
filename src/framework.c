@@ -693,9 +693,7 @@ QBAFramework_getsupport_relations(QBAFrameworkObject *self, void *closure)
 static PyObject *
 QBAFramework_getdisjoint_relations(QBAFrameworkObject *self, void *closure)
 {
-    if (self->disjoint_relations)
-        Py_RETURN_TRUE;
-    Py_RETURN_FALSE;
+    Py_RETURN_BOOL(self->disjoint_relations);
 }
 
 /**
@@ -723,7 +721,7 @@ QBAFramework_getsemantics(QBAFrameworkObject *self, void *closure)
 static PyObject *
 QBAFramework_getmin_strength(QBAFrameworkObject *self, void *closure)
 {
-    PyFloat_FromDouble(self->min_strength);
+    return PyFloat_FromDouble(self->min_strength);
 }
 
 /**
@@ -736,7 +734,7 @@ QBAFramework_getmin_strength(QBAFrameworkObject *self, void *closure)
 static PyObject *
 QBAFramework_getmax_strength(QBAFrameworkObject *self, void *closure)
 {
-    PyFloat_FromDouble(self->max_strength);
+    return PyFloat_FromDouble(self->max_strength);
 }
 
 /**
