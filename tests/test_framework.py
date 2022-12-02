@@ -351,6 +351,64 @@ def test_modify_final_strength():
     qbf.add_argument('a', 0.0)
     assert qbf.final_strength('a') == 1.0
 
+# TEST ATTACKED/SUPPORTED BY AND ATTACKERS/SUPPORTERS OF
+
+def test_attackedBy_attackersOf_incorrect_input():
+    framework = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3],
+                            [('a', 'c'), ('e', 'c')],
+                            [('a', 'b'), ('e', 'a')])
+    
+    with pytest.raises(TypeError):
+        framework.attackedBy([])
+    with pytest.raises(ValueError):
+        framework.attackedBy('f')
+    with pytest.raises(TypeError):
+        framework.attackersOf([])
+    with pytest.raises(ValueError):
+        framework.attackersOf('f')
+
+def test_attackedBy():
+    framework = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3],
+                            [('a', 'c'), ('e', 'c')],
+                            [('a', 'b'), ('e', 'a')])
+    for arg in ['a', 'b', 'c', 'e']:
+        assert set(framework.attack_relations.patients(arg)) == set(framework.attackedBy(arg))
+
+def test_attackersOf():
+    framework = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3],
+                            [('a', 'c'), ('e', 'c')],
+                            [('a', 'b'), ('e', 'a')])
+    for arg in ['a', 'b', 'c', 'e']:
+        assert set(framework.attack_relations.agents(arg)) == set(framework.attackersOf(arg))
+
+def test_supportedBy_supportersOf_incorrect_input():
+    framework = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3],
+                            [('a', 'c'), ('e', 'c')],
+                            [('a', 'b'), ('e', 'a')])
+    
+    with pytest.raises(TypeError):
+        framework.supportedBy([])
+    with pytest.raises(ValueError):
+        framework.supportedBy('f')
+    with pytest.raises(TypeError):
+        framework.supportersOf([])
+    with pytest.raises(ValueError):
+        framework.supportersOf('f')
+
+def test_supportedBy():
+    framework = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3],
+                            [('a', 'c'), ('e', 'c')],
+                            [('a', 'b'), ('e', 'a')])
+    for arg in ['a', 'b', 'c', 'e']:
+        assert set(framework.support_relations.patients(arg)) == set(framework.supportedBy(arg))
+
+def test_supportersOf():
+    framework = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3],
+                            [('a', 'c'), ('e', 'c')],
+                            [('a', 'b'), ('e', 'a')])
+    for arg in ['a', 'b', 'c', 'e']:
+        assert set(framework.support_relations.agents(arg)) == set(framework.supportersOf(arg))
+
 # TEST COPY
 
 def test_copy():
