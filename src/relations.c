@@ -677,6 +677,18 @@ QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
 }
 
 /**
+ * @brief Return an iterator of the set relations.
+ * 
+ * @param self a QBAFARelations object
+ * @return PyObject* new PyIter
+ */
+PyObject *
+QBAFARelations_iter(QBAFARelationsObject *self)
+{
+    return PyObject_GetIter(self->relations);
+}
+
+/**
  * @brief Return 1 if their relations are disjoint, 0 if they are not, and -1 if an error is encountered.
  * 
  * @param self a QBAFARelations instance (not NULL)
@@ -798,6 +810,7 @@ static PyTypeObject QBAFARelationsType = {
     .tp_repr = (reprfunc) QBAFARelations___str__,               // __repr__
     .tp_richcompare = (richcmpfunc) QBAFARelations_richcompare, // __lt__, __le__, __eq__, __ne__, __gt__, __ge__
     .tp_as_sequence = &QBAFARelations_sequencemethods,          // __len__, __contains__
+    .tp_iter = (getiterfunc) QBAFARelations_iter,               // __iter__
 };
 
 /**

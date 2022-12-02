@@ -5,33 +5,33 @@ from qbaf import QBAFramework, QBAFARelations
 
 def test_init_correct_args():
     args = ['a', 'b', 'c']
-    initial_weights = [1, 1, 5]
+    initial_strengths = [1, 1, 5]
     att = [('a', 'c')]
     supp = [('a', 'b')]
-    QBAFramework(args, initial_weights, att, supp,
+    QBAFramework(args, initial_strengths, att, supp,
         disjoint_relations=True,
         semantics="basic_model",
         aggregation_function=None,
         influence_function=None,
-        min_weight=-1.7976931348623157e+308,
-        max_weight=1.7976931348623157e+308)
+        min_strength=-1.7976931348623157e+308,
+        max_strength=1.7976931348623157e+308)
 
 def test_init_semantics():
-    args,initial_weights,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
-    QBAFramework(args, initial_weights, att, supp, semantics="basic_model")
-    QBAFramework(args, initial_weights, att, supp, semantics="QuadraticEnergy_model")
-    QBAFramework(args, initial_weights, att, supp, semantics="SquaredDFQuAD_model")
-    QBAFramework(args, initial_weights, att, supp, semantics="EulerBasedTop_model")
-    QBAFramework(args, initial_weights, att, supp, semantics="EulerBased_model")
+    args,initial_strengths,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
+    QBAFramework(args, initial_strengths, att, supp, semantics="basic_model")
+    QBAFramework(args, initial_strengths, att, supp, semantics="QuadraticEnergy_model")
+    QBAFramework(args, initial_strengths, att, supp, semantics="SquaredDFQuAD_model")
+    QBAFramework(args, initial_strengths, att, supp, semantics="EulerBasedTop_model")
+    QBAFramework(args, initial_strengths, att, supp, semantics="EulerBased_model")
     QBAFramework(args,[0.1, 0.1, 0.5], att, supp, semantics="DFQuAD_model")
     with pytest.raises(ValueError):
-        QBAFramework(args, initial_weights, att, supp, semantics="incorrect_model")
+        QBAFramework(args, initial_strengths, att, supp, semantics="incorrect_model")
 
 def test_init_no_args():
     with pytest.raises(TypeError):
         QBAFramework()
 
-def test_init_args_initial_weights():
+def test_init_args_initial_strengths():
     QBAFramework(['a', 'b'], [1, 1], [], [])
     with pytest.raises(TypeError):
         QBAFramework(['a', 'b'], [1, "1"], [], [])
@@ -64,27 +64,27 @@ def test_init_disjoint_relations():
 def test_init_getters():
     qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')], disjoint_relations=True)
     assert qbf.arguments == {'a', 'b', 'c'}
-    assert qbf.initial_weights == {'a':1.0, 'b':1.0, 'c':5.0}
+    assert qbf.initial_strengths == {'a':1.0, 'b':1.0, 'c':5.0}
     assert qbf.attack_relations.relations == {('a', 'c')}
     assert qbf.support_relations.relations == {('a', 'b')}
     assert qbf.disjoint_relations == True
-    assert qbf.final_weights == {'a': 1.0, 'c': 4.0, 'b': 2.0}
+    assert qbf.final_strengths == {'a': 1.0, 'c': 4.0, 'b': 2.0}
     assert qbf.semantics == "basic_model"
-    assert qbf.min_weight == -1.7976931348623157e+308
-    assert qbf.max_weight ==  1.7976931348623157e+308
+    assert qbf.min_strength == -1.7976931348623157e+308
+    assert qbf.max_strength ==  1.7976931348623157e+308
 
 def test_init_setters():
     qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')], disjoint_relations=True)
     with pytest.raises(AttributeError):
         qbf.arguments = set()
     with pytest.raises(AttributeError):
-        qbf.initial_weights = dict()
+        qbf.initial_strengths = dict()
     with pytest.raises(AttributeError):
         qbf.attack_relations = QBAFARelations([])
     with pytest.raises(AttributeError):
         qbf.support_relations = QBAFARelations([])
     with pytest.raises(AttributeError):
-        qbf.final_weights = dict()
+        qbf.final_strengths = dict()
     with pytest.raises(TypeError):
         qbf.disjoint_relations = 0
     qbf.disjoint_relations = False
@@ -93,11 +93,11 @@ def test_init_setters():
     with pytest.raises(ValueError):
         qbf.disjoint_relations = True
 
-# Test MAX MIN WEIGHTS
+# Test MAX MIN STRENGTHS
 
-def test_init_maxmin_weights_DFQuAD():
-    args,initial_weights,att,supp = ['a', 'b', 'c'], [0.1, 0.1, 0.5], [('a', 'c')], [('a', 'b')]
-    qbf = QBAFramework(args,initial_weights, att, supp, semantics="DFQuAD_model")
+def test_init_maxmin_strengths_DFQuAD():
+    args,initial_strengths,att,supp = ['a', 'b', 'c'], [0.1, 0.1, 0.5], [('a', 'c')], [('a', 'b')]
+    qbf = QBAFramework(args,initial_strengths, att, supp, semantics="DFQuAD_model")
     qbf.add_argument('a', 5) # If the arguments exists it does nothing
     qbf.add_argument('a', -5) # If the arguments exists it does nothing
     with pytest.raises(ValueError):
@@ -105,103 +105,103 @@ def test_init_maxmin_weights_DFQuAD():
     with pytest.raises(ValueError):
         qbf.add_argument('e', -5)
     with pytest.raises(ValueError):
-        qbf.modify_initial_weight('a', 5)
+        qbf.modify_initial_strength('a', 5)
     with pytest.raises(ValueError):
-        qbf.modify_initial_weight('a', -5)
+        qbf.modify_initial_strength('a', -5)
 
 # TEST SEMANTICS
 
 def test_custom_semantics_input():
-    args,initial_weights,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
-    QBAFramework(args,initial_weights, att, supp, semantics="basic_model")
-    QBAFramework(args,initial_weights, att, supp, semantics=None)
+    args,initial_strengths,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
+    QBAFramework(args,initial_strengths, att, supp, semantics="basic_model")
+    QBAFramework(args,initial_strengths, att, supp, semantics=None)
 
-    QBAFramework(args,initial_weights, att, supp,
+    QBAFramework(args,initial_strengths, att, supp,
                     semantics=None,
                     aggregation_function=lambda w1, w2 : w1 + w2,
                     influence_function=lambda w, s : w + s,
-                    min_weight=-10,
-                    max_weight=10)
+                    min_strength=-10,
+                    max_strength=10)
 
-    QBAFramework(args,initial_weights, att, supp,
+    QBAFramework(args,initial_strengths, att, supp,
                     aggregation_function=lambda w1, w2 : w1 + w2,
                     influence_function=lambda w, s : w + s,
-                    min_weight=-10,
-                    max_weight=10)
+                    min_strength=-10,
+                    max_strength=10)
 
-    QBAFramework(args,initial_weights, att, supp,
+    QBAFramework(args,initial_strengths, att, supp,
                     aggregation_function=lambda w1, w2 : w1 + w2,
                     influence_function=lambda w, s : w + s)
     
     with pytest.raises(ValueError):
-        QBAFramework(args,initial_weights, att, supp,
+        QBAFramework(args,initial_strengths, att, supp,
                     semantics="basic_model",
                     aggregation_function=lambda w1, w2 : w1 + w2,
                     influence_function=lambda w, s : w + s,
-                    min_weight=-10,
-                    max_weight=10)
+                    min_strength=-10,
+                    max_strength=10)
 
     with pytest.raises(ValueError):
-        QBAFramework(args,initial_weights, att, supp,
+        QBAFramework(args,initial_strengths, att, supp,
                     semantics=None,
                     aggregation_function=lambda w1, w2 : w1 + w2,
                     influence_function=None,
-                    min_weight=-10,
-                    max_weight=10)
+                    min_strength=-10,
+                    max_strength=10)
     
     with pytest.raises(ValueError):
-        QBAFramework(args,initial_weights, att, supp,
+        QBAFramework(args,initial_strengths, att, supp,
                     semantics=None,
                     aggregation_function=None,
                     influence_function=lambda w, s : w + s,
-                    min_weight=-10,
-                    max_weight=10)
+                    min_strength=-10,
+                    max_strength=10)
 
     with pytest.raises(ValueError):
-        QBAFramework(args,initial_weights, att, supp,
+        QBAFramework(args,initial_strengths, att, supp,
                     semantics=None,
-                    min_weight=-10)
+                    min_strength=-10)
 
     with pytest.raises(ValueError):
-        QBAFramework(args,initial_weights, att, supp,
+        QBAFramework(args,initial_strengths, att, supp,
                     semantics=None,
-                    max_weight=10)
+                    max_strength=10)
 
     with pytest.raises(ValueError):
-        QBAFramework(args,initial_weights, att, supp,
+        QBAFramework(args,initial_strengths, att, supp,
                     semantics="basic_model",
-                    min_weight=-10)
+                    min_strength=-10)
 
     with pytest.raises(ValueError):
-        QBAFramework(args,initial_weights, att, supp,
+        QBAFramework(args,initial_strengths, att, supp,
                     semantics="basic_model",
-                    max_weight=10)
+                    max_strength=10)
 
 def test_custom_semantics():
-    args,initial_weights,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
-    qbf = QBAFramework(args,initial_weights, att, supp, semantics="basic_model")
-    custom = QBAFramework(args,initial_weights, att, supp,
+    args,initial_strengths,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
+    qbf = QBAFramework(args,initial_strengths, att, supp, semantics="basic_model")
+    custom = QBAFramework(args,initial_strengths, att, supp,
                                 semantics=None,
                                 aggregation_function=lambda w1, w2 : w1 + w2,
                                 influence_function=lambda w, s : w + s,
-                                min_weight=-10,
-                                max_weight=10)
+                                min_strength=-10,
+                                max_strength=10)
     assert custom.semantics == None
-    assert qbf.final_weights == custom.final_weights
+    assert qbf.final_strengths == custom.final_strengths
 
-    custom = QBAFramework(args,initial_weights, att, supp,
+    custom = QBAFramework(args,initial_strengths, att, supp,
                                 semantics=None,
                                 aggregation_function=lambda w1, w2 : w1 + w2,
                                 influence_function=lambda w, s : w - s,
-                                min_weight=-10,
-                                max_weight=10)
-    assert qbf.final_weights != custom.final_weights
+                                min_strength=-10,
+                                max_strength=10)
+    assert qbf.final_strengths != custom.final_strengths
 
 def test_default_semantics():
-    args,initial_weights,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
-    qbf = QBAFramework(args,initial_weights, att, supp, semantics="basic_model")
-    qbf2 = QBAFramework(args,initial_weights, att, supp, semantics="QuadraticEnergy_model")
-    assert qbf.final_weights != qbf2.final_weights
+    args,initial_strengths,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
+    qbf = QBAFramework(args,initial_strengths, att, supp, semantics="basic_model")
+    qbf2 = QBAFramework(args,initial_strengths, att, supp, semantics="QuadraticEnergy_model")
+    assert qbf.final_strengths != qbf2.final_strengths
 
 # TEST ARGUMENTS
 
@@ -212,7 +212,7 @@ def test_modify_arguments():
     assert qbf.arguments == {'a', 'b', 'c'}
     qbf.add_argument('d', 1)
     assert qbf.arguments == {'a', 'b', 'c', 'd'}
-    assert qbf.initial_weights['d'] == 1.0
+    assert qbf.initial_strengths['d'] == 1.0
     with pytest.raises(ValueError):
         qbf.remove_argument('a')
     with pytest.raises(ValueError):
@@ -223,26 +223,26 @@ def test_modify_arguments():
     assert qbf.contains_argument('a') and qbf.contains_argument('b') and qbf.contains_argument('c')
     assert not qbf.contains_argument('d')
 
-# TEST INITIAL WEIGHTS
+# TEST INITIAL STRENGTHS
 
-def test_access_initial_weight():
+def test_access_initial_strength():
     qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')])
-    for argument, weight in qbf.initial_weights.items():
-        assert qbf.initial_weight(argument) == weight
+    for argument, strength in qbf.initial_strengths.items():
+        assert qbf.initial_strength(argument) == strength
     with pytest.raises(ValueError):
-        qbf.initial_weight('d')
+        qbf.initial_strength('d')
 
-def test_modify_initial_weight():
+def test_modify_initial_strength():
     qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')])
-    initial_weights = qbf.initial_weights
-    initial_weights['a'] = 0.0
-    assert qbf.initial_weight('a') == 1.0
+    initial_strengths = qbf.initial_strengths
+    initial_strengths['a'] = 0.0
+    assert qbf.initial_strength('a') == 1.0
 
-    qbf.modify_initial_weight('c', 4)
-    assert qbf.initial_weight('c') == 4.0
+    qbf.modify_initial_strength('c', 4)
+    assert qbf.initial_strength('c') == 4.0
 
     qbf.add_argument('a', 0.0)
-    assert qbf.initial_weight('a') == 1.0
+    assert qbf.initial_strength('a') == 1.0
 
 # TEST ATTACK RELATIONS
 
@@ -307,49 +307,107 @@ def test_modify_support_relations():
     with pytest.raises(PermissionError):
         qbf.support_relations.remove('a', 'b')
 
-# TEST FINAL WEIGHTS
+# TEST FINAL STRENGTHS
 
-def test_access_final_weight():
+def test_access_final_strength():
     qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')])
-    for argument, weight in qbf.final_weights.items():
-        assert qbf.final_weight(argument) == weight
+    for argument, strength in qbf.final_strengths.items():
+        assert qbf.final_strength(argument) == strength
     with pytest.raises(ValueError):
-        qbf.final_weight('d')
-    assert qbf.final_weights == {'a': 1.0, 'c': 4.0, 'b': 2.0}
+        qbf.final_strength('d')
+    assert qbf.final_strengths == {'a': 1.0, 'c': 4.0, 'b': 2.0}
 
     qbfe = qbf.copy()
-    assert qbfe.final_weights == {'a': 1.0, 'c': 4.0, 'b': 2.0}
-    qbfe.add_argument('e', initial_weight=3)
+    assert qbfe.final_strengths == {'a': 1.0, 'c': 4.0, 'b': 2.0}
+    qbfe.add_argument('e', initial_strength=3)
     qbfe.add_attack_relation('e', 'c')
-    assert qbfe.final_weights == {'a': 1.0, 'e': 3.0, 'c': 1.0, 'b': 2.0}
+    assert qbfe.final_strengths == {'a': 1.0, 'e': 3.0, 'c': 1.0, 'b': 2.0}
 
     qbfa = qbfe.copy()
-    assert qbfa.final_weights == {'a': 1.0, 'e': 3.0, 'c': 1.0, 'b': 2.0}
+    assert qbfa.final_strengths == {'a': 1.0, 'e': 3.0, 'c': 1.0, 'b': 2.0}
     qbfa.remove_attack_relation('e', 'c')
     qbfa.remove_argument('e')
-    qbfa.modify_initial_weight('a', 2)
-    assert qbfa.final_weights == {'a': 2.0, 'c': 3.0, 'b': 3.0}
+    qbfa.modify_initial_strength('a', 2)
+    assert qbfa.final_strengths == {'a': 2.0, 'c': 3.0, 'b': 3.0}
 
     qbf_ = qbfa.copy()
-    qbf_.final_weights == {'a': 2.0, 'c': 3.0, 'b': 3.0}
+    qbf_.final_strengths == {'a': 2.0, 'c': 3.0, 'b': 3.0}
     qbf_.add_argument('e', 3)
     qbf_.add_attack_relation('e', 'c')
     qbf_.add_argument('d', 1)
     qbf_.add_attack_relation('d', 'a')
     qbf_.add_support_relation('d', 'e')
-    qbf_.final_weights == {'d': 1.0, 'a': 1.0, 'e': 4.0, 'c': 0.0, 'b': 2.0}
+    qbf_.final_strengths == {'d': 1.0, 'a': 1.0, 'e': 4.0, 'c': 0.0, 'b': 2.0}
 
-def test_modify_final_weight():
+def test_modify_final_strength():
     qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')])
-    final_weights = qbf.final_weights
-    final_weights['a'] = 0.0
-    assert qbf.initial_weight('a') == 1.0
+    final_strengths = qbf.final_strengths
+    final_strengths['a'] = 0.0
+    assert qbf.initial_strength('a') == 1.0
 
-    qbf.modify_initial_weight('c', 4)
-    assert qbf.final_weight('c') == 3.0
+    qbf.modify_initial_strength('c', 4)
+    assert qbf.final_strength('c') == 3.0
 
     qbf.add_argument('a', 0.0)
-    assert qbf.final_weight('a') == 1.0
+    assert qbf.final_strength('a') == 1.0
+
+# TEST ATTACKED/SUPPORTED BY AND ATTACKERS/SUPPORTERS OF
+
+def test_attackedBy_attackersOf_incorrect_input():
+    framework = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3],
+                            [('a', 'c'), ('e', 'c')],
+                            [('a', 'b'), ('e', 'a')])
+    
+    with pytest.raises(TypeError):
+        framework.attackedBy([])
+    with pytest.raises(ValueError):
+        framework.attackedBy('f')
+    with pytest.raises(TypeError):
+        framework.attackersOf([])
+    with pytest.raises(ValueError):
+        framework.attackersOf('f')
+
+def test_attackedBy():
+    framework = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3],
+                            [('a', 'c'), ('e', 'c')],
+                            [('a', 'b'), ('e', 'a')])
+    for arg in ['a', 'b', 'c', 'e']:
+        assert set(framework.attack_relations.patients(arg)) == set(framework.attackedBy(arg))
+
+def test_attackersOf():
+    framework = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3],
+                            [('a', 'c'), ('e', 'c')],
+                            [('a', 'b'), ('e', 'a')])
+    for arg in ['a', 'b', 'c', 'e']:
+        assert set(framework.attack_relations.agents(arg)) == set(framework.attackersOf(arg))
+
+def test_supportedBy_supportersOf_incorrect_input():
+    framework = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3],
+                            [('a', 'c'), ('e', 'c')],
+                            [('a', 'b'), ('e', 'a')])
+    
+    with pytest.raises(TypeError):
+        framework.supportedBy([])
+    with pytest.raises(ValueError):
+        framework.supportedBy('f')
+    with pytest.raises(TypeError):
+        framework.supportersOf([])
+    with pytest.raises(ValueError):
+        framework.supportersOf('f')
+
+def test_supportedBy():
+    framework = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3],
+                            [('a', 'c'), ('e', 'c')],
+                            [('a', 'b'), ('e', 'a')])
+    for arg in ['a', 'b', 'c', 'e']:
+        assert set(framework.support_relations.patients(arg)) == set(framework.supportedBy(arg))
+
+def test_supportersOf():
+    framework = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3],
+                            [('a', 'c'), ('e', 'c')],
+                            [('a', 'b'), ('e', 'a')])
+    for arg in ['a', 'b', 'c', 'e']:
+        assert set(framework.support_relations.agents(arg)) == set(framework.supportersOf(arg))
 
 # TEST COPY
 
@@ -357,28 +415,28 @@ def test_copy():
     qbf = QBAFramework(['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')], disjoint_relations=False)
     copy = qbf.copy()
     assert qbf.arguments == copy.arguments
-    assert qbf.initial_weights == copy.initial_weights
+    assert qbf.initial_strengths == copy.initial_strengths
     assert qbf.attack_relations.relations == copy.attack_relations.relations
     assert qbf.support_relations.relations == copy.support_relations.relations
     assert qbf.disjoint_relations == copy.disjoint_relations
     copy.add_argument('d', 3)
-    copy.modify_initial_weight('c', 3)
+    copy.modify_initial_strength('c', 3)
     copy.remove_attack_relation('a', 'c')
     copy.add_support_relation('a', 'c')
     copy.disjoint_relations = True
     assert qbf.arguments != copy.arguments
-    assert qbf.initial_weights != copy.initial_weights
+    assert qbf.initial_strengths != copy.initial_strengths
     assert qbf.attack_relations.relations != copy.attack_relations.relations
     assert qbf.support_relations.relations != copy.support_relations.relations
     assert qbf.disjoint_relations != copy.disjoint_relations
 
 def test_copy_semantics():
-    args,initial_weights,att,supp = ['a', 'b', 'c'], [0.1, 0.1, 0.5], [('a', 'c')], [('a', 'b')]
-    qbf = QBAFramework(args,initial_weights, att, supp, semantics="DFQuAD_model")
+    args,initial_strengths,att,supp = ['a', 'b', 'c'], [0.1, 0.1, 0.5], [('a', 'c')], [('a', 'b')]
+    qbf = QBAFramework(args,initial_strengths, att, supp, semantics="DFQuAD_model")
     copy = qbf.copy()
     assert qbf.semantics == copy.semantics
-    assert qbf.min_weight == copy.min_weight
-    assert qbf.max_weight == copy.max_weight
+    assert qbf.min_strength == copy.min_strength
+    assert qbf.max_strength == copy.max_strength
 
 # TEST ACYCLIC
 
@@ -389,7 +447,7 @@ def test_isacyclic():
     qbf.add_attack_relation('c', 'a')
     assert not qbf.isacyclic()
     with pytest.raises(NotImplementedError):
-        qbf.final_weights
+        qbf.final_strengths
 
 # TEST EQUALS
 
@@ -404,7 +462,7 @@ def test_equals():
     assert not qbf == copy
 
     copy = qbf.copy()
-    copy.modify_initial_weight('c', 3)
+    copy.modify_initial_strength('c', 3)
     assert qbf != copy
     assert not qbf == copy
 
