@@ -1335,6 +1335,134 @@ QBAFramework_contains_support_relation(QBAFrameworkObject *self, PyObject *args,
 }
 
 /**
+ * @brief Return the arguments that are attacked by the argument attacker,
+ * NULL (with the corresponding exception) if an error has occurred.
+ * 
+ * @param self 
+ * @param args the argument values (attacker: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new PyList of QBAFArgument, NULL if an error occurred
+ */
+static PyObject *
+QBAFramework_attackedBy(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"attacker", NULL};
+    PyObject *attacker;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
+                                     &attacker))
+        return NULL;
+
+    int contains = PySet_Contains(self->arguments, attacker);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (!contains) {
+        PyErr_SetString(PyExc_ValueError,
+                        "attacker must be an argument of the framework");
+        return NULL;
+    }
+
+    return _QBAFARelations_patients(self->attack_relations, attacker);
+}
+
+/**
+ * @brief Return the arguments that are attacking the argument attacked,
+ * NULL (with the corresponding exception) if an error has occurred.
+ * 
+ * @param self 
+ * @param args the argument values (attacked: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new PyList of QBAFArgument, NULL if an error occurred
+ */
+static PyObject *
+QBAFramework_attackersOf(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"attacked", NULL};
+    PyObject *attacked;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
+                                     &attacked))
+        return NULL;
+
+    int contains = PySet_Contains(self->arguments, attacked);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (!contains) {
+        PyErr_SetString(PyExc_ValueError,
+                        "attacked must be an argument of the framework");
+        return NULL;
+    }
+
+    return _QBAFARelations_agents(self->attack_relations, attacked);
+}
+
+/**
+ * @brief Return the arguments that are supported by the argument supporter,
+ * NULL (with the corresponding exception) if an error has occurred.
+ * 
+ * @param self 
+ * @param args the argument values (supporter: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new PyList of QBAFArgument, NULL if an error occurred
+ */
+static PyObject *
+QBAFramework_supportedBy(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"supporter", NULL};
+    PyObject *supporter;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
+                                     &supporter))
+        return NULL;
+
+    int contains = PySet_Contains(self->arguments, supporter);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (!contains) {
+        PyErr_SetString(PyExc_ValueError,
+                        "supporter must be an argument of the framework");
+        return NULL;
+    }
+
+    return _QBAFARelations_patients(self->support_relations, supporter);
+}
+
+/**
+ * @brief Return the arguments that are supporting the argument supported,
+ * NULL (with the corresponding exception) if an error has occurred.
+ * 
+ * @param self 
+ * @param args the argument values (supported: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new PyList of QBAFArgument, NULL if an error occurred
+ */
+static PyObject *
+QBAFramework_supportersOf(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"supported", NULL};
+    PyObject *supported;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|", kwlist,
+                                     &supported))
+        return NULL;
+
+    int contains = PySet_Contains(self->arguments, supported);
+    if (contains < 0) {
+        return NULL;
+    }
+    if (!contains) {
+        PyErr_SetString(PyExc_ValueError,
+                        "supported must be an argument of the framework");
+        return NULL;
+    }
+
+    return _QBAFARelations_agents(self->support_relations, supported);
+}
+
+/**
  * @brief Return a shallow copy of this instance.
  * New references are created for the copy, except for the QBAFArgument and QBAFARelations.
  * 
@@ -3288,6 +3416,18 @@ static PyMethodDef QBAFramework_methods[] = {
     },
     {"contains_support_relation", (PyCFunctionWithKeywords) QBAFramework_contains_support_relation, METH_VARARGS | METH_KEYWORDS,
     "Return whether or not the Support relation (supporter, supported) is contained in the Framework."
+    },
+    {"attackedBy", (PyCFunctionWithKeywords) QBAFramework_attackedBy, METH_VARARGS | METH_KEYWORDS,
+    "Return the arguments that are attacked by the argument attacker."
+    },
+    {"attackersOf", (PyCFunctionWithKeywords) QBAFramework_attackersOf, METH_VARARGS | METH_KEYWORDS,
+    "Return the arguments that are attacking the argument attacked."
+    },
+    {"supportedBy", (PyCFunctionWithKeywords) QBAFramework_supportedBy, METH_VARARGS | METH_KEYWORDS,
+    "Return the arguments that are supported by the argument supporter."
+    },
+    {"supportersOf", (PyCFunctionWithKeywords) QBAFramework_supportersOf, METH_VARARGS | METH_KEYWORDS,
+    "Return the arguments that are supporting the argument supported."
     },
     {"__copy__", (PyCFunction) QBAFramework_copy, METH_NOARGS,
     "Return shallow a copy of the instance."

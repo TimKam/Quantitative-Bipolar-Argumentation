@@ -427,6 +427,50 @@ class QBAFramework:
         """
         return self.__support_relations.contains(supporter, supported)
 
+    def attackedBy(self, attacker) -> list:
+        """ Return the arguments that are attacked by the argument attacker.
+
+        Args:
+            attacker (QBAFArgument): the argument that is attacking
+
+        Returns:
+            list: the arguments that are attacked by attacker
+        """
+        return self.__attack_relations.patients(attacker)
+
+    def attackersOf(self, attacked) -> list:
+        """ Return the arguments that are attacking the argument attacked.
+
+        Args:
+            attacked (QBAFArgument): the argument that is attacked
+
+        Returns:
+            list: the arguments that are attacking the argument attacker
+        """
+        return self.__attack_relations.agents(attacked)
+
+    def supportedBy(self, supporter) -> list:
+        """ Return the arguments that are supported by the argument supporter.
+
+        Args:
+            supporter (QBAFArgument): the argument that is supporting
+
+        Returns:
+            list: the arguments that are supported by supporter
+        """
+        return self.__support_relations.patients(supporter)
+
+    def supportersOf(self, supported) -> list:
+        """ Return the arguments that are supporting the argument supported.
+
+        Args:
+            supported (QBAFArgument): the argument that is supported
+
+        Returns:
+            list: the arguments that are supporting the argument supporter
+        """
+        return self.__support_relations.agents(supported)
+
     def __copy__(self):
         """ Return a copy of the Framework.
 
