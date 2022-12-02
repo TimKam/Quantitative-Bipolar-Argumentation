@@ -12,15 +12,18 @@ def main():
     setup(
         name='qbaf-py',
         python_requires='>=3.8',
-        version='0.1',
+        version='0.1.0',
+        description='QBAF-Py is a package for argumentation-based reasoning of Quantitative Bipolar Argumentation Frameworks.',
+        author='José Ruiz Alarcón',
         ext_modules=[Extension('qbaf', 
                         include_dirs = [include_folder],
                         sources = source_files)],
         extras_require={
-        'dev': [
-            'pytest'
-        ]
-    }
+            'dev': [
+                'pytest'
+            ]
+        },
+        license='GPL-2'
     )
 
 if __name__ == '__main__':
