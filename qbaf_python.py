@@ -223,12 +223,12 @@ class QBAFramework:
         an attack relation Att ⊆ Args x Args, a support relation Supp ⊆ Args x Args and
         a total function τ : Args → I that assigns the initial strength τ(a) to every a ∈ Args.
     """
-    def __init__(self, arguments: list, initial_weights: list, attack_relations: Union[set,list], support_relations: Union[set,list]):
+    def __init__(self, arguments: list, initial_strengths: list, attack_relations: Union[set,list], support_relations: Union[set,list]):
         """ Init function of a QBAFramework.
 
         Args:
             arguments (list): a list of QBAFArgument
-            initial_weights (list): a list of floats corresponding to the arguments
+            initial_strengths (list): a list of floats corresponding to the arguments
             attack_relations (Union[set,list]): a collection of tuples (attacker: QBAFArgument, attacked: QBAFArgument)
             support_relations (Union[set,list]): a collection of tuples (supporter: QBAFArgument, supported: QBAFArgument)
 
@@ -237,9 +237,9 @@ class QBAFramework:
             ValueError: The attack relations and the support relations are not disjoint
         """
         self.__arguments = set(arguments)
-        self.__initial_weights = dict()
-        for arg, init_weight in zip(arguments, initial_weights):
-            self.__initial_weights[arg] = init_weight
+        self.__initial_strengths = dict()
+        for arg, init_strength in zip(arguments, initial_strengths):
+            self.__initial_strengths[arg] = init_strength
         self.__attack_relations = QBAFARelations(attack_relations)
         self.__support_relations = QBAFARelations(support_relations)
         # Checking its integrity
@@ -252,8 +252,8 @@ class QBAFramework:
         if not self.__attack_relations.isdisjoint(self.__support_relations):
             raise ValueError
         # Adding support variables
-        self.__final_weights = dict()
-        self.__modified = True          # True if the object have been modified after calculating the final weights
+        self.__final_strengths = dict()
+        self.__modified = True          # True if the object have been modified after calculating the final strengths
 
     @property
     def arguments(self) -> set:
@@ -283,46 +283,46 @@ class QBAFramework:
         return self.__support_relations
 
     @property
-    def initial_weights(self) -> dict:
-        """ Return a copy of the initial weights.
+    def initial_strengths(self) -> dict:
+        """ Return a copy of the initial strengths.
 
         Returns:
-            dict: a dictionary (argument: QBAFArgument, initial_weight: float)
+            dict: a dictionary (argument: QBAFArgument, initial_strength: float)
         """
-        return self.__initial_weights.copy()
+        return self.__initial_strengths.copy()
 
-    def modify_initial_weight(self, argument: QBAFArgument, initial_weight: float):
-        """ Modify the initial weight of the Argument argument.
+    def modify_initial_strength(self, argument: QBAFArgument, initial_strength: float):
+        """ Modify the initial strength of the Argument argument.
 
         Args:
             argument (QBAFArgument): the argument to be modified
-            initial_weight (float): the new value of initial weight
+            initial_strength (float): the new value of initial strength
         """
         self.__modified = True
-        self.__initial_weights[argument] = initial_weight
+        self.__initial_strengths[argument] = initial_strength
     
-    def initial_weight(self, argument: QBAFARelations) -> float:
-        """ Return the initial weight of the Argument argument.
+    def initial_strength(self, argument: QBAFARelations) -> float:
+        """ Return the initial strength of the Argument argument.
 
         Args:
             argument (QBAFARelations): the argument
 
         Returns:
-            float: the initial weight
+            float: the initial strength
         """
-        return self.__initial_weights[argument]
+        return self.__initial_strengths[argument]
 
-    def add_argument(self, argument: QBAFArgument, initial_weight=0.0):
+    def add_argument(self, argument: QBAFArgument, initial_strength=0.0):
         """ Add an Argument to the Framework. If it exists already it does nothing.
 
         Args:
             argument (QBAFArgument): the argument
-            initial_weight (float, optional): the initial weight of the argument. Defaults to 0.0.
+            initial_strength (float, optional): the initial strength of the argument. Defaults to 0.0.
         """
         if argument not in self.__arguments:
             self.__modified = True
             self.__arguments.add(argument)
-            self.__initial_weights[argument] = initial_weight
+            self.__initial_strengths[argument] = initial_strength
 
     def remove_argument(self, argument: QBAFArgument):
         """ Remove the Argument argument from the Framework. If it does not exist it does nothing.
@@ -334,7 +334,7 @@ class QBAFramework:
             # TODO: Check that the argument is not in attack/support relations
             self.__modified = True
             self.__arguments.remove(argument)
-            del self.__initial_weights[argument]
+            del self.__initial_strengths[argument]
 
     def add_attack_relation(self, attacker: QBAFArgument, attacked: QBAFArgument):
         """ Add the Attack relation (attacker, attacked) to the Framework.
@@ -427,6 +427,50 @@ class QBAFramework:
         """
         return self.__support_relations.contains(supporter, supported)
 
+    def attackedBy(self, attacker) -> list:
+        """ Return the arguments that are attacked by the argument attacker.
+
+        Args:
+            attacker (QBAFArgument): the argument that is attacking
+
+        Returns:
+            list: the arguments that are attacked by attacker
+        """
+        return self.__attack_relations.patients(attacker)
+
+    def attackersOf(self, attacked) -> list:
+        """ Return the arguments that are attacking the argument attacked.
+
+        Args:
+            attacked (QBAFArgument): the argument that is attacked
+
+        Returns:
+            list: the arguments that are attacking the argument attacker
+        """
+        return self.__attack_relations.agents(attacked)
+
+    def supportedBy(self, supporter) -> list:
+        """ Return the arguments that are supported by the argument supporter.
+
+        Args:
+            supporter (QBAFArgument): the argument that is supporting
+
+        Returns:
+            list: the arguments that are supported by supporter
+        """
+        return self.__support_relations.patients(supporter)
+
+    def supportersOf(self, supported) -> list:
+        """ Return the arguments that are supporting the argument supported.
+
+        Args:
+            supported (QBAFArgument): the argument that is supported
+
+        Returns:
+            list: the arguments that are supporting the argument supporter
+        """
+        return self.__support_relations.agents(supported)
+
     def __copy__(self):
         """ Return a copy of the Framework.
 
@@ -434,13 +478,13 @@ class QBAFramework:
             QBAFramework: a new QBAFramework
         """
         arguments = []
-        initial_weights = []
-        for arg, init_weight in self.__initial_weights.items():
+        initial_strengths = []
+        for arg, init_strength in self.__initial_strengths.items():
             arguments.append(arg)
-            initial_weights.append(init_weight)
+            initial_strengths.append(init_strength)
         attack_relations = self.__attack_relations.relations
         support_relations = self.__support_relations.relations
-        return QBAFramework(arguments, initial_weights, attack_relations, support_relations)
+        return QBAFramework(arguments, initial_strengths, attack_relations, support_relations)
 
     def __incycle_arguments(self, argument:QBAFArgument, not_visited: set, visiting=set()) -> list:
         """ Return a list with the arguments that are being attacked/supported by Argument argument (itself included)
@@ -484,30 +528,30 @@ class QBAFramework:
                 return False
         return True
 
-    def __calculate_f_weight(self, argument: QBAFArgument) -> float:
-        """ Return the final weight of a specific argument.
+    def __calculate_f_strength(self, argument: QBAFArgument) -> float:
+        """ Return the final strength of a specific argument.
             This function calls itself recursively. So, it only works with acyclic arguments.
-            It stores all the calculated final weights in self.__final_weights.
+            It stores all the calculated final strengths in self.__final_strengths.
 
         Args:
             argument (QBAFArgument): the QBAFArgument
 
         Returns:
-            float: the final weight of the argument
+            float: the final strength of the argument
         """
-        if argument in self.__final_weights:
-            return self.__final_weights[argument]
-        final_weight = self.initial_weight(argument)
+        if argument in self.__final_strengths:
+            return self.__final_strengths[argument]
+        final_strength = self.initial_strength(argument)
         for attacker in self.__attack_relations.agents(argument):
-            final_weight -= self.__calculate_f_weight(attacker)
+            final_strength -= self.__calculate_f_strength(attacker)
         for supporter in self.__support_relations.agents(argument):
-            final_weight += self.__calculate_f_weight(supporter)
-        self.__final_weights[argument] = final_weight
-        return final_weight
+            final_strength += self.__calculate_f_strength(supporter)
+        self.__final_strengths[argument] = final_strength
+        return final_strength
 
-    def __calculate_final_weights(self):
-        """ Calculate the final weights of all the arguments of the Framework.
-            It stores all the calculated final weights in self.__final_weights.
+    def __calculate_final_strengths(self):
+        """ Calculate the final strengths of all the arguments of the Framework.
+            It stores all the calculated final strengths in self.__final_strengths.
 
         Raises:
             NotImplementedError: The relations are not acyclic. There is no implementation for cyclic relations.
@@ -515,41 +559,41 @@ class QBAFramework:
         if not self.isacyclic():
             raise NotImplementedError
 
-        self.__final_weights = dict()
+        self.__final_strengths = dict()
         not_visited = self.__arguments.copy()
         while len(not_visited) > 0:
             argument = not_visited.pop()
-            self.__calculate_f_weight(argument)
+            self.__calculate_f_strength(argument)
 
     @property
-    def final_weights(self) -> dict:
-        """ Return the final weights of arguments of the Framework.
+    def final_strengths(self) -> dict:
+        """ Return the final strengths of arguments of the Framework.
             If the framework has been modified from the last time they were calculated
-            they are calculated again. Otherwise, it returns the already calculated final weights.
+            they are calculated again. Otherwise, it returns the already calculated final strengths.
 
         Returns:
-            dict: a dictionary with (key, value): (argument: QBAFArgument, final_weight: float)
+            dict: a dictionary with (key, value): (argument: QBAFArgument, final_strength: float)
         """
         if self.__modified:
-            self.__calculate_final_weights()
+            self.__calculate_final_strengths()
             self.__modified = False
-        return self.__final_weights.copy()
+        return self.__final_strengths.copy()
 
-    def final_weight(self, argument: QBAFArgument) -> float:
-        """ Return the final weights of Argument argument of the Framework.
-            If the framework has been modified from the last time the final weights were calculated
-            they are calculated again. Otherwise, it returns the already calculated final weight.
+    def final_strength(self, argument: QBAFArgument) -> float:
+        """ Return the final strengths of Argument argument of the Framework.
+            If the framework has been modified from the last time the final strengths were calculated
+            they are calculated again. Otherwise, it returns the already calculated final strength.
 
         Args:
             argument (QBAFArgument): the argument
 
         Returns:
-            float: the final weight
+            float: the final strength
         """
         if self.__modified:
-            self.__calculate_final_weights()
+            self.__calculate_final_strengths()
             self.__modified = False
-        return self.__final_weights[argument]
+        return self.__final_strengths[argument]
 
     def are_strength_consistent(self, other, arg1: QBAFArgument, arg2: QBAFArgument) -> bool:
         """ Return whether or not a pair of arguments are strength consistent between two frameworks.
@@ -562,11 +606,11 @@ class QBAFramework:
         Returns:
             bool: True if they are strength consistent. False, otherwise.
         """
-        if self.final_weights[arg1] < self.final_weights[arg2]:
-            return other.final_weights[arg1] < other.final_weights[arg2]
-        if self.final_weights[arg1] > self.final_weights[arg2]:
-            return other.final_weights[arg1] > other.final_weights[arg2]
-        return other.final_weights[arg1] == other.final_weights[arg2]
+        if self.final_strengths[arg1] < self.final_strengths[arg2]:
+            return other.final_strengths[arg1] < other.final_strengths[arg2]
+        if self.final_strengths[arg1] > self.final_strengths[arg2]:
+            return other.final_strengths[arg1] > other.final_strengths[arg2]
+        return other.final_strengths[arg1] == other.final_strengths[arg2]
 
     def reversal(self, other, set):
         """ Return the reversal framework of self (QBF') to other (QBF) w.r.t. set ⊆ Args'∪Args.
@@ -583,34 +627,32 @@ class QBAFramework:
 
         args = (self.__arguments.union(set)).difference(set.difference(other.__arguments))
         
-        att = QBAFARelations([])
-        for arg in args.difference(set):
-            for attacked in self.__attack_relations.patients(arg):
-                att.add(arg, attacked)
+        att = self.__attack_relations.copy()
         for arg in set:
-            for attacked in other.__attack_relations.patients(arg):
+            for attacked in self.__attack_relations.patients(arg).intersection(other):
+                att.remove(arg, attacked)
+            for attacked in other.__attack_relations.patients(arg).intersection(args):
                 att.add(arg, attacked)
         
-        supp = QBAFARelations([])
-        for arg in args.difference(set):
-            for supported in self.__support_relations.patients(arg):
-                supp.add(arg, supported)
+        supp = self.__support_relations.copy()
         for arg in set:
-            for supported in other.__support_relations.patients(arg):
+            for supported in self.__support_relations.patients(arg).intersection(other):
+                supp.remove(arg, supported)
+            for supported in other.__support_relations.patients(arg).intersection(args):
                 supp.add(arg, supported)
         
-        initial_weights = dict()
+        initial_strengths = dict()
         for arg in args:
             if arg in other.__arguments.intersection(set):
-                initial_weights[arg] = other.__initial_weights[arg]
+                initial_strengths[arg] = other.__initial_strengths[arg]
             else:
-                initial_weights[arg] = self.__initial_weights[arg]
+                initial_strengths[arg] = self.__initial_strengths[arg]
         
         reversal = QBAFramework([],[],[],[])
         reversal.__arguments = args
         reversal.__attack_relations = att
         reversal.__support_relations = supp
-        reversal.__initial_weights = initial_weights
+        reversal.__initial_strengths = initial_strengths
         reversal.__modified = True
 
         return reversal
@@ -730,7 +772,7 @@ class QBAFramework:
     def __candidate_argument(self, other, argument: QBAFArgument) -> bool:
         """ Return True if the Argument argument is candidate for a CSI explanation, False if not.
         An Argument is candidate if it is not contained by one of the frameworks or
-        it has a different initial weight or it has a different final weight between the frameworks or
+        it has a different initial strength or it has a different final strength between the frameworks or
         it has different relations as attacker/supporter (as attacked/supported not checked).
 
         Args:
@@ -742,9 +784,9 @@ class QBAFramework:
         """
         if not (argument in self.__arguments and argument in other.__arguments):
             return True
-        if self.__initial_weights[argument] != other.__initial_weights[argument]:
+        if self.__initial_strengths[argument] != other.__initial_strengths[argument]:
             return True
-        if self.final_weight(argument) != other.final_weight(argument):
+        if self.final_strength(argument) != other.final_strength(argument):
             return True
         if self.__attack_relations.patients(argument) != other.__attack_relations.patients(argument):
             return True
@@ -829,7 +871,7 @@ class QBAFramework:
 
     def __eq__(self, other: object) -> bool:
         return (self.__arguments == other.__arguments
-            and self.__initial_weights == other.__initial_weights
+            and self.__initial_strengths == other.__initial_strengths
             and self.__attack_relations == other.__attack_relations
             and self.__support_relations == other.__support_relations)
         
