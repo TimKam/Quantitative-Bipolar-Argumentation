@@ -956,6 +956,88 @@ QBAFARelations_contains_argument(QBAFARelationsObject *self, PyObject *argument)
 }
 
 /**
+ * @brief Remove all relations that contain the QBAFArgument argument.
+ * If an error occurred, -1 is returned with its corresponding exception.
+ * 
+ * @param self an instance of QBAFARelations
+ * @param argument an instance of QBAFArgument
+ * @return int 0 if succeeded, and -1 if an error is encountered
+ */
+static inline int
+_QBAFARelations_remove_argument(QBAFARelationsObject *self, PyObject *argument)
+{
+    PyObject *list, *iterator, *agent, *patient;
+    
+    list = _QBAFARelations_agents(self, argument); // New reference
+    if (list == NULL) {
+        return -1;
+    }
+    iterator = PyObject_GetIter(list);
+    if (iterator == NULL) {
+        Py_DECREF(list);
+        return -1;
+    }
+    while ((agent = PyIter_Next(iterator))) {
+        if (_QBAFARelations_remove(self, agent, argument) < 0) {
+            Py_DECREF(list); Py_DECREF(iterator); Py_DECREF(agent);
+            return -1;
+        }
+        Py_DECREF(agent);
+    }
+    Py_DECREF(iterator);
+    Py_DECREF(list);
+
+    list = _QBAFARelations_patients(self, argument); // New reference
+    if (list == NULL) {
+        return -1;
+    }
+    iterator = PyObject_GetIter(list);
+    if (iterator == NULL) {
+        Py_DECREF(list);
+        return -1;
+    }
+    while ((patient = PyIter_Next(iterator))) {
+        if (_QBAFARelations_remove(self, argument, patient) < 0) {
+            Py_DECREF(list); Py_DECREF(iterator); Py_DECREF(patient);
+            return -1;
+        }
+        Py_DECREF(patient);
+    }
+    Py_DECREF(iterator);
+    Py_DECREF(list);
+
+    return 0;
+}
+
+/**
+ * @brief Remove all relations that contain any QBAFArgument of the the iterable.
+ * Return -1 if an error has occurred, with its corresponding exception.
+ * 
+ * @param self an instance of QBAFARelations
+ * @param iterable an iterable of QBAFArgument
+ * @return int 0 if succeeded, and -1 if an error is encountered
+ */
+int
+_QBAFARelations_remove_arguments(QBAFARelationsObject *self, PyObject *iterable)
+{
+    PyObject *argument;
+    PyObject *iterator = PyObject_GetIter(iterable);
+    if (iterator == NULL) {
+        return -1;
+    }
+
+    while ((argument = PyIter_Next(iterator))) {
+        if (_QBAFARelations_remove_argument(self, argument) < 0) {
+            Py_DECREF(argument); Py_DECREF(iterator);
+            return -1;
+        }
+        Py_DECREF(argument);
+    }
+
+    return 0;
+}
+
+/**
  * @brief Return the patients that undergo the effect of a certain action (e.g. attack, support)
  * initiated by the agent. Return NULL if an error has ocurred.
  * 

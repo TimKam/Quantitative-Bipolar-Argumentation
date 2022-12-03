@@ -633,6 +633,11 @@ class QBAFramework:
                 att.remove(arg, attacked)
             for attacked in other.__attack_relations.patients(arg).intersection(args):
                 att.add(arg, attacked)
+        for arg in self.__arguments.union(other.__arguments).difference(args):
+            for attacked in att.patients(arg):
+                att.remove(arg, attacked)
+            for attacker in att.agents(arg):
+                att.remove(attacker, arg)
         
         supp = self.__support_relations.copy()
         for arg in set:
@@ -640,6 +645,11 @@ class QBAFramework:
                 supp.remove(arg, supported)
             for supported in other.__support_relations.patients(arg).intersection(args):
                 supp.add(arg, supported)
+        for arg in self.__arguments.union(other.__arguments).difference(args):
+            for supported in supp.patients(arg):
+                supp.remove(arg, supported)
+            for supporter in supp.agents(arg):
+                supp.remove(supporter, arg)
         
         initial_strengths = dict()
         for arg in args:

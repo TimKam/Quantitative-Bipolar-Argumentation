@@ -2302,6 +2302,28 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
     }
     Py_DECREF(set_iterator);
 
+    // Remove the attack/support relations that are not in Args*xArgs*
+    PyObject *self_union_other_arguments = PySet_Union(self->arguments, other->arguments);
+    if (self_union_other_arguments == NULL) {
+        Py_DECREF(reversal);
+        return NULL;
+    }
+    PyObject *self_union_other_difference_reversal_arguments = PySet_Difference(self_union_other_arguments, reversal->arguments);
+    Py_DECREF(self_union_other_arguments);
+    if (self_union_other_difference_reversal_arguments == NULL) {
+        Py_DECREF(reversal);
+        return NULL;
+    }
+    if (_QBAFARelations_remove_arguments((QBAFARelationsObject*)reversal->attack_relations, self_union_other_difference_reversal_arguments) < 0) {
+        Py_DECREF(reversal); Py_DECREF(self_union_other_difference_reversal_arguments);
+        return NULL;
+    }
+    if (_QBAFARelations_remove_arguments((QBAFARelationsObject*)reversal->support_relations, self_union_other_difference_reversal_arguments) < 0) {
+        Py_DECREF(reversal); Py_DECREF(self_union_other_difference_reversal_arguments);
+        return NULL;
+    }
+    Py_DECREF(self_union_other_difference_reversal_arguments);
+
     // Modify initial strengths
     if (reversal->initial_strengths == NULL) { // It should be an empty PyDict
         return NULL;
