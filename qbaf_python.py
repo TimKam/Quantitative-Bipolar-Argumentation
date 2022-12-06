@@ -1,3 +1,8 @@
+"""
+This file has been used as template for the implementation in C.
+It is not meant to be executed. It has not been checked if it works.
+"""
+
 from typing import Union
 
 class QBAFArgument:
