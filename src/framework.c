@@ -1748,6 +1748,18 @@ _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argum
         return -1.0;
     }
 
+    // if len(attackers) > 0: attackers_aggregation = attackers[0]
+    item = PyIter_Next(iterator);
+    if (item != NULL) {
+        attackers_aggregation = _QBAFramework_calculate_final_strength(self, item);
+        Py_DECREF(item);
+        if (attackers_aggregation == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(attackers); Py_DECREF(iterator);
+            return -1.0;
+        }
+    }
+
+    // for item in attackers[1:]:
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
         double item_final_strength = _QBAFramework_calculate_final_strength(self, item);
         Py_DECREF(item);
@@ -1773,6 +1785,18 @@ _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argum
         return -1.0;
     }
 
+    // if len(supporters) > 0: supporters_aggregation = supporters[0]
+    item = PyIter_Next(iterator);
+    if (item != NULL) {
+        supporters_aggregation = _QBAFramework_calculate_final_strength(self, item);
+        Py_DECREF(item);
+        if (supporters_aggregation == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(supporters); Py_DECREF(iterator);
+            return -1.0;
+        }
+    }
+
+    // for item in supporters[1:]:
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
         double item_final_strength = _QBAFramework_calculate_final_strength(self, item);
         Py_DECREF(item);
