@@ -153,84 +153,81 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
                                      &relations))
         return -1;
 
-    if (relations) { // It will always be true
-
-        if (!PySet_Check(relations) && !PyList_Check(relations)) {
-            PyErr_SetString(PyExc_TypeError,
-                            "relations parameter must be a set or a list");
-            return -1;
-        }
-
-        // Initialize relations
-        tmp = self->relations;
-        relations = PySet_New(relations);           // It creates a new reference
-        if (relations == NULL) { // If any item is not hashable it raises and error
-            return -1;
-        }
-        self->relations = relations;
-        Py_DECREF(tmp);                             // This instance stops owning the set created in the constructor
-
-        // Initialize agent_patients & patient_agents
-        PyObject *iterator = PyObject_GetIter(self->relations);
-        PyObject *item;
-        PyObject *agent, *patient;
-        PyObject *set;
-
-        if (iterator == NULL) {
-            /* propagate error */
-            return -1;
-        }
-
-        while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-            /* do something with item */
-            if (!PyTuple_Check(item) || (PyTuple_Size(item) != 2)) {
-                PyErr_SetString(PyExc_TypeError,
-                            "every item of relations must be a tuple of size 2");
-                Py_DECREF(item);
-                break;
-            }
-
-            agent = PyTuple_GetItem(item, 0);       // Returns borrowed reference. NULL if the index is wrong.
-            patient = PyTuple_GetItem(item, 1);     // Returns borrowed reference. NULL if the index is wrong.
-
-            Py_DECREF(item);
-
-            if (agent == NULL || patient == NULL) {
-                break;
-            }
-
-            set = PyDict_GetItemDefaultPySet_New(self->agent_patients, agent);  // Return borrowed reference
-            if (set == NULL) {
-                break;
-            }
-            Py_INCREF(patient);
-            // Add patient to the set
-            if (PySet_Add(set, patient) < 0) {
-                Py_DECREF(patient);
-                break;
-            }
-
-            set = PyDict_GetItemDefaultPySet_New(self->patient_agents, patient);  // Return borrowed reference
-            if (set == NULL) {
-                break;
-            }
-            Py_INCREF(agent);
-            // Add agent to the set
-            if (PySet_Add(set, agent) < 0) {
-                Py_DECREF(agent);
-                break;
-            }
-            
-        }
-
-        Py_DECREF(iterator);
-
-        if (PyErr_Occurred()) {
-            /* propagate error */
-            return -1;
-        }
-
+    if (!PySet_Check(relations) && !PyList_Check(relations)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "relations parameter must be a set or a list");
+        return -1;
     }
+
+    // Initialize relations
+    tmp = self->relations;
+    relations = PySet_New(relations);           // It creates a new reference
+    if (relations == NULL) { // If any item is not hashable it raises and error
+        return -1;
+    }
+    self->relations = relations;
+    Py_DECREF(tmp);                             // This instance stops owning the set created in the constructor
+
+    // Initialize agent_patients & patient_agents
+    PyObject *iterator = PyObject_GetIter(self->relations);
+    PyObject *item;
+    PyObject *agent, *patient;
+    PyObject *set;
+
+    if (iterator == NULL) {
+        /* propagate error */
+        return -1;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        /* do something with item */
+        if (!PyTuple_Check(item) || (PyTuple_Size(item) != 2)) {
+            PyErr_SetString(PyExc_TypeError,
+                        "every item of relations must be a tuple of size 2");
+            Py_DECREF(item);
+            break;
+        }
+
+        agent = PyTuple_GetItem(item, 0);       // Returns borrowed reference. NULL if the index is wrong.
+        patient = PyTuple_GetItem(item, 1);     // Returns borrowed reference. NULL if the index is wrong.
+
+        Py_DECREF(item);
+
+        if (agent == NULL || patient == NULL) {
+            break;
+        }
+
+        set = PyDict_GetItemDefaultPySet_New(self->agent_patients, agent);  // Return borrowed reference
+        if (set == NULL) {
+            break;
+        }
+        Py_INCREF(patient);
+        // Add patient to the set
+        if (PySet_Add(set, patient) < 0) {
+            Py_DECREF(patient);
+            break;
+        }
+
+        set = PyDict_GetItemDefaultPySet_New(self->patient_agents, patient);  // Return borrowed reference
+        if (set == NULL) {
+            break;
+        }
+        Py_INCREF(agent);
+        // Add agent to the set
+        if (PySet_Add(set, agent) < 0) {
+            Py_DECREF(agent);
+            break;
+        }
+        
+    }
+
+    Py_DECREF(iterator);
+
+    if (PyErr_Occurred()) {
+        /* propagate error */
+        return -1;
+    }
+
     return 0;
 }
 
