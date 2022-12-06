@@ -1728,7 +1728,7 @@ static double
 _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argument)
 {
     int contains = PyDict_Contains(self->final_strengths, argument);
-    if (contains < 0) { // TODO: Remove error checks in this function (not needed since this is only used internally)
+    if (contains < 0) {
         return -1.0;
     }
     if (contains) {
