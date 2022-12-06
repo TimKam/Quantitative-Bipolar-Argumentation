@@ -129,6 +129,16 @@ PyObject *_QBAFARelations_patients(QBAFARelationsObject *self, PyObject *agent);
 PyObject *_QBAFARelations_agents(QBAFARelationsObject *self, PyObject *patient);
 
 /**
+ * @brief Remove all relations that contain any QBAFArgument of the the iterable.
+ * Return -1 if an error has occurred, with its corresponding exception.
+ * 
+ * @param self an instance of QBAFARelations
+ * @param iterable an iterable of QBAFArgument
+ * @return int 0 if succeeded, and -1 if an error is encountered
+ */
+int _QBAFARelations_remove_arguments(QBAFARelationsObject *self, PyObject *iterable);
+
+/**
  * @brief Return the patients that undergo the effect of a certain action (e.g. attack, support)
  * initiated by the agent. Return NULL if an error has ocurred.
  * 

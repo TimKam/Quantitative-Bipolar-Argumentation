@@ -1728,7 +1728,7 @@ static double
 _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argument)
 {
     int contains = PyDict_Contains(self->final_strengths, argument);
-    if (contains < 0) { // TODO: Remove error checks in this function (not needed since this is only used internally)
+    if (contains < 0) {
         return -1.0;
     }
     if (contains) {
@@ -1748,6 +1748,18 @@ _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argum
         return -1.0;
     }
 
+    // if len(attackers) > 0: attackers_aggregation = attackers[0]
+    item = PyIter_Next(iterator);
+    if (item != NULL) {
+        attackers_aggregation = _QBAFramework_calculate_final_strength(self, item);
+        Py_DECREF(item);
+        if (attackers_aggregation == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(attackers); Py_DECREF(iterator);
+            return -1.0;
+        }
+    }
+
+    // for item in attackers[1:]:
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
         double item_final_strength = _QBAFramework_calculate_final_strength(self, item);
         Py_DECREF(item);
@@ -1773,6 +1785,18 @@ _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argum
         return -1.0;
     }
 
+    // if len(supporters) > 0: supporters_aggregation = supporters[0]
+    item = PyIter_Next(iterator);
+    if (item != NULL) {
+        supporters_aggregation = _QBAFramework_calculate_final_strength(self, item);
+        Py_DECREF(item);
+        if (supporters_aggregation == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(supporters); Py_DECREF(iterator);
+            return -1.0;
+        }
+    }
+
+    // for item in supporters[1:]:
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
         double item_final_strength = _QBAFramework_calculate_final_strength(self, item);
         Py_DECREF(item);
@@ -2301,6 +2325,28 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
         Py_DECREF(arg);
     }
     Py_DECREF(set_iterator);
+
+    // Remove the attack/support relations that are not in Args*xArgs*
+    PyObject *self_union_other_arguments = PySet_Union(self->arguments, other->arguments);
+    if (self_union_other_arguments == NULL) {
+        Py_DECREF(reversal);
+        return NULL;
+    }
+    PyObject *self_union_other_difference_reversal_arguments = PySet_Difference(self_union_other_arguments, reversal->arguments);
+    Py_DECREF(self_union_other_arguments);
+    if (self_union_other_difference_reversal_arguments == NULL) {
+        Py_DECREF(reversal);
+        return NULL;
+    }
+    if (_QBAFARelations_remove_arguments((QBAFARelationsObject*)reversal->attack_relations, self_union_other_difference_reversal_arguments) < 0) {
+        Py_DECREF(reversal); Py_DECREF(self_union_other_difference_reversal_arguments);
+        return NULL;
+    }
+    if (_QBAFARelations_remove_arguments((QBAFARelationsObject*)reversal->support_relations, self_union_other_difference_reversal_arguments) < 0) {
+        Py_DECREF(reversal); Py_DECREF(self_union_other_difference_reversal_arguments);
+        return NULL;
+    }
+    Py_DECREF(self_union_other_difference_reversal_arguments);
 
     // Modify initial strengths
     if (reversal->initial_strengths == NULL) { // It should be an empty PyDict
@@ -2891,20 +2937,6 @@ _QBAFramework_candidate_argument(QBAFrameworkObject *self, QBAFrameworkObject *o
     if (other_initial == NULL)
         return -1;
     int equals = PyObject_RichCompareBool(self_initial, other_initial, Py_EQ);
-    if (equals < 0)
-        return -1;
-    if (!equals) {
-        return TRUE;
-    }
-
-    // if self.final_strength(argument) != other.final_strength(argument): return True
-    PyObject *self_final = _QBAFramework_final_strength(self, argument);
-    if (self_final == NULL)
-        return -1;
-    PyObject *other_final = _QBAFramework_final_strength(other, argument);
-    if (other_final == NULL)
-        return -1;
-    equals = PyObject_RichCompareBool(self_final, other_final, Py_EQ);
     if (equals < 0)
         return -1;
     if (!equals) {

@@ -84,7 +84,6 @@ QBAFArgument_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         }
         self->description = PyUnicode_FromString("");
         if (self->description == NULL) {
-            Py_DECREF(self->name); // TODO: Check if this is correct
             Py_DECREF(self);
             return NULL;
         }
@@ -110,12 +109,11 @@ QBAFArgument_init(QBAFArgumentObject *self, PyObject *args, PyObject *kwds)
                                      &name, &description))
         return -1;
 
-    if (name) { // It will always be true
-        tmp = self->name;
-        Py_INCREF(name);
-        self->name = name;
-        Py_DECREF(tmp);
-    }
+    tmp = self->name;
+    Py_INCREF(name);
+    self->name = name;
+    Py_DECREF(tmp);
+
     if (description) {
         tmp = self->description;
         Py_INCREF(description);
