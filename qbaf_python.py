@@ -796,8 +796,6 @@ class QBAFramework:
             return True
         if self.__initial_strengths[argument] != other.__initial_strengths[argument]:
             return True
-        if self.final_strength(argument) != other.final_strength(argument):
-            return True
         if self.__attack_relations.patients(argument) != other.__attack_relations.patients(argument):
             return True
         if self.__support_relations.patients(argument) != other.__support_relations.patients(argument):

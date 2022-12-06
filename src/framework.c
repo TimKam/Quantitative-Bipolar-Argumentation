@@ -2919,20 +2919,6 @@ _QBAFramework_candidate_argument(QBAFrameworkObject *self, QBAFrameworkObject *o
         return TRUE;
     }
 
-    // if self.final_strength(argument) != other.final_strength(argument): return True
-    PyObject *self_final = _QBAFramework_final_strength(self, argument);
-    if (self_final == NULL)
-        return -1;
-    PyObject *other_final = _QBAFramework_final_strength(other, argument);
-    if (other_final == NULL)
-        return -1;
-    equals = PyObject_RichCompareBool(self_final, other_final, Py_EQ);
-    if (equals < 0)
-        return -1;
-    if (!equals) {
-        return TRUE;
-    }
-
     // if self.attack_relations.patients(argument) != other.attack_relations.patients(argument): return True
     int equal_attack_patients = _QBAFARelations_equal_patients(
         (QBAFARelationsObject*)self->attack_relations, (QBAFARelationsObject*)other->attack_relations, argument);
