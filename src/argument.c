@@ -185,15 +185,30 @@ QBAFArgument_setdescription(QBAFArgumentObject *self, PyObject *value, void *clo
     return 0;
 }
 
+PyDoc_STRVAR(name_doc,
+"The name of the argument. Also used as id of the argument.\n"
+"\n"
+"Getter: Return the argument's name\n"
+"Type: str"
+);
+
+PyDoc_STRVAR(description_doc, 
+"The description of the argument.\n"
+"\n"
+"Getter: Return the argument's description\n"
+"Setter: Set the argument's description\n"
+"Type: str"
+);
+
 /**
  * @brief A list with the setters and getters of the class QBAFArgument
  * 
  */
 static PyGetSetDef QBAFArgument_getsetters[] = {
     {"name", (getter) QBAFArgument_getname, NULL,
-     "name and identifier", NULL},
+     name_doc, NULL},
     {"description", (getter) QBAFArgument_getdescription, (setter) QBAFArgument_setdescription,
-     "argument description", NULL},
+     description_doc, NULL},
     {NULL}  /* Sentinel */
 };
 
@@ -265,6 +280,17 @@ static PyMethodDef QBAFArgument_methods[] = {
     {NULL}  /* Sentinel */
 };
 
+PyDoc_STRVAR(QBAFArgument_doc,
+"This class represents an argument of a QBAF.\n"
+"It has an unmodifiable string name that is used as id, and a string description.\n"
+"\n"
+"QBAFArgument(name: str, description=\"\")\n"
+"\n"
+"Args:\n"
+"    name (str): The name that will be used as identifier of the argument\n"
+"    description (str, optional): The description of the argument. Defaults to \"\""
+);
+
 /**
  * @brief Python definition for the class QBAFArgument
  * 
@@ -272,7 +298,7 @@ static PyMethodDef QBAFArgument_methods[] = {
 static PyTypeObject QBAFArgumentType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "qbaf.QBAFArgument",
-    .tp_doc = PyDoc_STR("QBAFArgument objects"),
+    .tp_doc = QBAFArgument_doc,
     .tp_basicsize = sizeof(QBAFArgumentObject),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC,
