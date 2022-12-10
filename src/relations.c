@@ -232,14 +232,6 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
 }
 
 /**
- * @brief A list with the attributes of the class QBAFARelations
- * 
- */
-static PyMemberDef QBAFARelations_members[] = {
-    {NULL}  /* Sentinel */
-};
-
-/**
  * @brief Getter of the attribute relations.
  * 
  * @param self the QBAFARelations instance
@@ -251,16 +243,6 @@ QBAFArgument_getrelations(QBAFARelationsObject *self, void *closure)
 {
     return PySet_New(self->relations);
 }
-
-/**
- * @brief A list with the setters and getters of the class QBAFARelations
- * 
- */
-static PyGetSetDef QBAFARelations_getsetters[] = {
-    {"relations", (getter) QBAFArgument_getrelations, NULL,
-     "copy of relations", NULL},
-    {NULL}  /* Sentinel */
-};
 
 /**
  * @brief Return the string format of a QBAFARelations object
@@ -746,6 +728,24 @@ QBAFARelations_richcompare(QBAFARelationsObject *self, PyObject *other, int op)
 
     return PyObject_RichCompare(self->relations, ((QBAFARelationsObject *)other)->relations, op);
 }
+
+/**
+ * @brief A list with the attributes of the class QBAFARelations
+ * 
+ */
+static PyMemberDef QBAFARelations_members[] = {
+    {NULL}  /* Sentinel */
+};
+
+/**
+ * @brief A list with the setters and getters of the class QBAFARelations
+ * 
+ */
+static PyGetSetDef QBAFARelations_getsetters[] = {
+    {"relations", (getter) QBAFArgument_getrelations, NULL,
+     "copy of relations", NULL},
+    {NULL}  /* Sentinel */
+};
 
 /**
  * @brief List of functions of the class QBAFARelations.
