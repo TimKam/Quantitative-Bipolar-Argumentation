@@ -124,14 +124,6 @@ QBAFArgument_init(QBAFArgumentObject *self, PyObject *args, PyObject *kwds)
 }
 
 /**
- * @brief A list with the attributes of the class QBAFArgument
- * 
- */
-static PyMemberDef QBAFArgument_members[] = {
-    {NULL}  /* Sentinel */
-};
-
-/**
  * @brief Getter of the attribute name.
  * 
  * @param self the QBAFArgument object
@@ -184,33 +176,6 @@ QBAFArgument_setdescription(QBAFArgumentObject *self, PyObject *value, void *clo
     self->description = value;
     return 0;
 }
-
-PyDoc_STRVAR(name_doc,
-"The name of the argument. Also used as id of the argument.\n"
-"\n"
-"Getter: Return the argument's name\n"
-"Type: str"
-);
-
-PyDoc_STRVAR(description_doc, 
-"The description of the argument.\n"
-"\n"
-"Getter: Return the argument's description\n"
-"Setter: Set the argument's description\n"
-"Type: str"
-);
-
-/**
- * @brief A list with the setters and getters of the class QBAFArgument
- * 
- */
-static PyGetSetDef QBAFArgument_getsetters[] = {
-    {"name", (getter) QBAFArgument_getname, NULL,
-     name_doc, NULL},
-    {"description", (getter) QBAFArgument_getdescription, (setter) QBAFArgument_setdescription,
-     description_doc, NULL},
-    {NULL}  /* Sentinel */
-};
 
 /**
  * @brief Return the comparison of the names of two QBAFArgument instances.
@@ -271,6 +236,41 @@ QBAFArgument_repr(QBAFArgumentObject *self, PyObject *Py_UNUSED(ignored))
 {
     return PyUnicode_FromFormat("'%S'", self->name);
 }
+
+/**
+ * @brief A list with the attributes of the class QBAFArgument
+ * 
+ */
+static PyMemberDef QBAFArgument_members[] = {
+    {NULL}  /* Sentinel */
+};
+
+PyDoc_STRVAR(name_doc,
+"The name of the argument. Also used as id of the argument.\n"
+"\n"
+"Getter: Return the argument's name\n"
+"Type: str"
+);
+
+PyDoc_STRVAR(description_doc, 
+"The description of the argument.\n"
+"\n"
+"Getter: Return the argument's description\n"
+"Setter: Set the argument's description\n"
+"Type: str"
+);
+
+/**
+ * @brief A list with the setters and getters of the class QBAFArgument
+ * 
+ */
+static PyGetSetDef QBAFArgument_getsetters[] = {
+    {"name", (getter) QBAFArgument_getname, NULL,
+     name_doc, NULL},
+    {"description", (getter) QBAFArgument_getdescription, (setter) QBAFArgument_setdescription,
+     description_doc, NULL},
+    {NULL}  /* Sentinel */
+};
 
 /**
  * @brief List of functions of the class QBAFArgument
