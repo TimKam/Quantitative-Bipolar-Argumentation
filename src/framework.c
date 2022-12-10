@@ -3381,30 +3381,96 @@ QBAFramework_richcompare(QBAFrameworkObject *self, PyObject *other, int op)
     Py_RETURN_BOOL(op == Py_EQ);
 }
 
+PyDoc_STRVAR(arguments_doc,
+"Set of arguments of the Framework.\n"
+"\n"
+"Getter: Return a copy of the QBAFramework's set of arguments\n"
+"Type: set of QBAFArgument"
+);
+
+PyDoc_STRVAR(initial_strengths_doc,
+"Initial strengths of the arguments of the Framework.\n"
+"\n"
+"Getter: Return a copy of the QBAFramework's initial strengths\n"
+"Type: dict of QBAFArgument: float"
+);
+
+PyDoc_STRVAR(attack_relations_doc,
+"Attack relations of the Framework.\n"
+"\n"
+"Getter: Return the QBAFramework's attack relations\n"
+"Type: QBAFARelations"
+);
+
+PyDoc_STRVAR(support_relations_doc,
+"Support relations of the Framework.\n"
+"\n"
+"Getter: Return the QBAFramework's support relations\n"
+"Type: QBAFARelations"
+);
+
+PyDoc_STRVAR(final_strengths_doc,
+"Final strengths of the arguments of the Framework.\n"
+"\n"
+"Getter: Calculate and return the QBAFramework's final strengths.\n"
+"        If the Framework has not been modified since last time they were calculated,\n"
+"        a copy of the previously calculated final strengths is returned.\n"
+"Type: dict of QBAFArgument: float"
+);
+
+PyDoc_STRVAR(disjoint_relations_doc,
+"True if the attack/support relations must be disjoint, False if they do not have to.\n"
+"\n"
+"Getter: Return if the attack/support relations must be disjoint or not\n"
+"Setter: Set if the attack/support relations must be disjoint or not\n"
+"Type: bool"
+);
+
+PyDoc_STRVAR(semantics_doc,
+"The name of the semantics used to calculate the final strengths of the Framework.\n"
+"If the semantics are custom (not predefined) then its value is None.\n"
+"\n"
+"Getter: Return the QBAFramework's semantics name. None if it is custom.\n"
+"Type: str"
+);
+
+PyDoc_STRVAR(min_strength_doc,
+"The minimun value an initial strength can have in the Framework.\n"
+"\n"
+"Getter: Return the QBAFramework's minimum strength.\n"
+"Type: float"
+);
+
+PyDoc_STRVAR(max_strength_doc,
+"The maximun value an initial strength can have in the Framework.\n"
+"\n"
+"Getter: Return the QBAFramework's maximum strength.\n"
+"Type: float"
+);
+
 /**
  * @brief A list with the setters and getters of the class QBAFramework
  * 
  */
 static PyGetSetDef QBAFramework_getsetters[] = {
     {"arguments", (getter) QBAFramework_getarguments, NULL,
-     "Return a copy of the arguments of the instance.", NULL},
+     arguments_doc, NULL},
     {"initial_strengths", (getter) QBAFramework_getinitial_strengths, NULL,
-     "Return a copy of the initial strengths.", NULL},
+     initial_strengths_doc, NULL},
     {"attack_relations", (getter) QBAFramework_getattack_relations, NULL,
-     "Return the attack relations of the instance.", NULL},
+     attack_relations_doc, NULL},
     {"support_relations", (getter) QBAFramework_getsupport_relations, NULL,
-     "Return the support relations of the instance.", NULL},
+     support_relations_doc, NULL},
     {"final_strengths", (getter) QBAFramework_getfinal_strengths, NULL,
-     "Return a copy of the final strengths.", NULL},
+     final_strengths_doc, NULL},
     {"disjoint_relations", (getter) QBAFramework_getdisjoint_relations, (setter) QBAFramework_setdisjoint_relations,
-     "Return True if the attack/support relations must be disjoint, False if they do not have to.",
-     "Setter of the attribute disjoint_relations."},
+     disjoint_relations_doc, NULL},
     {"semantics", (getter) QBAFramework_getsemantics, NULL,
-     "Return the semantics.", NULL},
+     semantics_doc, NULL},
     {"min_strength", (getter) QBAFramework_getmin_strength, NULL,
-     "Return the min value a initial_strength can have.", NULL},
+     min_strength_doc, NULL},
     {"max_strength", (getter) QBAFramework_getmax_strength, NULL,
-     "Return the max value a initial_strength can have.", NULL},
+     max_strength_doc, NULL},
     {NULL}  /* Sentinel */
 };
 
