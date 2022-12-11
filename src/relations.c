@@ -232,14 +232,6 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
 }
 
 /**
- * @brief A list with the attributes of the class QBAFARelations
- * 
- */
-static PyMemberDef QBAFARelations_members[] = {
-    {NULL}  /* Sentinel */
-};
-
-/**
  * @brief Getter of the attribute relations.
  * 
  * @param self the QBAFARelations instance
@@ -251,16 +243,6 @@ QBAFArgument_getrelations(QBAFARelationsObject *self, void *closure)
 {
     return PySet_New(self->relations);
 }
-
-/**
- * @brief A list with the setters and getters of the class QBAFARelations
- * 
- */
-static PyGetSetDef QBAFARelations_getsetters[] = {
-    {"relations", (getter) QBAFArgument_getrelations, NULL,
-     "copy of relations", NULL},
-    {NULL}  /* Sentinel */
-};
 
 /**
  * @brief Return the string format of a QBAFARelations object
@@ -748,33 +730,149 @@ QBAFARelations_richcompare(QBAFARelationsObject *self, PyObject *other, int op)
 }
 
 /**
+ * @brief A list with the attributes of the class QBAFARelations
+ * 
+ */
+static PyMemberDef QBAFARelations_members[] = {
+    {NULL}  /* Sentinel */
+};
+
+PyDoc_STRVAR(relations_doc,
+"Set of argument relations (Agent, Patient).\n"
+"\n"
+"Getter: Return a copy of the QBAFARelation's set of relations\n"
+"Type: set of (QBAFArgument, QBAFArgument)"
+);
+
+/**
+ * @brief A list with the setters and getters of the class QBAFARelations
+ * 
+ */
+static PyGetSetDef QBAFARelations_getsetters[] = {
+    {"relations", (getter) QBAFArgument_getrelations, NULL,
+     relations_doc, NULL},
+    {NULL}  /* Sentinel */
+};
+
+PyDoc_STRVAR(patients_doc,
+"patients(self, agent)\n"
+"--\n"
+"\n"
+"Return the patients that undergo the effect of a certain action (e.g. attack, support)\n"
+"initiated by the agent.\n"
+"\n"
+"Args:\n"
+"    agent (QBAFArgument): The initiator of the action\n"
+"\n"
+"Returns:\n"
+"    list: The list of QBAFArgment that undergo the effect of the action"
+);
+
+PyDoc_STRVAR(agents_doc,
+"agents(self, patient)\n"
+"--\n"
+"\n"
+"Return the agents that initiate a certain action (e.g. attack, support)\n"
+"which effects are undergone by the patient.\n"
+"\n"
+"Args:\n"
+"    patient (QBAFArgument): The entity undergoing the effect of the action\n"
+"\n"
+"Returns:\n"
+"    list: The list of QBAFArgment that initiate the action"
+);
+
+PyDoc_STRVAR(contains_doc,
+"contains(self, agent, patient)\n"
+"--\n"
+"\n"
+"Return True if the relation (agent, patient) is contained. False, otherwise.\n"
+"\n"
+"Args:\n"
+"    agent (QBAFArgument): The initiator of an action\n"
+"    patient (QBAFArgument): The entity undergoing the effect of an action\n"
+"\n"
+"Returns:\n"
+"    bool: True if contained, False if not contained"
+);
+
+PyDoc_STRVAR(add_doc,
+"add(self, agent, patient)\n"
+"--\n"
+"\n"
+"Add the relation (agent, patient). If it is contained it does nothing.\n"
+"\n"
+"Args:\n"
+"    agent (QBAFArgument): The initiator of an action\n"
+"    patient (QBAFArgument): The entity undergoing the effect of an action"
+);
+
+PyDoc_STRVAR(remove_doc,
+"remove(self, agent, patient)\n"
+"--\n"
+"\n"
+"Removed the relation (agent, patient). If it is not contained it does nothing.\n"
+"\n"
+"Args:\n"
+"    agent (QBAFArgument): The initiator of an action\n"
+"    patient (QBAFArgument): The entity undergoing the effect of an action"
+);
+
+PyDoc_STRVAR(__copy___doc,
+"__copy__(self, /)\n"
+"--\n"
+"\n"
+"Return a shallow copy of self."
+);
+
+PyDoc_STRVAR(copy_doc,
+"copy(self)\n"
+"--\n"
+"\n"
+"Return a shallow copy of self."
+);
+
+PyDoc_STRVAR(isdisjoint_doc,
+"isdisjoint(self, other)\n"
+"--\n"
+"\n"
+"Return True if self has no relation in common with other. False, otherwise.\n"
+"\n"
+"Args:\n"
+"    other (QBAFARelations): other instance of QBAFARelations\n"
+"\n"
+"Returns:\n"
+"    bool: True if disjointed, False if not disjointed"
+);
+
+/**
  * @brief List of functions of the class QBAFARelations.
  * 
  */
 static PyMethodDef QBAFARelations_methods[] = {
     {"patients", (PyCFunctionWithKeywords) QBAFARelations_patients, METH_VARARGS | METH_KEYWORDS,
-    "Return the patients that undergo the effect of a certain action (e.g. attack, support) initiated by the agent."
+    patients_doc
     },
     {"agents", (PyCFunctionWithKeywords) QBAFARelations_agents, METH_VARARGS | METH_KEYWORDS,
-    "Return the agents that initiate a certain action (e.g. attack, support) which effects are undergone by the patient."
+    agents_doc
     },
     {"contains", (PyCFunctionWithKeywords) QBAFARelations_contains, METH_VARARGS | METH_KEYWORDS,
-    "Return whether or not exists the relation (agent, patient) in this instance."
+    contains_doc
     },
     {"add", (PyCFunctionWithKeywords) QBAFARelations_add, METH_VARARGS | METH_KEYWORDS,
-    "Add the relation (agent, patient) to the instance."
+    add_doc
     },
     {"remove", (PyCFunctionWithKeywords) QBAFARelations_remove, METH_VARARGS | METH_KEYWORDS, 
-    "Remove the relation (agent, patient) from the instance."
+    remove_doc
     },
     {"__copy__", (PyCFunction) QBAFARelations_copy, METH_NOARGS,
-    "Return a copy of the instance."
+    __copy___doc
     },
     {"copy", (PyCFunction) QBAFARelations_copy, METH_NOARGS,
-    "Return a copy of the instance."
+    copy_doc
     },
     {"isdisjoint", (PyCFunctionWithKeywords) QBAFARelations_isDisjoint, METH_VARARGS | METH_KEYWORDS, 
-    "Return True if their relations are disjoint, False if they are not."
+    isdisjoint_doc
     },
     {NULL}  /* Sentinel */
 };
@@ -784,6 +882,21 @@ static PySequenceMethods QBAFARelations_sequencemethods = {
     .sq_contains = (objobjproc) QBAFARelations___contains__,    // __contains__
 };
 
+PyDoc_STRVAR(QBAFARelations_doc,
+"Class representing a set of Relations (Agent, Patient) of type QBAFArgument.\n"
+"Every Relation has an Agent (the initiator of an action)\n"
+"and a Patient (the entity undergoing the effect of an action).\n"
+"Example of (Agent, Patient): (Attacker, Attacked) or (Supporter, Supported).\n"
+"\n"
+"Note: Every time the type QBAFArgument is written,\n"
+"any type that is hashable can be used.\n"
+"\n"
+"QBAFARelations(relations)\n"
+"\n"
+"Args:\n"
+"    relations (Union[list, set]): A collection of (Agent: QBAFArgument, Patient: QBAFArgument)"
+);
+
 /**
  * @brief Python definition for the class QBAFARelations
  * 
@@ -791,7 +904,7 @@ static PySequenceMethods QBAFARelations_sequencemethods = {
 static PyTypeObject QBAFARelationsType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "qbaf.QBAFARelations",
-    .tp_doc = PyDoc_STR("QBAFARelations objects"),
+    .tp_doc = QBAFARelations_doc,
     .tp_basicsize = sizeof(QBAFARelationsObject),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC,
@@ -818,6 +931,8 @@ static PyTypeObject QBAFARelationsType = {
 PyTypeObject *get_QBAFARelationsType() {
     return &QBAFARelationsType;
 }
+
+// Helper code for other classes
 
 /**
  * @brief Create a new object QBAFARelations. It cannot be modified from python.
