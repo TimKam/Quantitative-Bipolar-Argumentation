@@ -3904,6 +3904,8 @@ PyDoc_STRVAR(QBAFramework_doc,
 "to the supporters of the argument minus the result of applying the same aggregation\n"
 "function to the attackers of the argument.\n"
 "\n"
+"Note that every time the type QBAFArgument is written, any type that is hashable can be used.\n"
+"\n"
 "The semantics of a QBAF are associated with the way the final strengths are calculated.\n"
 "There are some predefined semantics (The default is 'basic_model'), but custom semantics\n"
 "can be created by implementing your own aggregation function and influence function.\n"
