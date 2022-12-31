@@ -249,7 +249,7 @@ PyDoc_STRVAR(name_doc,
 "The name of the argument. Also used as id of the argument.\n"
 "\n"
 "Getter: Return the argument's name\n"
-"Type: str"
+"Type: str\n"
 );
 
 PyDoc_STRVAR(description_doc, 
@@ -257,7 +257,7 @@ PyDoc_STRVAR(description_doc,
 "\n"
 "Getter: Return the argument's description\n"
 "Setter: Set the argument's description\n"
-"Type: str"
+"Type: str\n"
 );
 
 /**
@@ -288,7 +288,7 @@ PyDoc_STRVAR(QBAFArgument_doc,
 "\n"
 "Args:\n"
 "    name (str): The name that will be used as identifier of the argument\n"
-"    description (str, optional): The description of the argument. Defaults to \"\""
+"    description (str, optional): The description of the argument. Defaults to \"\"\n"
 );
 
 /**

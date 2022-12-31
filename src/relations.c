@@ -741,7 +741,7 @@ PyDoc_STRVAR(relations_doc,
 "Set of argument relations (Agent, Patient).\n"
 "\n"
 "Getter: Return a copy of the QBAFARelation's set of relations\n"
-"Type: set of (QBAFArgument, QBAFArgument)"
+"Type: set of (QBAFArgument, QBAFArgument)\n"
 );
 
 /**
@@ -765,7 +765,7 @@ PyDoc_STRVAR(patients_doc,
 "    agent (QBAFArgument): The initiator of the action\n"
 "\n"
 "Returns:\n"
-"    list: The list of QBAFArgment that undergo the effect of the action"
+"    list: The list of QBAFArgment that undergo the effect of the action\n"
 );
 
 PyDoc_STRVAR(agents_doc,
@@ -779,7 +779,7 @@ PyDoc_STRVAR(agents_doc,
 "    patient (QBAFArgument): The entity undergoing the effect of the action\n"
 "\n"
 "Returns:\n"
-"    list: The list of QBAFArgment that initiate the action"
+"    list: The list of QBAFArgment that initiate the action\n"
 );
 
 PyDoc_STRVAR(contains_doc,
@@ -793,7 +793,7 @@ PyDoc_STRVAR(contains_doc,
 "    patient (QBAFArgument): The entity undergoing the effect of an action\n"
 "\n"
 "Returns:\n"
-"    bool: True if contained, False if not contained"
+"    bool: True if contained, False if not contained\n"
 );
 
 PyDoc_STRVAR(add_doc,
@@ -804,7 +804,7 @@ PyDoc_STRVAR(add_doc,
 "\n"
 "Args:\n"
 "    agent (QBAFArgument): The initiator of an action\n"
-"    patient (QBAFArgument): The entity undergoing the effect of an action"
+"    patient (QBAFArgument): The entity undergoing the effect of an action\n"
 );
 
 PyDoc_STRVAR(remove_doc,
@@ -815,21 +815,21 @@ PyDoc_STRVAR(remove_doc,
 "\n"
 "Args:\n"
 "    agent (QBAFArgument): The initiator of an action\n"
-"    patient (QBAFArgument): The entity undergoing the effect of an action"
+"    patient (QBAFArgument): The entity undergoing the effect of an action\n"
 );
 
 PyDoc_STRVAR(__copy___doc,
 "__copy__(self, /)\n"
 "--\n"
 "\n"
-"Return a shallow copy of self."
+"Return a shallow copy of self.\n"
 );
 
 PyDoc_STRVAR(copy_doc,
 "copy(self)\n"
 "--\n"
 "\n"
-"Return a shallow copy of self."
+"Return a shallow copy of self.\n"
 );
 
 PyDoc_STRVAR(isdisjoint_doc,
@@ -842,7 +842,7 @@ PyDoc_STRVAR(isdisjoint_doc,
 "    other (QBAFARelations): other instance of QBAFARelations\n"
 "\n"
 "Returns:\n"
-"    bool: True if disjointed, False if not disjointed"
+"    bool: True if disjointed, False if not disjointed\n"
 );
 
 /**
@@ -894,7 +894,7 @@ PyDoc_STRVAR(QBAFARelations_doc,
 "QBAFARelations(relations)\n"
 "\n"
 "Args:\n"
-"    relations (Union[list, set]): A collection of (Agent: QBAFArgument, Patient: QBAFArgument)"
+"    relations (Union[list, set]): A collection of (Agent: QBAFArgument, Patient: QBAFArgument)\n"
 );
 
 /**

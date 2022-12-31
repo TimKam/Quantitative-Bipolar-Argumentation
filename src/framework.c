@@ -3385,28 +3385,28 @@ PyDoc_STRVAR(arguments_doc,
 "Set of arguments of the Framework.\n"
 "\n"
 "Getter: Return a copy of the QBAFramework's set of arguments\n"
-"Type: set of QBAFArgument"
+"Type: set of QBAFArgument\n"
 );
 
 PyDoc_STRVAR(initial_strengths_doc,
 "Initial strengths of the arguments of the Framework.\n"
 "\n"
 "Getter: Return a copy of the QBAFramework's initial strengths\n"
-"Type: dict of QBAFArgument: float"
+"Type: dict of QBAFArgument: float\n"
 );
 
 PyDoc_STRVAR(attack_relations_doc,
 "Attack relations of the Framework.\n"
 "\n"
 "Getter: Return the QBAFramework's attack relations\n"
-"Type: QBAFARelations"
+"Type: QBAFARelations\n"
 );
 
 PyDoc_STRVAR(support_relations_doc,
 "Support relations of the Framework.\n"
 "\n"
 "Getter: Return the QBAFramework's support relations\n"
-"Type: QBAFARelations"
+"Type: QBAFARelations\n"
 );
 
 PyDoc_STRVAR(final_strengths_doc,
@@ -3415,7 +3415,7 @@ PyDoc_STRVAR(final_strengths_doc,
 "Getter: Calculate and return the QBAFramework's final strengths.\n"
 "        If the Framework has not been modified since last time they were calculated,\n"
 "        a copy of the previously calculated final strengths is returned.\n"
-"Type: dict of QBAFArgument: float"
+"Type: dict of QBAFArgument: float\n"
 );
 
 PyDoc_STRVAR(disjoint_relations_doc,
@@ -3423,7 +3423,7 @@ PyDoc_STRVAR(disjoint_relations_doc,
 "\n"
 "Getter: Return if the attack/support relations must be disjoint or not\n"
 "Setter: Set if the attack/support relations must be disjoint or not\n"
-"Type: bool"
+"Type: bool\n"
 );
 
 PyDoc_STRVAR(semantics_doc,
@@ -3431,21 +3431,21 @@ PyDoc_STRVAR(semantics_doc,
 "If the semantics are custom (not predefined) then its value is None.\n"
 "\n"
 "Getter: Return the QBAFramework's semantics name. None if it is custom.\n"
-"Type: str"
+"Type: str\n"
 );
 
 PyDoc_STRVAR(min_strength_doc,
 "The minimun value an initial strength can have in the Framework.\n"
 "\n"
 "Getter: Return the QBAFramework's minimum strength.\n"
-"Type: float"
+"Type: float\n"
 );
 
 PyDoc_STRVAR(max_strength_doc,
 "The maximun value an initial strength can have in the Framework.\n"
 "\n"
 "Getter: Return the QBAFramework's maximum strength.\n"
-"Type: float"
+"Type: float\n"
 );
 
 /**
@@ -3482,7 +3482,7 @@ PyDoc_STRVAR(modify_initial_strength_doc,
 "\n"
 "Args:\n"
 "    argument (QBAFArgument): the argument to be modified\n"
-"    initial_strength (float): the new value of initial strength"
+"    initial_strength (float): the new value of initial strength\n"
 );
 
 PyDoc_STRVAR(initial_strength_doc,
@@ -3495,7 +3495,7 @@ PyDoc_STRVAR(initial_strength_doc,
 "    argument (QBAFARelations): the argument\n"
 "\n"
 "Returns:\n"
-"    float: the initial strength"
+"    float: the initial strength\n"
 );
 
 PyDoc_STRVAR(final_strength_doc,
@@ -3510,7 +3510,7 @@ PyDoc_STRVAR(final_strength_doc,
 "    argument (QBAFARelations): the argument\n"
 "\n"
 "Returns:\n"
-"    float: the initial strength"
+"    float: the initial strength\n"
 );
 
 PyDoc_STRVAR(add_argument_doc,
@@ -3521,7 +3521,7 @@ PyDoc_STRVAR(add_argument_doc,
 "\n"
 "Args:\n"
 "    argument (QBAFArgument): the argument\n"
-"    initial_strength (float, optional): the initial strength of the argument. Defaults to 0.0."
+"    initial_strength (float, optional): the initial strength of the argument. Defaults to 0.0.\n"
 );
 
 PyDoc_STRVAR(remove_argument_doc,
@@ -3544,7 +3544,7 @@ PyDoc_STRVAR(add_attack_relation_doc,
 "\n"
 "Args:\n"
 "    attacker (QBAFArgument): the argument that is attacking\n"
-"    attacked (QBAFArgument): the argument that is being attacked"
+"    attacked (QBAFArgument): the argument that is being attacked\n"
 );
 
 PyDoc_STRVAR(remove_attack_relation_doc,
@@ -3556,7 +3556,7 @@ PyDoc_STRVAR(remove_attack_relation_doc,
 "\n"
 "Args:\n"
 "    attacker (QBAFArgument): the argument that is attacking\n"
-"    attacked (QBAFArgument): the argument that is being attacked"
+"    attacked (QBAFArgument): the argument that is being attacked\n"
 );
 
 PyDoc_STRVAR(add_support_relation_doc,
@@ -3569,7 +3569,7 @@ PyDoc_STRVAR(add_support_relation_doc,
 "\n"
 "Args:\n"
 "    supporter (QBAFArgument): the argument that is supporting\n"
-"    supported (QBAFArgument): the argument that is being supported"
+"    supported (QBAFArgument): the argument that is being supported\n"
 );
 
 PyDoc_STRVAR(remove_support_relation_doc,
@@ -3581,7 +3581,7 @@ PyDoc_STRVAR(remove_support_relation_doc,
 "\n"
 "Args:\n"
 "    supporter (QBAFArgument): the argument that is supporting\n"
-"    supported (QBAFArgument): the argument that is being supported"
+"    supported (QBAFArgument): the argument that is being supported\n"
 );
 
 PyDoc_STRVAR(contains_argument_doc,
@@ -3594,7 +3594,7 @@ PyDoc_STRVAR(contains_argument_doc,
 "    argument (QBAFARelations): the argument\n"
 "\n"
 "Returns:\n"
-"    bool: True if contained, False if not contained"
+"    bool: True if contained, False if not contained\n"
 );
 
 PyDoc_STRVAR(contains_attack_relation_doc,
@@ -3609,7 +3609,7 @@ PyDoc_STRVAR(contains_attack_relation_doc,
 "    attacked (QBAFArgument): the argument that is being attacked\n"
 "\n"
 "Returns:\n"
-"    bool: True if contained, False if not contained"
+"    bool: True if contained, False if not contained\n"
 );
 
 PyDoc_STRVAR(contains_support_relation_doc,
@@ -3624,7 +3624,7 @@ PyDoc_STRVAR(contains_support_relation_doc,
 "    supported (QBAFArgument): the argument that is being supported\n"
 "\n"
 "Returns:\n"
-"    bool: True if contained, False if not contained"
+"    bool: True if contained, False if not contained\n"
 );
 
 PyDoc_STRVAR(attackedBy_doc,
@@ -3637,7 +3637,7 @@ PyDoc_STRVAR(attackedBy_doc,
 "    attacker (QBAFArgument): the argument that is attacking\n"
 "\n"
 "Returns:\n"
-"    list: the arguments that are being attacked"
+"    list: the arguments that are being attacked\n"
 );
 
 PyDoc_STRVAR(attackersOf_doc,
@@ -3650,7 +3650,7 @@ PyDoc_STRVAR(attackersOf_doc,
 "    attacked (QBAFArgument): the argument that is being attacked\n"
 "\n"
 "Returns:\n"
-"    list: the arguments that are attacking"
+"    list: the arguments that are attacking\n"
 );
 
 PyDoc_STRVAR(supportedBy_doc,
@@ -3663,7 +3663,7 @@ PyDoc_STRVAR(supportedBy_doc,
 "    supporter (QBAFArgument): the argument that is supporting\n"
 "\n"
 "Returns:\n"
-"    list: the arguments that are being supported"
+"    list: the arguments that are being supported\n"
 );
 
 PyDoc_STRVAR(supportersOf_doc,
@@ -3676,21 +3676,21 @@ PyDoc_STRVAR(supportersOf_doc,
 "    supported (QBAFArgument): the argument that is being supported\n"
 "\n"
 "Returns:\n"
-"    list: the arguments that are supporting"
+"    list: the arguments that are supporting\n"
 );
 
 PyDoc_STRVAR(__copy___doc,
 "__copy__(self, /)\n"
 "--\n"
 "\n"
-"Return a shallow copy of self."
+"Return a shallow copy of self.\n"
 );
 
 PyDoc_STRVAR(copy_doc,
 "copy(self)\n"
 "--\n"
 "\n"
-"Return a shallow copy of self."
+"Return a shallow copy of self.\n"
 );
 
 PyDoc_STRVAR(isacyclic_doc,
@@ -3701,7 +3701,7 @@ PyDoc_STRVAR(isacyclic_doc,
 "False otherwise.\n"
 "\n"
 "Returns:\n"
-"    bool: True if acyclic, False if not acyclic"
+"    bool: True if acyclic, False if not acyclic\n"
 );
 
 PyDoc_STRVAR(are_strength_consistent_doc,
@@ -3718,7 +3718,7 @@ PyDoc_STRVAR(are_strength_consistent_doc,
 "    arg2 (QBAFArgument): second argument\n"
 "\n"
 "Returns:\n"
-"    bool: True if strength consistent, False if strength inconsistent"
+"    bool: True if strength consistent, False if strength inconsistent\n"
 );
 
 PyDoc_STRVAR(reversal_doc,
@@ -3734,7 +3734,7 @@ PyDoc_STRVAR(reversal_doc,
 "    set (set): a set of arguments\n"
 "\n"
 "Returns:\n"
-"    QBAFramework: a new Framework"
+"    QBAFramework: a new Framework\n"
 );
 
 PyDoc_STRVAR(isSSIExplanation_doc,
@@ -3753,7 +3753,7 @@ PyDoc_STRVAR(isSSIExplanation_doc,
 "    arg2 (QBAFArgument): second argument\n"
 "\n"
 "Returns:\n"
-"    bool: True if SSI Explanation, False if not SSI Explanation"
+"    bool: True if SSI Explanation, False if not SSI Explanation\n"
 );
 
 PyDoc_STRVAR(isCSIExplanation_doc,
@@ -3772,7 +3772,7 @@ PyDoc_STRVAR(isCSIExplanation_doc,
 "    arg2 (QBAFArgument): second argument\n"
 "\n"
 "Returns:\n"
-"    bool: True if CSI Explanation, False if not CSI Explanation"
+"    bool: True if CSI Explanation, False if not CSI Explanation\n"
 );
 
 PyDoc_STRVAR(minimalSSIExplanations_doc,
@@ -3789,7 +3789,7 @@ PyDoc_STRVAR(minimalSSIExplanations_doc,
 "    arg2 (QBAFArgument): second argument\n"
 "\n"
 "Returns:\n"
-"    list: list of set of arguments"
+"    list: list of set of arguments\n"
 );
 
 PyDoc_STRVAR(minimalCSIExplanations_doc,
@@ -3806,7 +3806,7 @@ PyDoc_STRVAR(minimalCSIExplanations_doc,
 "    arg2 (QBAFArgument): second argument\n"
 "\n"
 "Returns:\n"
-"    list: list of set of arguments"
+"    list: list of set of arguments\n"
 );
 
 /**
@@ -3932,7 +3932,7 @@ PyDoc_STRVAR(QBAFramework_doc,
 "    min_strength (float, optional): The minimum value an initial strength can have. Defaults to -1.7976931348623157e+308.\n"
 "        It can only be modified when the semantics are custom\n"
 "    max_strength (float, optional): The maximum value an initial strength can have. Defaults to 1.7976931348623157e+308.\n"
-"        It can only be modified when the semantics are custom"
+"        It can only be modified when the semantics are custom\n"
 );
 
 /**
