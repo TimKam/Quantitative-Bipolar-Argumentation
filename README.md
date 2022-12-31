@@ -1,16 +1,15 @@
-# Quantitative-Bipolar-Argumentation
+# QBAF-Py
 ![CI status](https://github.com/TimKam/Quantitative-Bipolar-Argumentation/actions/workflows/actions.yml/badge.svg)
 
-This will be a CPython implementation of Explaining Change in Quantitative Bipolar Argumentation (KAMPIK &amp; ČYRAS,  2022).
+This project provides _QBAF-Py_, a library for drawing inferences from Quantitative Bipolar Argumentation Frameworks (QBAFs) and explaining them.
+The library is written in CPython (C with a Python API) to facilitate speed and efficiency.
 
-In order to use the Quantitative Bipolar Argumentation Framework (QBAF) library run in this directory:
+In order to use QBAF-Py, run the following command in the root directory of this project:
 
 pip install .
 
-Requirements for Windows: 
+Build requirements for Windows (installation and usage merely requires Python): 
 - Microsoft Visual C++ 14.0 or greater
-
-Additionally, in the file qbaf_python, there will be a simple implementation of this.
 
 ## Testing
 To test the package locally, first install the test requirements (`pip install -e .[dev]`) and then run `pytest` in the project's root directory.
