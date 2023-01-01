@@ -656,6 +656,50 @@ def test_isCSIExplanation_output():
     for ns in [set(),{'a'},{'b'},{'c'},{'a','b'},{'a','c'},{'b','c'},{'a','b','c'}]:
         assert qbfa.isCSIExplanation(qbfe, ns.union({'e'}), 'b', 'c')
 
+# TEST IS NSI EXPLANATION
+
+def test_isNSIExplanation_input():
+    qbfa = QBAFramework(['a', 'b', 'c'], [2, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+
+    qbfa.isNSIExplanation(qbfe, [], 'a', 'b')
+    qbfa.isNSIExplanation(qbfe, set(), 'a', 'b')
+
+    with pytest.raises(TypeError):
+        qbfa.isNSIExplanation(1, [], 'a', 'b')
+    with pytest.raises(TypeError):
+        qbfa.isNSIExplanation(qbfe, 1, 'a', 'b')
+    with pytest.raises(TypeError):
+        qbfa.isNSIExplanation(qbfe, [], [], 'b')
+    with pytest.raises(ValueError):
+        qbfa.isNSIExplanation(qbfe, [], 'a', 'e')
+    with pytest.raises(ValueError):
+        qbfa.isNSIExplanation(qbfe, [], 'e', 'b')
+
+def test_isNSIExplanation_output():
+    qbfa = QBAFramework(['a', 'b', 'c'], [2, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+
+    assert qbfa.isNSIExplanation(qbfa, [], 'b', 'c')
+    assert not qbfa.isNSIExplanation(qbfa, ['a'], 'b', 'c')
+
+    assert qbfa.isNSIExplanation(qbfe, [], 'b', 'b')
+    assert not qbfa.isNSIExplanation(qbfe, ['a'], 'b', 'b')
+
+    for ns in [set(),{'a'},{'b'},{'c'},{'e'},{'a','b'},{'a','c'},{'b','c'},{'b','e'},{'c','e'},
+                {'a','b','c'}, {'b','c','e'}]:
+        assert not qbfe.isNSIExplanation(qbfa, ns, 'b', 'c')
+
+    for ns in [set(),{'a'},{'b'},{'c'},{'a','b'},{'a','c'},{'b','c'},{'a','b','c'}]:
+        assert not qbfa.isNSIExplanation(qbfe, ns, 'b', 'c')
+    
+    for ns in [set(),{'a'},{'b'},{'c'},{'e'},{'a','b'},{'a','c'},{'b','c'},{'b','e'},{'c','e'},
+                {'a','b','c'}, {'b','c','e'}]:
+        assert qbfe.isNSIExplanation(qbfa, ns.union({'a','e'}), 'b', 'c')
+
+    for ns in [set(),{'a'},{'b'},{'c'},{'a','b'},{'a','c'},{'b','c'},{'a','b','c'}]:
+        assert qbfa.isNSIExplanation(qbfe, ns.union({'e'}), 'b', 'c')
+
 # TEST MINIMAL SSI EXPLANATIONS
 
 def test_minimalSSIExplanations_input():
@@ -711,3 +755,35 @@ def test_minimalCSIExplanations_output():
 
     assert qbfe.minimalCSIExplanations(qbfa, 'b', 'c') == [{'a', 'e'}]
     assert qbfa.minimalCSIExplanations(qbfe, 'b', 'c') == [{'e'}]
+
+# TEST MINIMAL NSI EXPLANATIONS
+
+def test_minimalNSIExplanations_input():
+    qbfa = QBAFramework(['a', 'b', 'c'], [2, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+    
+    qbfe.minimalNSIExplanations(qbfa, 'b', 'c')
+
+    with pytest.raises(TypeError):
+        qbfe.minimalNSIExplanations(1, 'b', 'c')
+    with pytest.raises(TypeError):
+        qbfe.minimalNSIExplanations(qbfe, [], 'c')
+
+    with pytest.raises(ValueError):
+        qbfe.minimalNSIExplanations(qbfe, 'x', 'c')
+    with pytest.raises(ValueError):
+        qbfe.minimalNSIExplanations(qbfe, 'b', 'x')
+
+def test_minimalNSIExplanations_output():
+    qbfa = QBAFramework(['a', 'b', 'c'], [2, 1, 5], [('a', 'c')], [('a', 'b')])
+    qbfe = QBAFramework(['a', 'b', 'c', 'e'], [1, 1, 5, 3], [('a', 'c'), ('e', 'c')], [('a', 'b')])
+    qbf_ = QBAFramework(['a', 'b', 'c', 'e', 'd'], [2, 1, 5, 3, 1], [('a', 'c'), ('e', 'c'), ('d', 'a')], [('a', 'b'), ('d', 'e')])
+
+    assert qbfe.minimalNSIExplanations(qbfe, 'b', 'c') == [set()]
+    assert qbfe.minimalNSIExplanations(qbfa, 'b', 'b') == [set()]
+
+    assert qbfe.minimalNSIExplanations(qbfa, 'b', 'c') == [{'a', 'e'}]
+    assert qbfa.minimalNSIExplanations(qbfe, 'b', 'c') == [{'e'}]
+
+    assert qbf_.minimalNSIExplanations(qbfa, 'b', 'c') == [{'d', 'e'}]
+    assert qbfa.minimalNSIExplanations(qbf_, 'b', 'c') == [{'e'}]
