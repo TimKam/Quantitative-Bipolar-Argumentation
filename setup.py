@@ -10,7 +10,7 @@ def main():
     source_files = [os.path.join(module_folder, file) for file in os.listdir(module_folder)]
 
     setup(
-        name='qbaf-py',
+        name='QBAF-Py',
         python_requires='>=3.8',
         version='0.1.0',
         description='QBAF-Py is a package for argumentation-based reasoning of Quantitative Bipolar Argumentation Frameworks.',
