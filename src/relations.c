@@ -153,94 +153,83 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
                                      &relations))
         return -1;
 
-    if (relations) { // It will always be true
-
-        if (!PySet_Check(relations) && !PyList_Check(relations)) {
-            PyErr_SetString(PyExc_TypeError,
-                            "relations parameter must be a set or a list");
-            return -1;
-        }
-
-        // Initialize relations
-        tmp = self->relations;
-        relations = PySet_New(relations);           // It creates a new reference
-        if (relations == NULL) { // If any item is not hashable it raises and error
-            return -1;
-        }
-        self->relations = relations;
-        Py_DECREF(tmp);                             // This instance stops owning the set created in the constructor
-
-        // Initialize agent_patients & patient_agents
-        PyObject *iterator = PyObject_GetIter(self->relations);
-        PyObject *item;
-        PyObject *agent, *patient;
-        PyObject *set;
-
-        if (iterator == NULL) {
-            /* propagate error */
-            return -1;
-        }
-
-        while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-            /* do something with item */
-            if (!PyTuple_Check(item) || (PyTuple_Size(item) != 2)) {
-                PyErr_SetString(PyExc_TypeError,
-                            "every item of relations must be a tuple of size 2");
-                Py_DECREF(item);
-                break;
-            }
-
-            agent = PyTuple_GetItem(item, 0);       // Returns borrowed reference. NULL if the index is wrong.
-            patient = PyTuple_GetItem(item, 1);     // Returns borrowed reference. NULL if the index is wrong.
-
-            Py_DECREF(item);
-
-            if (agent == NULL || patient == NULL) {
-                break;
-            }
-
-            set = PyDict_GetItemDefaultPySet_New(self->agent_patients, agent);  // Return borrowed reference
-            if (set == NULL) {
-                break;
-            }
-            Py_INCREF(patient);
-            // Add patient to the set
-            if (PySet_Add(set, patient) < 0) {
-                Py_DECREF(patient);
-                break;
-            }
-
-            set = PyDict_GetItemDefaultPySet_New(self->patient_agents, patient);  // Return borrowed reference
-            if (set == NULL) {
-                break;
-            }
-            Py_INCREF(agent);
-            // Add agent to the set
-            if (PySet_Add(set, agent) < 0) {
-                Py_DECREF(agent);
-                break;
-            }
-            
-        }
-
-        Py_DECREF(iterator);
-
-        if (PyErr_Occurred()) {
-            /* propagate error */
-            return -1;
-        }
-
+    if (!PySet_Check(relations) && !PyList_Check(relations)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "relations parameter must be a set or a list");
+        return -1;
     }
+
+    // Initialize relations
+    tmp = self->relations;
+    relations = PySet_New(relations);           // It creates a new reference
+    if (relations == NULL) { // If any item is not hashable it raises and error
+        return -1;
+    }
+    self->relations = relations;
+    Py_DECREF(tmp);                             // This instance stops owning the set created in the constructor
+
+    // Initialize agent_patients & patient_agents
+    PyObject *iterator = PyObject_GetIter(self->relations);
+    PyObject *item;
+    PyObject *agent, *patient;
+    PyObject *set;
+
+    if (iterator == NULL) {
+        /* propagate error */
+        return -1;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        /* do something with item */
+        if (!PyTuple_Check(item) || (PyTuple_Size(item) != 2)) {
+            PyErr_SetString(PyExc_TypeError,
+                        "every item of relations must be a tuple of size 2");
+            Py_DECREF(item);
+            break;
+        }
+
+        agent = PyTuple_GetItem(item, 0);       // Returns borrowed reference. NULL if the index is wrong.
+        patient = PyTuple_GetItem(item, 1);     // Returns borrowed reference. NULL if the index is wrong.
+
+        Py_DECREF(item);
+
+        if (agent == NULL || patient == NULL) {
+            break;
+        }
+
+        set = PyDict_GetItemDefaultPySet_New(self->agent_patients, agent);  // Return borrowed reference
+        if (set == NULL) {
+            break;
+        }
+        Py_INCREF(patient);
+        // Add patient to the set
+        if (PySet_Add(set, patient) < 0) {
+            Py_DECREF(patient);
+            break;
+        }
+
+        set = PyDict_GetItemDefaultPySet_New(self->patient_agents, patient);  // Return borrowed reference
+        if (set == NULL) {
+            break;
+        }
+        Py_INCREF(agent);
+        // Add agent to the set
+        if (PySet_Add(set, agent) < 0) {
+            Py_DECREF(agent);
+            break;
+        }
+        
+    }
+
+    Py_DECREF(iterator);
+
+    if (PyErr_Occurred()) {
+        /* propagate error */
+        return -1;
+    }
+
     return 0;
 }
-
-/**
- * @brief A list with the attributes of the class QBAFARelations
- * 
- */
-static PyMemberDef QBAFARelations_members[] = {
-    {NULL}  /* Sentinel */
-};
 
 /**
  * @brief Getter of the attribute relations.
@@ -254,16 +243,6 @@ QBAFArgument_getrelations(QBAFARelationsObject *self, void *closure)
 {
     return PySet_New(self->relations);
 }
-
-/**
- * @brief A list with the setters and getters of the class QBAFARelations
- * 
- */
-static PyGetSetDef QBAFARelations_getsetters[] = {
-    {"relations", (getter) QBAFArgument_getrelations, NULL,
-     "copy of relations", NULL},
-    {NULL}  /* Sentinel */
-};
 
 /**
  * @brief Return the string format of a QBAFARelations object
@@ -751,33 +730,149 @@ QBAFARelations_richcompare(QBAFARelationsObject *self, PyObject *other, int op)
 }
 
 /**
+ * @brief A list with the attributes of the class QBAFARelations
+ * 
+ */
+static PyMemberDef QBAFARelations_members[] = {
+    {NULL}  /* Sentinel */
+};
+
+PyDoc_STRVAR(relations_doc,
+"Set of argument relations (Agent, Patient).\n"
+"\n"
+"Getter: Return a copy of the QBAFARelation's set of relations\n"
+"Type: set of (QBAFArgument, QBAFArgument)\n"
+);
+
+/**
+ * @brief A list with the setters and getters of the class QBAFARelations
+ * 
+ */
+static PyGetSetDef QBAFARelations_getsetters[] = {
+    {"relations", (getter) QBAFArgument_getrelations, NULL,
+     relations_doc, NULL},
+    {NULL}  /* Sentinel */
+};
+
+PyDoc_STRVAR(patients_doc,
+"patients(self, agent)\n"
+"--\n"
+"\n"
+"Return the patients that undergo the effect of a certain action (e.g. attack, support)\n"
+"initiated by the agent.\n"
+"\n"
+"Args:\n"
+"    agent (QBAFArgument): The initiator of the action\n"
+"\n"
+"Returns:\n"
+"    list: The list of QBAFArgment that undergo the effect of the action\n"
+);
+
+PyDoc_STRVAR(agents_doc,
+"agents(self, patient)\n"
+"--\n"
+"\n"
+"Return the agents that initiate a certain action (e.g. attack, support)\n"
+"which effects are undergone by the patient.\n"
+"\n"
+"Args:\n"
+"    patient (QBAFArgument): The entity undergoing the effect of the action\n"
+"\n"
+"Returns:\n"
+"    list: The list of QBAFArgment that initiate the action\n"
+);
+
+PyDoc_STRVAR(contains_doc,
+"contains(self, agent, patient)\n"
+"--\n"
+"\n"
+"Return True if the relation (agent, patient) is contained. False, otherwise.\n"
+"\n"
+"Args:\n"
+"    agent (QBAFArgument): The initiator of an action\n"
+"    patient (QBAFArgument): The entity undergoing the effect of an action\n"
+"\n"
+"Returns:\n"
+"    bool: True if contained, False if not contained\n"
+);
+
+PyDoc_STRVAR(add_doc,
+"add(self, agent, patient)\n"
+"--\n"
+"\n"
+"Add the relation (agent, patient). If it is contained it does nothing.\n"
+"\n"
+"Args:\n"
+"    agent (QBAFArgument): The initiator of an action\n"
+"    patient (QBAFArgument): The entity undergoing the effect of an action\n"
+);
+
+PyDoc_STRVAR(remove_doc,
+"remove(self, agent, patient)\n"
+"--\n"
+"\n"
+"Removed the relation (agent, patient). If it is not contained it does nothing.\n"
+"\n"
+"Args:\n"
+"    agent (QBAFArgument): The initiator of an action\n"
+"    patient (QBAFArgument): The entity undergoing the effect of an action\n"
+);
+
+PyDoc_STRVAR(__copy___doc,
+"__copy__(self, /)\n"
+"--\n"
+"\n"
+"Return a shallow copy of self.\n"
+);
+
+PyDoc_STRVAR(copy_doc,
+"copy(self)\n"
+"--\n"
+"\n"
+"Return a shallow copy of self.\n"
+);
+
+PyDoc_STRVAR(isdisjoint_doc,
+"isdisjoint(self, other)\n"
+"--\n"
+"\n"
+"Return True if self has no relation in common with other. False, otherwise.\n"
+"\n"
+"Args:\n"
+"    other (QBAFARelations): other instance of QBAFARelations\n"
+"\n"
+"Returns:\n"
+"    bool: True if disjointed, False if not disjointed\n"
+);
+
+/**
  * @brief List of functions of the class QBAFARelations.
  * 
  */
 static PyMethodDef QBAFARelations_methods[] = {
     {"patients", (PyCFunctionWithKeywords) QBAFARelations_patients, METH_VARARGS | METH_KEYWORDS,
-    "Return the patients that undergo the effect of a certain action (e.g. attack, support) initiated by the agent."
+    patients_doc
     },
     {"agents", (PyCFunctionWithKeywords) QBAFARelations_agents, METH_VARARGS | METH_KEYWORDS,
-    "Return the agents that initiate a certain action (e.g. attack, support) which effects are undergone by the patient."
+    agents_doc
     },
     {"contains", (PyCFunctionWithKeywords) QBAFARelations_contains, METH_VARARGS | METH_KEYWORDS,
-    "Return whether or not exists the relation (agent, patient) in this instance."
+    contains_doc
     },
     {"add", (PyCFunctionWithKeywords) QBAFARelations_add, METH_VARARGS | METH_KEYWORDS,
-    "Add the relation (agent, patient) to the instance."
+    add_doc
     },
     {"remove", (PyCFunctionWithKeywords) QBAFARelations_remove, METH_VARARGS | METH_KEYWORDS, 
-    "Remove the relation (agent, patient) from the instance."
+    remove_doc
     },
     {"__copy__", (PyCFunction) QBAFARelations_copy, METH_NOARGS,
-    "Return a copy of the instance."
+    __copy___doc
     },
     {"copy", (PyCFunction) QBAFARelations_copy, METH_NOARGS,
-    "Return a copy of the instance."
+    copy_doc
     },
     {"isdisjoint", (PyCFunctionWithKeywords) QBAFARelations_isDisjoint, METH_VARARGS | METH_KEYWORDS, 
-    "Return True if their relations are disjoint, False if they are not."
+    isdisjoint_doc
     },
     {NULL}  /* Sentinel */
 };
@@ -787,6 +882,21 @@ static PySequenceMethods QBAFARelations_sequencemethods = {
     .sq_contains = (objobjproc) QBAFARelations___contains__,    // __contains__
 };
 
+PyDoc_STRVAR(QBAFARelations_doc,
+"Class representing a set of Relations (Agent, Patient) of type QBAFArgument.\n"
+"Every Relation has an Agent (the initiator of an action)\n"
+"and a Patient (the entity undergoing the effect of an action).\n"
+"Example of (Agent, Patient): (Attacker, Attacked) or (Supporter, Supported).\n"
+"\n"
+"Note: Every time the type QBAFArgument is written,\n"
+"any type that is hashable can be used.\n"
+"\n"
+"QBAFARelations(relations)\n"
+"\n"
+"Args:\n"
+"    relations (Union[list, set]): A collection of (Agent: QBAFArgument, Patient: QBAFArgument)\n"
+);
+
 /**
  * @brief Python definition for the class QBAFARelations
  * 
@@ -794,7 +904,7 @@ static PySequenceMethods QBAFARelations_sequencemethods = {
 static PyTypeObject QBAFARelationsType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "qbaf.QBAFARelations",
-    .tp_doc = PyDoc_STR("QBAFARelations objects"),
+    .tp_doc = QBAFARelations_doc,
     .tp_basicsize = sizeof(QBAFARelationsObject),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC,
@@ -821,6 +931,8 @@ static PyTypeObject QBAFARelationsType = {
 PyTypeObject *get_QBAFARelationsType() {
     return &QBAFARelationsType;
 }
+
+// Helper code for other classes
 
 /**
  * @brief Create a new object QBAFARelations. It cannot be modified from python.
@@ -953,6 +1065,88 @@ QBAFARelations_contains_argument(QBAFARelationsObject *self, PyObject *argument)
     Py_DECREF(tuple);
 
     return 0;   // return False
+}
+
+/**
+ * @brief Remove all relations that contain the QBAFArgument argument.
+ * If an error occurred, -1 is returned with its corresponding exception.
+ * 
+ * @param self an instance of QBAFARelations
+ * @param argument an instance of QBAFArgument
+ * @return int 0 if succeeded, and -1 if an error is encountered
+ */
+static inline int
+_QBAFARelations_remove_argument(QBAFARelationsObject *self, PyObject *argument)
+{
+    PyObject *list, *iterator, *agent, *patient;
+    
+    list = _QBAFARelations_agents(self, argument); // New reference
+    if (list == NULL) {
+        return -1;
+    }
+    iterator = PyObject_GetIter(list);
+    if (iterator == NULL) {
+        Py_DECREF(list);
+        return -1;
+    }
+    while ((agent = PyIter_Next(iterator))) {
+        if (_QBAFARelations_remove(self, agent, argument) < 0) {
+            Py_DECREF(list); Py_DECREF(iterator); Py_DECREF(agent);
+            return -1;
+        }
+        Py_DECREF(agent);
+    }
+    Py_DECREF(iterator);
+    Py_DECREF(list);
+
+    list = _QBAFARelations_patients(self, argument); // New reference
+    if (list == NULL) {
+        return -1;
+    }
+    iterator = PyObject_GetIter(list);
+    if (iterator == NULL) {
+        Py_DECREF(list);
+        return -1;
+    }
+    while ((patient = PyIter_Next(iterator))) {
+        if (_QBAFARelations_remove(self, argument, patient) < 0) {
+            Py_DECREF(list); Py_DECREF(iterator); Py_DECREF(patient);
+            return -1;
+        }
+        Py_DECREF(patient);
+    }
+    Py_DECREF(iterator);
+    Py_DECREF(list);
+
+    return 0;
+}
+
+/**
+ * @brief Remove all relations that contain any QBAFArgument of the the iterable.
+ * Return -1 if an error has occurred, with its corresponding exception.
+ * 
+ * @param self an instance of QBAFARelations
+ * @param iterable an iterable of QBAFArgument
+ * @return int 0 if succeeded, and -1 if an error is encountered
+ */
+int
+_QBAFARelations_remove_arguments(QBAFARelationsObject *self, PyObject *iterable)
+{
+    PyObject *argument;
+    PyObject *iterator = PyObject_GetIter(iterable);
+    if (iterator == NULL) {
+        return -1;
+    }
+
+    while ((argument = PyIter_Next(iterator))) {
+        if (_QBAFARelations_remove_argument(self, argument) < 0) {
+            Py_DECREF(argument); Py_DECREF(iterator);
+            return -1;
+        }
+        Py_DECREF(argument);
+    }
+
+    return 0;
 }
 
 /**

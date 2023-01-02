@@ -973,7 +973,7 @@ QBAFramework_add_argument(QBAFrameworkObject *self, PyObject *args, PyObject *kw
 }
 
 /**
- * @brief Remove an Argument from the Framework. If it does not exists already it does nothing.
+ * @brief Remove an Argument from the Framework. If it does not exist already it does nothing.
  * 
  * @param self an instance of QBAFramework
  * @param args the argument values (argument: QBAFArgument)
@@ -1728,7 +1728,7 @@ static double
 _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argument)
 {
     int contains = PyDict_Contains(self->final_strengths, argument);
-    if (contains < 0) { // TODO: Remove error checks in this function (not needed since this is only used internally)
+    if (contains < 0) {
         return -1.0;
     }
     if (contains) {
@@ -1748,6 +1748,18 @@ _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argum
         return -1.0;
     }
 
+    // if len(attackers) > 0: attackers_aggregation = attackers[0]
+    item = PyIter_Next(iterator);
+    if (item != NULL) {
+        attackers_aggregation = _QBAFramework_calculate_final_strength(self, item);
+        Py_DECREF(item);
+        if (attackers_aggregation == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(attackers); Py_DECREF(iterator);
+            return -1.0;
+        }
+    }
+
+    // for item in attackers[1:]:
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
         double item_final_strength = _QBAFramework_calculate_final_strength(self, item);
         Py_DECREF(item);
@@ -1773,6 +1785,18 @@ _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argum
         return -1.0;
     }
 
+    // if len(supporters) > 0: supporters_aggregation = supporters[0]
+    item = PyIter_Next(iterator);
+    if (item != NULL) {
+        supporters_aggregation = _QBAFramework_calculate_final_strength(self, item);
+        Py_DECREF(item);
+        if (supporters_aggregation == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(supporters); Py_DECREF(iterator);
+            return -1.0;
+        }
+    }
+
+    // for item in supporters[1:]:
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
         double item_final_strength = _QBAFramework_calculate_final_strength(self, item);
         Py_DECREF(item);
@@ -2302,6 +2326,28 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
     }
     Py_DECREF(set_iterator);
 
+    // Remove the attack/support relations that are not in Args*xArgs*
+    PyObject *self_union_other_arguments = PySet_Union(self->arguments, other->arguments);
+    if (self_union_other_arguments == NULL) {
+        Py_DECREF(reversal);
+        return NULL;
+    }
+    PyObject *self_union_other_difference_reversal_arguments = PySet_Difference(self_union_other_arguments, reversal->arguments);
+    Py_DECREF(self_union_other_arguments);
+    if (self_union_other_difference_reversal_arguments == NULL) {
+        Py_DECREF(reversal);
+        return NULL;
+    }
+    if (_QBAFARelations_remove_arguments((QBAFARelationsObject*)reversal->attack_relations, self_union_other_difference_reversal_arguments) < 0) {
+        Py_DECREF(reversal); Py_DECREF(self_union_other_difference_reversal_arguments);
+        return NULL;
+    }
+    if (_QBAFARelations_remove_arguments((QBAFARelationsObject*)reversal->support_relations, self_union_other_difference_reversal_arguments) < 0) {
+        Py_DECREF(reversal); Py_DECREF(self_union_other_difference_reversal_arguments);
+        return NULL;
+    }
+    Py_DECREF(self_union_other_difference_reversal_arguments);
+
     // Modify initial strengths
     if (reversal->initial_strengths == NULL) { // It should be an empty PyDict
         return NULL;
@@ -2443,7 +2489,7 @@ _QBAFramework_isSSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
 }
 
 /**
- * @brief Return True if a set of arguments set is Counterfactual Strength Inconsistency (SSI) Explanation
+ * @brief Return True if a set of arguments set is Counterfactual Strength Inconsistency (CSI) Explanation
  * of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF), False if not,
  * -1 if encountered an error.
  * 
@@ -2475,6 +2521,83 @@ _QBAFramework_isCSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
 }
 
 /**
+ * @brief Return True if a set of arguments set is Necessary Strength Inconsistency (NSI) Explanation
+ * of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF), False if not,
+ * -1 if encountered an error.
+ * 
+ * @param self an instance of QBAFramework
+ * @param other a different instance of QBAFramework
+ * @param set a PySet of QBAFArgument
+ * @param arg1 a QBAFArgument
+ * @param arg2 a QBAFArgument
+ * @return int 1 if it is a NSI Explanation, 0 if it is not, -1 if an error has occurred
+ */
+static int
+_QBAFramework_isNSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *set, PyObject *arg1, PyObject *arg2)
+{
+    // if not isSSIExplanation: return False
+    int isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, set, arg1, arg2);
+    if (isSSIExplanation < 0)
+        return -1;
+    if (!isSSIExplanation)
+        return FALSE;
+
+    PyObject *self_arguments_union_other_arguments = PySet_Union(self->arguments, other->arguments);
+    if (self_arguments_union_other_arguments == NULL) {
+        return -1;
+    }
+    PyObject *self_arguments_union_other_arguments_difference_set = PySet_Difference(self_arguments_union_other_arguments, set);
+    Py_DECREF(self_arguments_union_other_arguments);
+    if (self_arguments_union_other_arguments_difference_set == NULL) {
+        return -1;
+    }
+
+    // Find any SSI Explanation trying with size from 1 to length of self_arguments_union_other_arguments_difference_set
+    Py_ssize_t max_size = PySet_GET_SIZE(self_arguments_union_other_arguments_difference_set);
+    PyObject *iterator, *subsets, *currentset;
+
+    for (Py_ssize_t size = 1; size <= max_size; size++) {
+        subsets = PySet_SubSets(self_arguments_union_other_arguments_difference_set, size);
+        if (subsets == NULL) {
+            Py_DECREF(self_arguments_union_other_arguments_difference_set);
+            return -1;
+        }
+
+        iterator = PyObject_GetIter(subsets);
+        if (iterator == NULL) {
+            Py_DECREF(subsets); Py_DECREF(self_arguments_union_other_arguments_difference_set);
+            return -1;
+        }
+
+        while ((currentset = PyIter_Next(iterator))) {
+            isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, currentset, arg1, arg2);
+            if (isSSIExplanation < 0) {
+                Py_DECREF(subsets); Py_DECREF(self_arguments_union_other_arguments_difference_set);
+                Py_DECREF(currentset); Py_DECREF(iterator);
+                return -1;
+            }
+
+            // if any subset isSSIExplanation: return False
+            if (isSSIExplanation) {
+                Py_DECREF(subsets); Py_DECREF(self_arguments_union_other_arguments_difference_set);
+                Py_DECREF(currentset); Py_DECREF(iterator);
+                return FALSE;
+            }
+
+            Py_DECREF(currentset);
+        }
+
+        Py_DECREF(iterator);
+        Py_DECREF(subsets);
+    }
+
+    Py_DECREF(self_arguments_union_other_arguments_difference_set);
+
+    // return True
+    return TRUE;
+}
+
+/**
  * @brief Return True if a set of arguments set is Sufficient Strength Inconsistency (SSI) Explanation
  * of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF), False if not,
  * NULL if encountered an error.
@@ -2482,7 +2605,7 @@ _QBAFramework_isCSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
  * @param self an instance of QBAFramework
  * @param args the argument values (other: QBAFramework, set: PySet of QBAFArgument, arg1: QBAFArgument, arg2: QBAFArgument)
  * @param kwds the argument names
- * @return int PyTrue if it is a SSI Explanation, PyFalse if it is not, NULL if an error has occurred
+ * @return PyObject* PyTrue if it is a SSI Explanation, PyFalse if it is not, NULL if an error has occurred
  */
 static PyObject *
 QBAFramework_isSSIExplanation(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
@@ -2580,14 +2703,14 @@ QBAFramework_isSSIExplanation(QBAFrameworkObject *self, PyObject *args, PyObject
 }
 
 /**
- * @brief Return True if a set of arguments set is Counterfactual Strength Inconsistency (SSI) Explanation
+ * @brief Return True if a set of arguments set is Counterfactual Strength Inconsistency (CSI) Explanation
  * of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF), False if not,
  * NULL if encountered an error.
  * 
  * @param self an instance of QBAFramework
  * @param args the argument values (other: QBAFramework, set: PySet of QBAFArgument, arg1: QBAFArgument, arg2: QBAFArgument)
  * @param kwds the argument names
- * @return int PyTrue if it is a SSI Explanation, PyFalse if it is not, NULL if an error has occurred
+ * @return PyObject* PyTrue if it is a CSI Explanation, PyFalse if it is not, NULL if an error has occurred
  */
 static PyObject *
 QBAFramework_isCSIExplanation(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
@@ -2682,6 +2805,109 @@ QBAFramework_isCSIExplanation(QBAFrameworkObject *self, PyObject *args, PyObject
     if (isCSIExplanation)
         Py_RETURN_TRUE;
     Py_RETURN_FALSE;
+}
+
+/**
+ * @brief Return True if a set of arguments set is Necessary Strength Inconsistency (NSI) Explanation
+ * of arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF), False if not,
+ * NULL if encountered an error.
+ * 
+ * @param self an instance of QBAFramework
+ * @param args the argument values (other: QBAFramework, set: PySet of QBAFArgument, arg1: QBAFArgument, arg2: QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* PyTrue if it is a NSI Explanation, PyFalse if it is not, NULL if an error has occurred
+ */
+static PyObject *
+QBAFramework_isNSIExplanation(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"other", "set", "arg1", "arg2", NULL};
+    PyObject *other, *set, *arg1, *arg2;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOOO|", kwlist,
+                                     &other, &set, &arg1, &arg2))
+        return NULL;
+    
+    // Check other is a QBAFramework
+    if (!PyObject_TypeCheck(other, Py_TYPE(self))) {
+        PyErr_SetString(PyExc_TypeError, "other must be an instance of QBAFramework");
+        return NULL;
+    }
+
+    // Check set is a PySet or a PyList. If a PyList, create a Pyset.
+    if (PySet_Check(set)) {
+        Py_INCREF(set);
+    } else if (PyList_Check(set)) {
+        set = PySet_New(set); // new reference
+        if (set == NULL) {
+            return NULL;
+        }
+    } else {
+        PyErr_SetString(PyExc_TypeError, "argument set must be an instance of set or list");
+        return NULL;
+    }
+
+    // Check all items of PySet are in self->arguments UNION other->arguments
+    PyObject *self_arguments_union_other_arguments = PySet_Union(self->arguments, ((QBAFrameworkObject*)other)->arguments);
+    if (self_arguments_union_other_arguments == NULL) {
+        Py_DECREF(set);
+        return NULL;
+    }
+    PyObject *iterator = PyObject_GetIter(set);
+    PyObject *item;
+    int contains;
+    if (iterator == NULL) {
+        Py_DECREF(set); Py_DECREF(self_arguments_union_other_arguments);
+        return NULL;
+    }
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        contains = PySet_Contains(self_arguments_union_other_arguments, item);
+        if (contains < 0) {
+            Py_DECREF(set); Py_DECREF(self_arguments_union_other_arguments);
+            Py_DECREF(item); Py_DECREF(iterator);
+            return NULL;
+        }
+        if (!contains) {
+            Py_DECREF(set); Py_DECREF(self_arguments_union_other_arguments);
+            Py_DECREF(item); Py_DECREF(iterator);
+            PyErr_SetString(PyExc_ValueError, "every item of set must be contained in self.arguments UNION other.arguments");
+            return NULL;
+        }
+        Py_DECREF(item);
+    }
+    Py_DECREF(iterator);
+    Py_DECREF(self_arguments_union_other_arguments);
+
+    // Check arg1 is in self->arguments intersection other->arguments
+    PyObject *self_arguments_intersection_other_arguments = PySet_Intersection(self->arguments, ((QBAFrameworkObject*)other)->arguments);
+    contains = PySet_Contains(self_arguments_intersection_other_arguments, arg1);
+    if (contains < 0) {
+        Py_DECREF(set); Py_DECREF(self_arguments_intersection_other_arguments);
+        return NULL;
+    }
+    if (!contains) {
+        Py_DECREF(set); Py_DECREF(self_arguments_intersection_other_arguments);
+        PyErr_SetString(PyExc_ValueError, "arg1 must be contained in self.arguments INTERSECTION other.arguments");
+        return NULL;
+    }
+    contains = PySet_Contains(self_arguments_intersection_other_arguments, arg2);
+    if (contains < 0) {
+        Py_DECREF(set); Py_DECREF(self_arguments_intersection_other_arguments);
+        return NULL;
+    }
+    if (!contains) {
+        Py_DECREF(set); Py_DECREF(self_arguments_intersection_other_arguments);
+        PyErr_SetString(PyExc_ValueError, "arg2 must be contained in self.arguments INTERSECTION other.arguments");
+        return NULL;
+    }
+    Py_DECREF(self_arguments_intersection_other_arguments);
+
+    int isNSIExplanation = _QBAFramework_isNSIExplanation(self, (QBAFrameworkObject*)other, set, arg1, arg2);
+    Py_DECREF(set);
+    if (isNSIExplanation < 0) {
+        return NULL;
+    }
+
+    Py_RETURN_BOOL(isNSIExplanation);
 }
 
 /**
@@ -2897,20 +3123,6 @@ _QBAFramework_candidate_argument(QBAFrameworkObject *self, QBAFrameworkObject *o
         return TRUE;
     }
 
-    // if self.final_strength(argument) != other.final_strength(argument): return True
-    PyObject *self_final = _QBAFramework_final_strength(self, argument);
-    if (self_final == NULL)
-        return -1;
-    PyObject *other_final = _QBAFramework_final_strength(other, argument);
-    if (other_final == NULL)
-        return -1;
-    equals = PyObject_RichCompareBool(self_final, other_final, Py_EQ);
-    if (equals < 0)
-        return -1;
-    if (!equals) {
-        return TRUE;
-    }
-
     // if self.attack_relations.patients(argument) != other.attack_relations.patients(argument): return True
     int equal_attack_patients = _QBAFARelations_equal_patients(
         (QBAFARelationsObject*)self->attack_relations, (QBAFARelationsObject*)other->attack_relations, argument);
@@ -3074,10 +3286,11 @@ _QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
                         Py_DECREF(set); Py_DECREF(iterator);
                         return NULL;
                     }
-                } else {
-                    Py_DECREF(set);
+                    Py_INCREF(set);
                 }
             }
+
+            Py_DECREF(set);
         }
 
         Py_DECREF(iterator);
@@ -3258,10 +3471,11 @@ _QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
                         Py_DECREF(set); Py_DECREF(iterator);
                         return NULL;
                     }
-                } else {
-                    Py_DECREF(set);
+                    Py_INCREF(set);
                 }
             }
+
+            Py_DECREF(set);
         }
 
         Py_DECREF(iterator);
@@ -3299,6 +3513,226 @@ QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, PyObject *args, Py
     }
 
     return _QBAFramework_minimalCSIExplanations(self, (QBAFrameworkObject*)other, arg1, arg2);
+}
+
+/**
+ * @brief Return a list of all the sets of arguments that are minimal NSI Explanations of arg1 and arg2
+ * w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF), NULL if an error was encountered.
+ * 
+ * @param self an instance of QBAFramework
+ * @param other a different instance of QBAFramework
+ * @param arg1 a QBAFArgument
+ * @param arg2 a QBAFArgument
+ * @return PyObject* new PyList, NULL if an error occurred
+ */
+static inline PyObject *
+_QBAFramework_minimalNSIExplanations(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
+{
+    // If empty set is a NSI Explanation return it
+    PyObject *empty_set = PySet_New(NULL);
+    if (empty_set == NULL) {
+        return NULL;
+    }
+    
+    int isNSIExplanation = _QBAFramework_isNSIExplanation(self, other, empty_set, arg1, arg2);
+    if (isNSIExplanation < 0) {
+        Py_DECREF(empty_set);
+        return NULL;
+    }
+    if (isNSIExplanation) {
+        PyObject *list = PyList_New(1);
+        if (list == NULL) {
+            Py_DECREF(empty_set);
+            return NULL;
+        }
+        PyList_SET_ITEM(list, 0, empty_set);
+        return list;
+    }
+
+    Py_DECREF(empty_set);
+
+    // Obtain the influential arguments (arguments that attack/support arg1 or arg2, directly or indirectly)
+    PyObject *self_influential_arguments = _QBAFramework_influential_arguments_set(self, arg1, arg2);
+    if (self_influential_arguments == NULL) {
+        return NULL;
+    }
+
+    PyObject *other_influential_arguments = _QBAFramework_influential_arguments_set(other, arg1, arg2);
+    if (other_influential_arguments == NULL) {
+        Py_DECREF(self_influential_arguments);
+        return NULL;
+    }
+
+    PyObject *influential_arguments = PySet_Union(self_influential_arguments, other_influential_arguments);
+    if (influential_arguments == NULL) {
+        Py_DECREF(self_influential_arguments); Py_DECREF(other_influential_arguments);
+        return NULL;
+    }
+
+    Py_DECREF(self_influential_arguments);
+    Py_DECREF(other_influential_arguments);
+
+    // Filter the candidate arguments (arguments that are 'different' in self and other)
+    PyObject *candidate_arguments = PySet_New(NULL);
+    if (candidate_arguments == NULL) {
+        Py_DECREF(influential_arguments);
+        return NULL;
+    }
+
+    PyObject *iterator = PyObject_GetIter(influential_arguments);
+    PyObject *argument;
+    int candidate;
+
+    if (iterator == NULL) {
+        Py_DECREF(influential_arguments); Py_DECREF(candidate_arguments);
+        return NULL;
+    }
+
+    while ((argument = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        candidate = _QBAFramework_candidate_argument(self, other, argument);
+        if (candidate < 0) {
+            Py_DECREF(influential_arguments); Py_DECREF(candidate_arguments);
+            Py_DECREF(argument); Py_DECREF(iterator);
+            return NULL;
+        }
+        
+        if (candidate) {
+            if (PySet_Add(candidate_arguments, argument) < 0) {
+                Py_DECREF(influential_arguments); Py_DECREF(candidate_arguments);
+                Py_DECREF(argument); Py_DECREF(iterator);
+                return NULL;
+            }
+            Py_INCREF(argument);
+        }
+
+        Py_DECREF(argument);
+    }
+
+    Py_DECREF(iterator);
+    Py_DECREF(influential_arguments);
+
+    PyObject *minimalSSIExplanations = _QBAFramework_minimalSSIExplanations(self, other, arg1, arg2);
+    if (minimalSSIExplanations == NULL) {
+        Py_DECREF(candidate_arguments);
+        return NULL;
+    }
+
+    // Find NSI Explanations trying with size from 1 to length of candidate_arguments
+    Py_ssize_t max_size = PySet_GET_SIZE(candidate_arguments);
+    PyObject *subsets, *explanations, *set;
+    int contains_subset;
+    int isSSIExplanation;
+    int contains_subset_SSIExplanation;
+
+    explanations = PyList_New(0);
+    if (explanations == NULL) {
+        Py_DECREF(candidate_arguments); Py_DECREF(minimalSSIExplanations);
+        return NULL;
+    }
+
+    for (Py_ssize_t size = 1; size <= max_size; size++) {
+        subsets = PySet_SubSets(candidate_arguments, size);
+        if (subsets == NULL) {
+            Py_DECREF(candidate_arguments); Py_DECREF(minimalSSIExplanations); Py_DECREF(explanations);
+            return NULL;
+        }
+
+        iterator = PyObject_GetIter(subsets);
+        if (iterator == NULL) {
+            Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
+            return NULL;
+        }
+
+        while ((set = PyIter_Next(iterator))) {
+            contains_subset = PyList_ContainsSubset(explanations, set);
+            if (contains_subset < 0) {
+                Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
+                Py_DECREF(set); Py_DECREF(iterator);
+                return NULL;
+            }
+            
+            if (!contains_subset) { // If set is not a superset of any explanation
+                isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, set, arg1, arg2);
+                if (isSSIExplanation < 0) {
+                    Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
+                    Py_DECREF(set); Py_DECREF(iterator);
+                    return NULL;
+                }
+
+                if (isSSIExplanation) { // If set is SSI Explanation
+
+                    PyObject *self_arguments_union_other_arguments = PySet_Union(self->arguments, other->arguments);
+                    if (self_arguments_union_other_arguments == NULL) {
+                        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
+                        Py_DECREF(set); Py_DECREF(iterator);
+                        return NULL;
+                    }
+                    PyObject *self_arguments_union_other_arguments_difference_set = PySet_Difference(self_arguments_union_other_arguments, set);
+                    Py_DECREF(self_arguments_union_other_arguments);
+                    if (self_arguments_union_other_arguments_difference_set == NULL) {
+                        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
+                        Py_DECREF(set); Py_DECREF(iterator);
+                        return NULL;
+                    }
+
+                    contains_subset_SSIExplanation = PyList_ContainsSubset(minimalSSIExplanations, self_arguments_union_other_arguments_difference_set);
+                    Py_DECREF(self_arguments_union_other_arguments_difference_set);
+                    if (contains_subset_SSIExplanation < 0) {
+                        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
+                        Py_DECREF(set); Py_DECREF(iterator);
+                        return NULL;
+                    }
+
+                    if (!contains_subset_SSIExplanation) { // If it does not exist a SSI Explanation that is subset of self->arguments.union(other->arguments).difference(set)
+                        if (PyList_Append(explanations, set) < 0) {
+                            Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
+                            Py_DECREF(set); Py_DECREF(iterator);
+                            return NULL;
+                        }
+                        Py_INCREF(set);
+                    }
+                }
+            }
+
+            Py_DECREF(set);
+        }
+
+        Py_DECREF(iterator);
+        Py_DECREF(subsets);
+
+    }
+
+    Py_DECREF(minimalSSIExplanations);
+    Py_DECREF(candidate_arguments);
+
+    return explanations;
+}
+
+/**
+ * @brief Return a list of all the sets of arguments that are minimal NSI Explanations of arg1 and arg2
+ * w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF), NULL if an error was encountered.
+ * 
+ * @param self an instance of QBAFramework
+ * @param args a tuple with arguments (other: QBAFramework, arg1: QBAFArgument, arg2: QBAFArgument)
+ * @param kwds name of the arguments args
+ * @return PyObject* new PyList, NULL if an error occurred
+ */
+static PyObject *
+QBAFramework_minimalNSIExplanations(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"other", "arg1", "arg2", NULL};
+    PyObject *other, *arg1, *arg2;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|", kwlist,
+                                     &other, &arg1, &arg2))
+        return NULL;
+
+    if (!PyObject_TypeCheck(other, Py_TYPE(self))) {
+        PyErr_SetString(PyExc_TypeError, "other must be an instance of QBAFramework");
+        return NULL;
+    }
+
+    return _QBAFramework_minimalNSIExplanations(self, (QBAFrameworkObject*)other, arg1, arg2);
 }
 
 /**
@@ -3349,32 +3783,469 @@ QBAFramework_richcompare(QBAFrameworkObject *self, PyObject *other, int op)
     Py_RETURN_BOOL(op == Py_EQ);
 }
 
+PyDoc_STRVAR(arguments_doc,
+"Set of arguments of the Framework.\n"
+"\n"
+"Getter: Return a copy of the QBAFramework's set of arguments\n"
+"Type: set of QBAFArgument\n"
+);
+
+PyDoc_STRVAR(initial_strengths_doc,
+"Initial strengths of the arguments of the Framework.\n"
+"\n"
+"Getter: Return a copy of the QBAFramework's initial strengths\n"
+"Type: dict of QBAFArgument: float\n"
+);
+
+PyDoc_STRVAR(attack_relations_doc,
+"Attack relations of the Framework.\n"
+"\n"
+"Getter: Return the QBAFramework's attack relations\n"
+"Type: QBAFARelations\n"
+);
+
+PyDoc_STRVAR(support_relations_doc,
+"Support relations of the Framework.\n"
+"\n"
+"Getter: Return the QBAFramework's support relations\n"
+"Type: QBAFARelations\n"
+);
+
+PyDoc_STRVAR(final_strengths_doc,
+"Final strengths of the arguments of the Framework.\n"
+"\n"
+"Getter: Calculate and return the QBAFramework's final strengths.\n"
+"        If the Framework has not been modified since last time they were calculated,\n"
+"        a copy of the previously calculated final strengths is returned.\n"
+"Type: dict of QBAFArgument: float\n"
+);
+
+PyDoc_STRVAR(disjoint_relations_doc,
+"True if the attack/support relations must be disjoint, False if they do not have to.\n"
+"\n"
+"Getter: Return if the attack/support relations must be disjoint or not\n"
+"Setter: Set if the attack/support relations must be disjoint or not\n"
+"Type: bool\n"
+);
+
+PyDoc_STRVAR(semantics_doc,
+"The name of the semantics used to calculate the final strengths of the Framework.\n"
+"If the semantics are custom (not predefined) then its value is None.\n"
+"\n"
+"Getter: Return the QBAFramework's semantics name. None if it is custom.\n"
+"Type: str\n"
+);
+
+PyDoc_STRVAR(min_strength_doc,
+"The minimun value an initial strength can have in the Framework.\n"
+"\n"
+"Getter: Return the QBAFramework's minimum strength.\n"
+"Type: float\n"
+);
+
+PyDoc_STRVAR(max_strength_doc,
+"The maximun value an initial strength can have in the Framework.\n"
+"\n"
+"Getter: Return the QBAFramework's maximum strength.\n"
+"Type: float\n"
+);
+
 /**
  * @brief A list with the setters and getters of the class QBAFramework
  * 
  */
 static PyGetSetDef QBAFramework_getsetters[] = {
     {"arguments", (getter) QBAFramework_getarguments, NULL,
-     "Return a copy of the arguments of the instance.", NULL},
+     arguments_doc, NULL},
     {"initial_strengths", (getter) QBAFramework_getinitial_strengths, NULL,
-     "Return a copy of the initial strengths.", NULL},
+     initial_strengths_doc, NULL},
     {"attack_relations", (getter) QBAFramework_getattack_relations, NULL,
-     "Return the attack relations of the instance.", NULL},
+     attack_relations_doc, NULL},
     {"support_relations", (getter) QBAFramework_getsupport_relations, NULL,
-     "Return the support relations of the instance.", NULL},
+     support_relations_doc, NULL},
     {"final_strengths", (getter) QBAFramework_getfinal_strengths, NULL,
-     "Return a copy of the final strengths.", NULL},
+     final_strengths_doc, NULL},
     {"disjoint_relations", (getter) QBAFramework_getdisjoint_relations, (setter) QBAFramework_setdisjoint_relations,
-     "Return True if the attack/support relations must be disjoint, False if they do not have to.",
-     "Setter of the attribute disjoint_relations."},
+     disjoint_relations_doc, NULL},
     {"semantics", (getter) QBAFramework_getsemantics, NULL,
-     "Return the semantics.", NULL},
+     semantics_doc, NULL},
     {"min_strength", (getter) QBAFramework_getmin_strength, NULL,
-     "Return the min value a initial_strength can have.", NULL},
+     min_strength_doc, NULL},
     {"max_strength", (getter) QBAFramework_getmax_strength, NULL,
-     "Return the max value a initial_strength can have.", NULL},
+     max_strength_doc, NULL},
     {NULL}  /* Sentinel */
 };
+
+PyDoc_STRVAR(modify_initial_strength_doc,
+"modify_initial_strength(self, argument, initial_strength)\n"
+"--\n"
+"\n"
+"Modify the initial strength of the argument.\n"
+"\n"
+"Args:\n"
+"    argument (QBAFArgument): the argument to be modified\n"
+"    initial_strength (float): the new value of initial strength\n"
+);
+
+PyDoc_STRVAR(initial_strength_doc,
+"initial_strength(self, argument)\n"
+"--\n"
+"\n"
+"Return the initial strength of the argument.\n"
+"\n"
+"Args:\n"
+"    argument (QBAFARelations): the argument\n"
+"\n"
+"Returns:\n"
+"    float: the initial strength\n"
+);
+
+PyDoc_STRVAR(final_strength_doc,
+"final_strength(self, argument)\n"
+"--\n"
+"\n"
+"Return the final strength of the argument.\n"
+"If the framework has been modified from the last time the final strengths were calculated\n"
+"they are calculated again. Otherwise, it returns the already calculated final strength.\n"
+"\n"
+"Args:\n"
+"    argument (QBAFARelations): the argument\n"
+"\n"
+"Returns:\n"
+"    float: the initial strength\n"
+);
+
+PyDoc_STRVAR(add_argument_doc,
+"add_argument(self, argument, initial_strength=0.0)\n"
+"--\n"
+"\n"
+"Add an argument to the Framework. If it already exists it does nothing.\n"
+"\n"
+"Args:\n"
+"    argument (QBAFArgument): the argument\n"
+"    initial_strength (float, optional): the initial strength of the argument. Defaults to 0.0.\n"
+);
+
+PyDoc_STRVAR(remove_argument_doc,
+"remove_argument(self, argument)\n"
+"--\n"
+"\n"
+"Remove the argument from the Framework. If it does not exist it does nothing.\n"
+"\n"
+"Args:\n"
+"    argument (QBAFArgument): the argument\n"
+);
+
+PyDoc_STRVAR(add_attack_relation_doc,
+"add_attack_relation(self, attacker, attacked)\n"
+"--\n"
+"\n"
+"Add the Attack relation (attacker, attacked) to the Framework.\n"
+"The relation's arguments must be contained in the Framework's arguments.\n"
+"If the Attack relation already exists, this method does nothing.\n"
+"\n"
+"Args:\n"
+"    attacker (QBAFArgument): the argument that is attacking\n"
+"    attacked (QBAFArgument): the argument that is being attacked\n"
+);
+
+PyDoc_STRVAR(remove_attack_relation_doc,
+"remove_attack_relation(self, attacker, attacked)\n"
+"--\n"
+"\n"
+"Remove the Attack relation (attacker, attacked) from the Framework.\n"
+"If the Attack relation does not exist, this method does nothing.\n"
+"\n"
+"Args:\n"
+"    attacker (QBAFArgument): the argument that is attacking\n"
+"    attacked (QBAFArgument): the argument that is being attacked\n"
+);
+
+PyDoc_STRVAR(add_support_relation_doc,
+"add_support_relation(self, supporter, supported)\n"
+"--\n"
+"\n"
+"Add the Support relation (supporter, supported) to the Framework.\n"
+"The relation's arguments must be contained in the Framework's arguments.\n"
+"If the Support relation already exists, this method does nothing.\n"
+"\n"
+"Args:\n"
+"    supporter (QBAFArgument): the argument that is supporting\n"
+"    supported (QBAFArgument): the argument that is being supported\n"
+);
+
+PyDoc_STRVAR(remove_support_relation_doc,
+"remove_support_relation(self, supporter, supported)\n"
+"--\n"
+"\n"
+"Remove the Support relation (supporter, supported) from the Framework.\n"
+"If the Support relation does not exist, this method does nothing.\n"
+"\n"
+"Args:\n"
+"    supporter (QBAFArgument): the argument that is supporting\n"
+"    supported (QBAFArgument): the argument that is being supported\n"
+);
+
+PyDoc_STRVAR(contains_argument_doc,
+"contains_argument(self, argument)\n"
+"--\n"
+"\n"
+"Return True if the argument is contained in the Framework. False if it is not.\n"
+"\n"
+"Args:\n"
+"    argument (QBAFARelations): the argument\n"
+"\n"
+"Returns:\n"
+"    bool: True if contained, False if not contained\n"
+);
+
+PyDoc_STRVAR(contains_attack_relation_doc,
+"contains_attack_relation(self, argument)\n"
+"--\n"
+"\n"
+"Return True if the Attack relation (attacker, attacked) is contained\n"
+"in the Framework. False if it is not.\n"
+"\n"
+"Args:\n"
+"    attacker (QBAFArgument): the argument that is attacking\n"
+"    attacked (QBAFArgument): the argument that is being attacked\n"
+"\n"
+"Returns:\n"
+"    bool: True if contained, False if not contained\n"
+);
+
+PyDoc_STRVAR(contains_support_relation_doc,
+"contains_support_relation(self, argument)\n"
+"--\n"
+"\n"
+"Return True if the Support relation (supporter, supported) is contained\n"
+"in the Framework. False if it is not.\n"
+"\n"
+"Args:\n"
+"    supporter (QBAFArgument): the argument that is supporting\n"
+"    supported (QBAFArgument): the argument that is being supported\n"
+"\n"
+"Returns:\n"
+"    bool: True if contained, False if not contained\n"
+);
+
+PyDoc_STRVAR(attackedBy_doc,
+"attackedBy(self, attacker)\n"
+"--\n"
+"\n"
+"Return the arguments that are being attacked by the argument attacker.\n"
+"\n"
+"Args:\n"
+"    attacker (QBAFArgument): the argument that is attacking\n"
+"\n"
+"Returns:\n"
+"    list: the arguments that are being attacked\n"
+);
+
+PyDoc_STRVAR(attackersOf_doc,
+"attackersOf(self, attacked)\n"
+"--\n"
+"\n"
+"Return the arguments that are attacking the argument attacked.\n"
+"\n"
+"Args:\n"
+"    attacked (QBAFArgument): the argument that is being attacked\n"
+"\n"
+"Returns:\n"
+"    list: the arguments that are attacking\n"
+);
+
+PyDoc_STRVAR(supportedBy_doc,
+"supportedBy(self, supporter)\n"
+"--\n"
+"\n"
+"Return the arguments that are being supported by the argument supporter.\n"
+"\n"
+"Args:\n"
+"    supporter (QBAFArgument): the argument that is supporting\n"
+"\n"
+"Returns:\n"
+"    list: the arguments that are being supported\n"
+);
+
+PyDoc_STRVAR(supportersOf_doc,
+"supportersOf(self, supported)\n"
+"--\n"
+"\n"
+"Return the arguments that are supporting the argument supported.\n"
+"\n"
+"Args:\n"
+"    supported (QBAFArgument): the argument that is being supported\n"
+"\n"
+"Returns:\n"
+"    list: the arguments that are supporting\n"
+);
+
+PyDoc_STRVAR(__copy___doc,
+"__copy__(self, /)\n"
+"--\n"
+"\n"
+"Return a shallow copy of self.\n"
+);
+
+PyDoc_STRVAR(copy_doc,
+"copy(self)\n"
+"--\n"
+"\n"
+"Return a shallow copy of self.\n"
+);
+
+PyDoc_STRVAR(isacyclic_doc,
+"isacyclic(self)\n"
+"--\n"
+"\n"
+"Return True if the Attack/Support relations of the Framework have no cycles.\n"
+"False otherwise.\n"
+"\n"
+"Returns:\n"
+"    bool: True if acyclic, False if not acyclic\n"
+);
+
+PyDoc_STRVAR(are_strength_consistent_doc,
+"are_strength_consistent(self, other, arg1, arg2)\n"
+"--\n"
+"\n"
+"Return True if the argument arg1 and the argument arg2 are strength consistent\n"
+"w.r.t the Framework self and the Framework other.\n"
+"Both arguments must be contained in both Frameworks.\n"
+"\n"
+"Args:\n"
+"    other (QBAFramework): a Framework\n"
+"    arg1 (QBAFArgument): first argument\n"
+"    arg2 (QBAFArgument): second argument\n"
+"\n"
+"Returns:\n"
+"    bool: True if strength consistent, False if strength inconsistent\n"
+);
+
+PyDoc_STRVAR(reversal_doc,
+"reversal(self, other, set)\n"
+"--\n"
+"\n"
+"Return the reversal Framework of the Framework self to the Framework other\n"
+"w.r.t. the Set of arguments set.\n"
+"All arguments in set must be contained in at least one of the Frameworks.\n"
+"\n"
+"Args:\n"
+"    other (QBAFramework): a Framework\n"
+"    set (set): a set of arguments\n"
+"\n"
+"Returns:\n"
+"    QBAFramework: a new Framework\n"
+);
+
+PyDoc_STRVAR(isSSIExplanation_doc,
+"isSSIExplanation(self, other, set, arg1, arg2)\n"
+"--\n"
+"\n"
+"Return True if the Set of arguments set is Sufficient Strength Inconsistency (SSI) Explanation\n"
+"of the argument arg1 and the argument arg2 w.r.t. the framework self and the framework other.\n"
+"Both arguments must be contained in both Frameworks.\n"
+"All arguments in set must be contained in at least one of the Frameworks.\n"
+"\n"
+"Args:\n"
+"    other (QBAFramework): a Framework\n"
+"    set (set): a set of arguments\n"
+"    arg1 (QBAFArgument): first argument\n"
+"    arg2 (QBAFArgument): second argument\n"
+"\n"
+"Returns:\n"
+"    bool: True if SSI Explanation, False if not SSI Explanation\n"
+);
+
+PyDoc_STRVAR(isCSIExplanation_doc,
+"isCSIExplanation(self, other, set, arg1, arg2)\n"
+"--\n"
+"\n"
+"Return True if the Set of arguments set is Counterfactual Strength Inconsistency (CSI) Explanation\n"
+"of the argument arg1 and the argument arg2 w.r.t. the framework self and the framework other.\n"
+"Both arguments must be contained in both Frameworks.\n"
+"All arguments in set must be contained in at least one of the Frameworks.\n"
+"\n"
+"Args:\n"
+"    other (QBAFramework): a Framework\n"
+"    set (set): a set of arguments\n"
+"    arg1 (QBAFArgument): first argument\n"
+"    arg2 (QBAFArgument): second argument\n"
+"\n"
+"Returns:\n"
+"    bool: True if CSI Explanation, False if not CSI Explanation\n"
+);
+
+PyDoc_STRVAR(isNSIExplanation_doc,
+"isNSIExplanation(self, other, set, arg1, arg2)\n"
+"--\n"
+"\n"
+"Return True if the Set of arguments set is Necessary Strength Inconsistency (NSI) Explanation\n"
+"of the argument arg1 and the argument arg2 w.r.t. the framework self and the framework other.\n"
+"Both arguments must be contained in both Frameworks.\n"
+"All arguments in set must be contained in at least one of the Frameworks.\n"
+"\n"
+"Args:\n"
+"    other (QBAFramework): a Framework\n"
+"    set (set): a set of arguments\n"
+"    arg1 (QBAFArgument): first argument\n"
+"    arg2 (QBAFArgument): second argument\n"
+"\n"
+"Returns:\n"
+"    bool: True if NSI Explanation, False if not NSI Explanation\n"
+);
+
+PyDoc_STRVAR(minimalSSIExplanations_doc,
+"minimalSSIExplanations(self, other, arg1, arg2)\n"
+"--\n"
+"\n"
+"Return all the sets of arguments that are a subset-minimal SSI Explanation\n"
+"of the argument arg1 and the argument arg2 w.r.t. the Framework self and the Framework other.\n"
+"Both arguments must be contained in both Frameworks.\n"
+"\n"
+"Args:\n"
+"    other (QBAFramework): a Framework\n"
+"    arg1 (QBAFArgument): first argument\n"
+"    arg2 (QBAFArgument): second argument\n"
+"\n"
+"Returns:\n"
+"    list: list of set of arguments\n"
+);
+
+PyDoc_STRVAR(minimalCSIExplanations_doc,
+"minimalCSIExplanations(self, other, arg1, arg2)\n"
+"--\n"
+"\n"
+"Return all the sets of arguments that are a subset-minimal CSI Explanation\n"
+"of the argument arg1 and the argument arg2 w.r.t. the Framework self and the Framework other.\n"
+"Both arguments must be contained in both Frameworks.\n"
+"\n"
+"Args:\n"
+"    other (QBAFramework): a Framework\n"
+"    arg1 (QBAFArgument): first argument\n"
+"    arg2 (QBAFArgument): second argument\n"
+"\n"
+"Returns:\n"
+"    list: list of set of arguments\n"
+);
+
+PyDoc_STRVAR(minimalNSIExplanations_doc,
+"minimalNSIExplanations(self, other, arg1, arg2)\n"
+"--\n"
+"\n"
+"Return all the sets of arguments that are a subset-minimal NSI Explanation\n"
+"of the argument arg1 and the argument arg2 w.r.t. the Framework self and the Framework other.\n"
+"Both arguments must be contained in both Frameworks.\n"
+"\n"
+"Args:\n"
+"    other (QBAFramework): a Framework\n"
+"    arg1 (QBAFArgument): first argument\n"
+"    arg2 (QBAFArgument): second argument\n"
+"\n"
+"Returns:\n"
+"    list: list of set of arguments\n"
+);
 
 /**
  * @brief List of functions of the class QBAFramework
@@ -3382,82 +4253,133 @@ static PyGetSetDef QBAFramework_getsetters[] = {
  */
 static PyMethodDef QBAFramework_methods[] = {
     {"modify_initial_strength", (PyCFunctionWithKeywords) QBAFramework_modify_initial_strengths, METH_VARARGS | METH_KEYWORDS,
-    "Modify the initial strength of the Argument argument."
+    modify_initial_strength_doc
     },
     {"initial_strength", (PyCFunctionWithKeywords) QBAFramework_initial_strength, METH_VARARGS | METH_KEYWORDS,
-    "Return the initial strength of the Argument argument."
+    initial_strength_doc
     },
     {"final_strength", (PyCFunctionWithKeywords) QBAFramework_final_strength, METH_VARARGS | METH_KEYWORDS,
-    "Return the final strength of the Argument argument."
+    final_strength_doc
     },
     {"add_argument", (PyCFunctionWithKeywords) QBAFramework_add_argument, METH_VARARGS | METH_KEYWORDS,
-    "Add an Argument to the Framework. If it exists already it does nothing."
+    add_argument_doc
     },
     {"remove_argument", (PyCFunctionWithKeywords) QBAFramework_remove_argument, METH_VARARGS | METH_KEYWORDS,
-    "Remove the Argument argument from the Framework. If it does not exist it does nothing."
+    remove_argument_doc
     },
     {"add_attack_relation", (PyCFunctionWithKeywords) QBAFramework_add_attack_relation, METH_VARARGS | METH_KEYWORDS,
-    "Add the Attack relation (attacker, attacked) to the Framework."
+    add_attack_relation_doc
     },
     {"add_support_relation", (PyCFunctionWithKeywords) QBAFramework_add_support_relation, METH_VARARGS | METH_KEYWORDS,
-    "Add the Support relation (supporter, supported) to the Framework."
+    add_support_relation_doc
     },
     {"remove_attack_relation", (PyCFunctionWithKeywords) QBAFramework_remove_attack_relation, METH_VARARGS | METH_KEYWORDS,
-    "Remove the Attack relation (attacker, attacked) from the Framework."
+    remove_attack_relation_doc
     },
     {"remove_support_relation", (PyCFunctionWithKeywords) QBAFramework_remove_support_relation, METH_VARARGS | METH_KEYWORDS,
-    "Remove the Support relation (supporter, supported) from the Framework."
+    remove_support_relation_doc
     },
     {"contains_argument", (PyCFunctionWithKeywords) QBAFramework_contains_argument, METH_VARARGS | METH_KEYWORDS,
-    "Return whether or not the Framework contains the Argument argument."
+    contains_argument_doc
     },
     {"contains_attack_relation", (PyCFunctionWithKeywords) QBAFramework_contains_attack_relation, METH_VARARGS | METH_KEYWORDS,
-    "Return whether or not the Attack relation (attacker, attacked) is contained in the Framework."
+    contains_attack_relation_doc
     },
     {"contains_support_relation", (PyCFunctionWithKeywords) QBAFramework_contains_support_relation, METH_VARARGS | METH_KEYWORDS,
-    "Return whether or not the Support relation (supporter, supported) is contained in the Framework."
+    contains_support_relation_doc
     },
     {"attackedBy", (PyCFunctionWithKeywords) QBAFramework_attackedBy, METH_VARARGS | METH_KEYWORDS,
-    "Return the arguments that are attacked by the argument attacker."
+    attackedBy_doc
     },
     {"attackersOf", (PyCFunctionWithKeywords) QBAFramework_attackersOf, METH_VARARGS | METH_KEYWORDS,
-    "Return the arguments that are attacking the argument attacked."
+    attackersOf_doc
     },
     {"supportedBy", (PyCFunctionWithKeywords) QBAFramework_supportedBy, METH_VARARGS | METH_KEYWORDS,
-    "Return the arguments that are supported by the argument supporter."
+    supportedBy_doc
     },
     {"supportersOf", (PyCFunctionWithKeywords) QBAFramework_supportersOf, METH_VARARGS | METH_KEYWORDS,
-    "Return the arguments that are supporting the argument supported."
+    supportersOf_doc
     },
     {"__copy__", (PyCFunction) QBAFramework_copy, METH_NOARGS,
-    "Return shallow a copy of the instance."
+    __copy___doc
     },
     {"copy", (PyCFunction) QBAFramework_copy, METH_NOARGS,
-    "Return shallow a copy of the instance."
+    copy_doc
     },
     {"isacyclic", (PyCFunction) QBAFramework_isacyclic, METH_NOARGS,
-    "Return whether or not the relations of the Framework are acyclic."
+    isacyclic_doc
     },
     {"are_strength_consistent", (PyCFunctionWithKeywords) QBAFramework_are_strength_consistent, METH_VARARGS | METH_KEYWORDS,
-    "Return True if a pair of arguments are strength consistent between two frameworks, False otherwise."
+    are_strength_consistent_doc
     },
     {"reversal", (PyCFunctionWithKeywords) QBAFramework_reversal, METH_VARARGS | METH_KEYWORDS,
-    "Return the reversal framework of self to other w.r.t. set."
+    reversal_doc
     },
     {"isSSIExplanation", (PyCFunctionWithKeywords) QBAFramework_isSSIExplanation, METH_VARARGS | METH_KEYWORDS,
-    "Return True if a set of arguments set is Sufficient Strength Inconsistency (SSI) Explanation, False if not."
+    isSSIExplanation_doc
     },
     {"isCSIExplanation", (PyCFunctionWithKeywords) QBAFramework_isCSIExplanation, METH_VARARGS | METH_KEYWORDS,
-    "Return True if a set of arguments set is Counterfactual Strength Inconsistency (CSI) Explanation, False if not."
+    isCSIExplanation_doc
+    },
+    {"isNSIExplanation", (PyCFunctionWithKeywords) QBAFramework_isNSIExplanation, METH_VARARGS | METH_KEYWORDS,
+    isNSIExplanation_doc
     },
     {"minimalSSIExplanations", (PyCFunctionWithKeywords) QBAFramework_minimalSSIExplanations, METH_VARARGS | METH_KEYWORDS,
-    "Return a list of a set of arguments that are minimal (all have the same size) SSI Explanations\nof arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF)."
+    minimalSSIExplanations_doc
     },
     {"minimalCSIExplanations", (PyCFunctionWithKeywords) QBAFramework_minimalCSIExplanations, METH_VARARGS | METH_KEYWORDS,
-    "Return a list of a set of arguments that are minimal (all have the same size) CSI Explanations\nof arg1 and arg2 w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF)."
+    minimalCSIExplanations_doc
+    },
+    {"minimalNSIExplanations", (PyCFunctionWithKeywords) QBAFramework_minimalNSIExplanations, METH_VARARGS | METH_KEYWORDS,
+    minimalNSIExplanations_doc
     },
     {NULL}  /* Sentinel */
 };
+
+PyDoc_STRVAR(QBAFramework_doc,
+"This class represents a Quantitative Bipolar Argumentation Framework (QBAF).\n"
+"\n"
+"A QBAF consists of a set of arguments, Attack relations between arguments,\n"
+"Support relations between arguments and each argument has an initial strength.\n"
+"\n"
+"Each argument has a final strength which is calculated as the result of an influence\n"
+"function that combines the initial strength and the aggregation result.\n"
+"The aggregation result is obtained as the result of applying an aggregation function\n"
+"to the supporters of the argument minus the result of applying the same aggregation\n"
+"function to the attackers of the argument.\n"
+"\n"
+"Note that every time the type QBAFArgument is written, any type that is hashable can be used.\n"
+"\n"
+"The semantics of a QBAF are associated with the way the final strengths are calculated.\n"
+"There are some predefined semantics (The default is 'basic_model'), but custom semantics\n"
+"can be created by implementing your own aggregation function and influence function.\n"
+"\n"
+"Predefined semantics: 'basic_model', 'QuadraticEnergy_model', 'SquaredDFQuAD_model',\n"
+"    'EulerBasedTop_model', 'EulerBased_model' and 'DFQuAD_model'.\n"
+"\n"
+"QBAFramework(arguments, initial_strengths, attack_relations, support_relations,\n"
+"    disjoint_relations=True, semantics=None,\n"
+"    aggregation_function=None, influence_function=None,\n"
+"     min_strength=-1.7976931348623157e+308, max_strength=1.7976931348623157e+308)\n"     
+"\n"
+"Args:\n"
+"    arguments (list): a list of QBAFArgument\n"
+"    initial_strengths (list): a list of floats corresponding to each argument of arguments\n"
+"    attack_relations (Union[set,list]): a collection of (attacker: QBAFArgument, attacked: QBAFArgument)\n"
+"    support_relations (Union[set,list]): a collection of (supporter: QBAFArgument, supported: QBAFArgument)\n"
+"    disjoint_relations (bool, optional): True if the Attack relations and the Support relations must be disjoint.\n"
+"        Defaults to True.\n"
+"    semantics (str, optional): Name of the predifined semantics to be used to calculate the final strengths.\n"
+"        Defaults to None. If the aggregation function and the influence function are None it defaults to 'basic_model'.\n"
+"    aggregation_function (Callable[[float, float], float], optional): Function to combine two final strengths.\n"
+"        Defaults to None.\n"
+"    influence_function (Callable[[float, float], float], optional): Function to combine the initial strength\n"
+"        and the aggregation result. Defaults to None.\n"
+"    min_strength (float, optional): The minimum value an initial strength can have. Defaults to -1.7976931348623157e+308.\n"
+"        It can only be modified when the semantics are custom\n"
+"    max_strength (float, optional): The maximum value an initial strength can have. Defaults to 1.7976931348623157e+308.\n"
+"        It can only be modified when the semantics are custom\n"
+);
 
 /**
  * @brief Python definition for the class QBAFramework
@@ -3466,7 +4388,7 @@ static PyMethodDef QBAFramework_methods[] = {
 static PyTypeObject QBAFrameworkType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "qbaf.QBAFramework",
-    .tp_doc = PyDoc_STR("QBAFramework objects"),
+    .tp_doc = QBAFramework_doc,
     .tp_basicsize = sizeof(QBAFrameworkObject),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC,
