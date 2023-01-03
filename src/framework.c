@@ -3787,6 +3787,7 @@ PyDoc_STRVAR(arguments_doc,
 "Set of arguments of the Framework.\n"
 "\n"
 "Getter: Return a copy of the QBAFramework's set of arguments\n"
+"\n"
 "Type: set of QBAFArgument\n"
 );
 
@@ -3794,6 +3795,7 @@ PyDoc_STRVAR(initial_strengths_doc,
 "Initial strengths of the arguments of the Framework.\n"
 "\n"
 "Getter: Return a copy of the QBAFramework's initial strengths\n"
+"\n"
 "Type: dict of QBAFArgument: float\n"
 );
 
@@ -3801,6 +3803,7 @@ PyDoc_STRVAR(attack_relations_doc,
 "Attack relations of the Framework.\n"
 "\n"
 "Getter: Return the QBAFramework's attack relations\n"
+"\n"
 "Type: QBAFARelations\n"
 );
 
@@ -3808,6 +3811,7 @@ PyDoc_STRVAR(support_relations_doc,
 "Support relations of the Framework.\n"
 "\n"
 "Getter: Return the QBAFramework's support relations\n"
+"\n"
 "Type: QBAFARelations\n"
 );
 
@@ -3815,8 +3819,9 @@ PyDoc_STRVAR(final_strengths_doc,
 "Final strengths of the arguments of the Framework.\n"
 "\n"
 "Getter: Calculate and return the QBAFramework's final strengths.\n"
-"        If the Framework has not been modified since last time they were calculated,\n"
-"        a copy of the previously calculated final strengths is returned.\n"
+"    If the Framework has not been modified since last time they were calculated,\n"
+"    a copy of the previously calculated final strengths is returned.\n"
+"\n"
 "Type: dict of QBAFArgument: float\n"
 );
 
@@ -3824,7 +3829,9 @@ PyDoc_STRVAR(disjoint_relations_doc,
 "True if the attack/support relations must be disjoint, False if they do not have to.\n"
 "\n"
 "Getter: Return if the attack/support relations must be disjoint or not\n"
+"\n"
 "Setter: Set if the attack/support relations must be disjoint or not\n"
+"\n"
 "Type: bool\n"
 );
 
@@ -3833,6 +3840,7 @@ PyDoc_STRVAR(semantics_doc,
 "If the semantics are custom (not predefined) then its value is None.\n"
 "\n"
 "Getter: Return the QBAFramework's semantics name. None if it is custom.\n"
+"\n"
 "Type: str\n"
 );
 
@@ -3840,6 +3848,7 @@ PyDoc_STRVAR(min_strength_doc,
 "The minimun value an initial strength can have in the Framework.\n"
 "\n"
 "Getter: Return the QBAFramework's minimum strength.\n"
+"\n"
 "Type: float\n"
 );
 
@@ -3847,6 +3856,7 @@ PyDoc_STRVAR(max_strength_doc,
 "The maximun value an initial strength can have in the Framework.\n"
 "\n"
 "Getter: Return the QBAFramework's maximum strength.\n"
+"\n"
 "Type: float\n"
 );
 
@@ -4360,7 +4370,7 @@ PyDoc_STRVAR(QBAFramework_doc,
 "QBAFramework(arguments, initial_strengths, attack_relations, support_relations,\n"
 "    disjoint_relations=True, semantics=None,\n"
 "    aggregation_function=None, influence_function=None,\n"
-"     min_strength=-1.7976931348623157e+308, max_strength=1.7976931348623157e+308)\n"     
+"    min_strength=-1.7976931348623157e+308, max_strength=1.7976931348623157e+308)\n"     
 "\n"
 "Args:\n"
 "    arguments (list): a list of QBAFArgument\n"
