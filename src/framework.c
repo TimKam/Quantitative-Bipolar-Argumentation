@@ -3158,18 +3158,16 @@ _QBAFramework_candidate_argument(QBAFrameworkObject *self, QBAFrameworkObject *o
 static inline PyObject *
 _QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
 {
-    // If empty set is a SSI Explanation return it
-    PyObject *empty_set = PySet_New(NULL);
-    if (empty_set == NULL) {
+    // If strength consistent return a list with empty set
+    int strength_consistent = _QBAFramework_are_strength_consistent(self, other, arg1, arg2);
+    if (strength_consistent < 0) {
         return NULL;
     }
-    
-    int isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, empty_set, arg1, arg2);
-    if (isSSIExplanation < 0) {
-        Py_DECREF(empty_set);
-        return NULL;
-    }
-    if (isSSIExplanation) {
+    if (strength_consistent) {
+        PyObject *empty_set = PySet_New(NULL);
+        if (empty_set == NULL) {
+            return NULL;
+        }
         PyObject *list = PyList_New(1);
         if (list == NULL) {
             Py_DECREF(empty_set);
@@ -3178,8 +3176,6 @@ _QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         PyList_SET_ITEM(list, 0, empty_set);
         return list;
     }
-
-    Py_DECREF(empty_set);
 
     // Obtain the influential arguments (arguments that attack/support arg1 or arg2, directly or indirectly)
     PyObject *self_influential_arguments = _QBAFramework_influential_arguments_set(self, arg1, arg2);
@@ -3243,7 +3239,7 @@ _QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
     // Find SSI Explanations trying with size from 1 to length of candidate_arguments
     Py_ssize_t max_size = PySet_GET_SIZE(candidate_arguments);
     PyObject *subsets, *explanations, *set;
-    int contains_subset;
+    int contains_subset, isSSIExplanation;
 
     explanations = PyList_New(0);
     if (explanations == NULL) {
@@ -3343,18 +3339,16 @@ QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, PyObject *args, Py
 static inline PyObject *
 _QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
 {
-    // If empty set is a CSI Explanation return it
-    PyObject *empty_set = PySet_New(NULL);
-    if (empty_set == NULL) {
+    // If strength consistent return a list with empty set
+    int strength_consistent = _QBAFramework_are_strength_consistent(self, other, arg1, arg2);
+    if (strength_consistent < 0) {
         return NULL;
     }
-    
-    int isCSIExplanation = _QBAFramework_isCSIExplanation(self, other, empty_set, arg1, arg2);
-    if (isCSIExplanation < 0) {
-        Py_DECREF(empty_set);
-        return NULL;
-    }
-    if (isCSIExplanation) {
+    if (strength_consistent) {
+        PyObject *empty_set = PySet_New(NULL);
+        if (empty_set == NULL) {
+            return NULL;
+        }
         PyObject *list = PyList_New(1);
         if (list == NULL) {
             Py_DECREF(empty_set);
@@ -3363,8 +3357,6 @@ _QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         PyList_SET_ITEM(list, 0, empty_set);
         return list;
     }
-
-    Py_DECREF(empty_set);
 
     // Obtain the influential arguments (arguments that attack/support arg1 or arg2, directly or indirectly)
     PyObject *self_influential_arguments = _QBAFramework_influential_arguments_set(self, arg1, arg2);
@@ -3428,7 +3420,7 @@ _QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
     // Find CSI Explanations trying with size from 1 to length of candidate_arguments
     Py_ssize_t max_size = PySet_GET_SIZE(candidate_arguments);
     PyObject *subsets, *explanations, *set;
-    int contains_subset;
+    int contains_subset, isCSIExplanation;
 
     explanations = PyList_New(0);
     if (explanations == NULL) {
@@ -3528,18 +3520,16 @@ QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, PyObject *args, Py
 static inline PyObject *
 _QBAFramework_minimalNSIExplanations(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
 {
-    // If empty set is a NSI Explanation return it
-    PyObject *empty_set = PySet_New(NULL);
-    if (empty_set == NULL) {
+    // If strength consistent return a list with empty set
+    int strength_consistent = _QBAFramework_are_strength_consistent(self, other, arg1, arg2);
+    if (strength_consistent < 0) {
         return NULL;
     }
-    
-    int isNSIExplanation = _QBAFramework_isNSIExplanation(self, other, empty_set, arg1, arg2);
-    if (isNSIExplanation < 0) {
-        Py_DECREF(empty_set);
-        return NULL;
-    }
-    if (isNSIExplanation) {
+    if (strength_consistent) {
+        PyObject *empty_set = PySet_New(NULL);
+        if (empty_set == NULL) {
+            return NULL;
+        }
         PyObject *list = PyList_New(1);
         if (list == NULL) {
             Py_DECREF(empty_set);
@@ -3548,8 +3538,6 @@ _QBAFramework_minimalNSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         PyList_SET_ITEM(list, 0, empty_set);
         return list;
     }
-
-    Py_DECREF(empty_set);
 
     // Obtain the influential arguments (arguments that attack/support arg1 or arg2, directly or indirectly)
     PyObject *self_influential_arguments = _QBAFramework_influential_arguments_set(self, arg1, arg2);
