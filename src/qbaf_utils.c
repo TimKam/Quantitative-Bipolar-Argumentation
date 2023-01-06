@@ -64,6 +64,10 @@ int PySet_IsDisjoint(PyObject *set1, PyObject *set2) {
 int
 PySet_IsSubset(PyObject *set1, PyObject *set2)
 {
+    if (PySet_GET_SIZE(set1) > PySet_GET_SIZE(set2)) {
+        return 0; // return False
+    }
+
     PyObject *iterator = PyObject_GetIter(set1);
     PyObject *item;
 
