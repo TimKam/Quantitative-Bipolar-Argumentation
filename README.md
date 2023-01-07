@@ -21,9 +21,12 @@ Only if you want to work on the *QBAF-Py* code base, you should install some *de
 
 ## Tutorials
 To illustrate how *QBAF-Py* works, the notebook [examples.ipynb](https://github.com/TimKam/Quantitative-Bipolar-Argumentation/blob/main/examples.ipynb) has several examples available.
+The notebook is also available on [Google Colab](https://colab.research.google.com/drive/1EDOpBgmHZmZtAJx3N5wOeXVuwMaTWf8M?usp=sharing).
 
 ## Documentation
 You can generate documentation making use of sphinx (you need to have sphinx installed).
+
+The documentation is genereted from your installed libraries, so you need to install *QBAF-Py* first.
 
 To generate the documentation, run in the [doc](https://github.com/TimKam/Quantitative-Bipolar-Argumentation/tree/main/doc) directory:
 
