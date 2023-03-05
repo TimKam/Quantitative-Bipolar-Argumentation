@@ -126,4 +126,14 @@ PyObject *PySet_PowersetWithoutEmptySet(PyObject *set);
  */
 int PyList_ContainsSubset(PyObject *list, PyObject *superset);
 
+/**
+ * @brief Return True if the list contains at least one set that is disjoint with the set set,
+ * False if it does not, -1 if an error has been encountered.
+ * 
+ * @param list a PyList of PySet
+ * @param set a PySet
+ * @return int 1 if contained, 0 if not contained, -1 if an error occurred
+ */
+int PyList_ContainsDisjoint(PyObject *list, PyObject *set);
+
 #endif

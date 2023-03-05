@@ -774,3 +774,41 @@ PyList_ContainsSubset(PyObject *list, PyObject *superset) {
 
     return 0; // return False
 }
+
+/**
+ * @brief Return True if the list contains at least one set that is disjoint with the set set,
+ * False if it does not, -1 if an error has been encountered.
+ * 
+ * @param list a PyList of PySet
+ * @param set a PySet
+ * @return int 1 if contained, 0 if not contained, -1 if an error occurred
+ */
+int
+PyList_ContainsDisjoint(PyObject *list, PyObject *set) {
+    PyObject *iterator = PyObject_GetIter(list);
+    PyObject *current_set;
+    int isdisjoint;
+
+    if (iterator == NULL) {
+        return -1;
+    }
+
+    while ((current_set = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        isdisjoint = PySet_IsDisjoint(current_set, set);
+        if (isdisjoint < 0) {
+            Py_DECREF(current_set); Py_DECREF(iterator);
+            return -1;
+        }
+
+        Py_DECREF(current_set);
+
+        if (isdisjoint) {
+            Py_DECREF(iterator);
+            return 1; // return True
+        }
+    }
+
+    Py_DECREF(iterator);
+
+    return 0; // return False
+}

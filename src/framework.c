@@ -3558,13 +3558,54 @@ _QBAFramework_minimalNSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         return NULL;
     }
 
-    // Find NSI Explanations
+    // Discard sets that have an empty intersection with at least one minimal SSI Explanation
+    PyObject *filtered_subsets = PyList_New(0);
+    if (filtered_subsets == NULL) {
+        Py_DECREF(minimalSSIExplanations); Py_DECREF(explanations);
+        Py_DECREF(subsets);
+        return NULL;
+    }
+
+    PyObject *iterator = PyObject_GetIter(subsets);
     PyObject *set;
+    if (iterator == NULL) {
+        Py_DECREF(minimalSSIExplanations); Py_DECREF(explanations);
+        Py_DECREF(subsets); Py_DECREF(filtered_subsets);
+        return NULL;
+    }
+
+    while ((set = PyIter_Next(iterator))) {
+        int contains_disjoint = PyList_ContainsDisjoint(minimalSSIExplanations, set);
+        if (contains_disjoint < 0) {
+            Py_DECREF(minimalSSIExplanations); Py_DECREF(explanations);
+            Py_DECREF(subsets); Py_DECREF(filtered_subsets);
+            Py_DECREF(iterator); Py_DECREF(set);
+            return NULL;
+        }
+        
+        if (!contains_disjoint) {
+            if (PyList_Append(filtered_subsets, set) < 0) {
+                Py_DECREF(minimalSSIExplanations); Py_DECREF(explanations);
+                Py_DECREF(subsets); Py_DECREF(filtered_subsets);
+                Py_DECREF(iterator); Py_DECREF(set);
+                return NULL;
+            }
+            Py_INCREF(set);
+        }
+
+        Py_DECREF(set);
+    }
+    Py_DECREF(iterator);
+
+    Py_DECREF(subsets);
+    subsets = filtered_subsets;
+
+    // Find NSI Explanations
     int contains_subset;
     int isSSIExplanation;
     int contains_subset_SSIExplanation;
 
-    PyObject *iterator = PyObject_GetIter(subsets);
+    iterator = PyObject_GetIter(subsets);
     if (iterator == NULL) {
         Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations);
         return NULL;
