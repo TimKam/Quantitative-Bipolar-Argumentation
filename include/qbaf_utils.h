@@ -83,6 +83,14 @@ PyObject *PyList_Concat(PyObject *list1, PyObject *list2);
 PyObject *PyList_NewEmptySet(void);
 
 /**
+ * @brief Return the concatenation of all the sublists of one list, NULL if an error has occurred.
+ * 
+ * @param list a PyList of PyList
+ * @return PyObject* a new PyList, NULL if an error occurred
+ */
+PyObject *PyList_ConcatItems(PyObject *list);
+
+/**
  * @brief Return a list of subsets of size size from the set set, NULL if an error has occurred.
  * 
  * @param set a PySet
