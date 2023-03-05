@@ -91,6 +91,14 @@ PyObject *PyList_NewEmptySet(void);
 PyObject *PyList_ConcatItems(PyObject *list);
 
 /**
+ * @brief Given a list of sets, return the union of all the sets, NULL if an error has occurred.
+ * 
+ * @param list a PyList of PySet
+ * @return PyObject* a new PySet, NULL if an error occurred
+ */
+PyObject *PyListOfPySet_Union(PyObject *list);
+
+/**
  * @brief Return a list of subsets of size size from the set set, NULL if an error has occurred.
  * 
  * @param set a PySet

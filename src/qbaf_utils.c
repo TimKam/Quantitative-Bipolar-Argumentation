@@ -408,6 +408,56 @@ PyList_ConcatItems(PyObject *list)
 }
 
 /**
+ * @brief Given a list of sets, return the union of all the sets, NULL if an error has occurred.
+ * 
+ * @param list a PyList of PySet
+ * @return PyObject* a new PySet, NULL if an error occurred
+ */
+PyObject *
+PyListOfPySet_Union(PyObject *list) {
+    PyObject *set = PySet_New(NULL);
+    if (set == NULL) {
+        return NULL;
+    }
+
+    PyObject *list_iterator = PyObject_GetIter(list);
+    PyObject *current_set;
+
+    if (list_iterator == NULL) {
+        Py_DECREF(set);
+        return NULL;
+    }
+
+    while ((current_set = PyIter_Next(list_iterator))) {    // PyIter_Next returns a new reference
+        PyObject *set_iterator = PyObject_GetIter(current_set);
+        PyObject *item;
+
+        if (set_iterator == NULL) {
+            Py_DECREF(set);
+            Py_DECREF(list_iterator); Py_DECREF(current_set);
+            return NULL;
+        }
+
+        while ((item = PyIter_Next(set_iterator))) {
+
+            if (PySet_Add(set, item) < 0) {
+                Py_DECREF(set);
+                Py_DECREF(list_iterator); Py_DECREF(current_set);
+                Py_DECREF(set_iterator); Py_DECREF(item);
+                return NULL;
+            }
+
+        }
+        Py_DECREF(set_iterator);
+
+        Py_DECREF(current_set);
+    }
+    Py_DECREF(list_iterator);
+
+    return set;
+}
+
+/**
  * @brief Return a list of subsets of size size from the set set, NULL if an error has occurred.
  * 
  * @param set a PySet
