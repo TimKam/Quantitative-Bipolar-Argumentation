@@ -3247,52 +3247,49 @@ _QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         return NULL;
     }
 
-    for (Py_ssize_t size = 1; size <= max_size; size++) {
-        subsets = PySet_SubSets(candidate_arguments, size);
-        if (subsets == NULL) {
-            Py_DECREF(candidate_arguments); Py_DECREF(explanations);
-            return NULL;
-        }
+    subsets = PySet_PowersetWihtoutEmptySet(candidate_arguments);
+    if (subsets == NULL) {
+        Py_DECREF(candidate_arguments); Py_DECREF(explanations);
+        return NULL;
+    }
 
-        iterator = PyObject_GetIter(subsets);
-        if (iterator == NULL) {
+    iterator = PyObject_GetIter(subsets);
+    if (iterator == NULL) {
+        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
+        return NULL;
+    }
+
+    while ((set = PyIter_Next(iterator))) {
+        contains_subset = PyList_ContainsSubset(explanations, set);
+        if (contains_subset < 0) {
             Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
+            Py_DECREF(set); Py_DECREF(iterator);
             return NULL;
         }
-
-        while ((set = PyIter_Next(iterator))) {
-            contains_subset = PyList_ContainsSubset(explanations, set);
-            if (contains_subset < 0) {
+        
+        if (!contains_subset) { // If set is not a superset of any explanation
+            isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, set, arg1, arg2);
+            if (isSSIExplanation < 0) {
                 Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
                 Py_DECREF(set); Py_DECREF(iterator);
                 return NULL;
             }
-            
-            if (!contains_subset) { // If set is not a superset of any explanation
-                isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, set, arg1, arg2);
-                if (isSSIExplanation < 0) {
+
+            if (isSSIExplanation) {
+                if (PyList_Append(explanations, set) < 0) {
                     Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
                     Py_DECREF(set); Py_DECREF(iterator);
                     return NULL;
                 }
-
-                if (isSSIExplanation) {
-                    if (PyList_Append(explanations, set) < 0) {
-                        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
-                        Py_DECREF(set); Py_DECREF(iterator);
-                        return NULL;
-                    }
-                    Py_INCREF(set);
-                }
+                Py_INCREF(set);
             }
-
-            Py_DECREF(set);
         }
 
-        Py_DECREF(iterator);
-        Py_DECREF(subsets);
-
+        Py_DECREF(set);
     }
+
+    Py_DECREF(iterator);
+    Py_DECREF(subsets);
 
     Py_DECREF(candidate_arguments);
 
@@ -3428,52 +3425,50 @@ _QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         return NULL;
     }
 
-    for (Py_ssize_t size = 1; size <= max_size; size++) {
-        subsets = PySet_SubSets(candidate_arguments, size);
-        if (subsets == NULL) {
-            Py_DECREF(candidate_arguments); Py_DECREF(explanations);
-            return NULL;
-        }
+    subsets = PySet_PowersetWihtoutEmptySet(candidate_arguments);
+    if (subsets == NULL) {
+        Py_DECREF(candidate_arguments); Py_DECREF(explanations);
+        return NULL;
+    }
 
-        iterator = PyObject_GetIter(subsets);
-        if (iterator == NULL) {
+    iterator = PyObject_GetIter(subsets);
+    if (iterator == NULL) {
+        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
+        return NULL;
+    }
+
+    while ((set = PyIter_Next(iterator))) {
+        contains_subset = PyList_ContainsSubset(explanations, set);
+        if (contains_subset < 0) {
             Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
+            Py_DECREF(set); Py_DECREF(iterator);
             return NULL;
         }
-
-        while ((set = PyIter_Next(iterator))) {
-            contains_subset = PyList_ContainsSubset(explanations, set);
-            if (contains_subset < 0) {
+        
+        if (!contains_subset) { // If set is not a superset of any explanation
+            isCSIExplanation = _QBAFramework_isCSIExplanation(self, other, set, arg1, arg2);
+            if (isCSIExplanation < 0) {
                 Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
                 Py_DECREF(set); Py_DECREF(iterator);
                 return NULL;
             }
-            
-            if (!contains_subset) { // If set is not a superset of any explanation
-                isCSIExplanation = _QBAFramework_isCSIExplanation(self, other, set, arg1, arg2);
-                if (isCSIExplanation < 0) {
+
+            if (isCSIExplanation) {
+                if (PyList_Append(explanations, set) < 0) {
                     Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
                     Py_DECREF(set); Py_DECREF(iterator);
                     return NULL;
                 }
-
-                if (isCSIExplanation) {
-                    if (PyList_Append(explanations, set) < 0) {
-                        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
-                        Py_DECREF(set); Py_DECREF(iterator);
-                        return NULL;
-                    }
-                    Py_INCREF(set);
-                }
+                Py_INCREF(set);
             }
-
-            Py_DECREF(set);
         }
 
-        Py_DECREF(iterator);
-        Py_DECREF(subsets);
-
+        Py_DECREF(set);
     }
+
+    Py_DECREF(iterator);
+    Py_DECREF(subsets);
+
 
     Py_DECREF(candidate_arguments);
 

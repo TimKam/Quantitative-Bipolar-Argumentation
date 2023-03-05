@@ -325,13 +325,35 @@ PyList_Concat(PyObject *list1, PyObject *list2)
 }
 
 /**
+ * @brief Return a list containing an empty PySet, NULL if an error has occurred.
+ * 
+ * @return PyObject* a new PyList, NULL if an error occurred
+ */
+PyObject *
+PyList_NewEmptySet(void)
+{
+    PyObject *empty_set = PySet_New(NULL);
+    if (empty_set == NULL) {
+        return NULL;
+    }
+    PyObject *list = PyList_New(1);
+    if (list == NULL) {
+        Py_DECREF(empty_set);
+        return NULL;
+    }
+    PyList_SET_ITEM(list, 0, empty_set);
+    return list;
+}
+
+/**
  * @brief Return a list of subsets of size size from the set set, NULL if an error has occurred.
  * 
  * @param set a PySet
  * @param size the size of each subset (> 0)
  * @return PyObject* a new PyList, NULL if an error occurred
  */
-PyObject *PySet_SubSets(PyObject *set, Py_ssize_t size)
+PyObject *
+PySet_SubSets(PyObject *set, Py_ssize_t size)
 {
     if (PySet_GET_SIZE(set) == 0) {
         PyObject *new_set = PySet_New(NULL);
@@ -436,6 +458,39 @@ PyObject *PySet_SubSets(PyObject *set, Py_ssize_t size)
 
     Py_DECREF(myset);
 
+    return list;
+}
+
+/**
+ * @brief Return a list of all subsets (empty set not included) from the set set sorted by size (in ascending order),
+ * NULL if an error has occurred.
+ * 
+ * @param set a PySet
+ * @return PyObject* a new PyList, NULL if an error occurred
+ */
+PyObject *
+PySet_PowersetWihtoutEmptySet(PyObject *set)
+{
+    Py_ssize_t set_size = PySet_GET_SIZE(set);
+
+    PyObject *list = PyList_NewEmptySet();
+    if (list == NULL) {
+        return NULL;
+    }
+
+    for (Py_ssize_t size = 1; size <= set_size; size++)  {
+        PyObject *current_list = PySet_SubSets(set, size);
+        if (current_list == NULL) {
+            Py_DECREF(list);
+            return NULL;
+        }
+
+        PyObject *new_list = PyList_Concat(list, current_list);
+        Py_DECREF(current_list); Py_DECREF(list);
+
+        list = new_list;
+    }
+    
     return list;
 }
 

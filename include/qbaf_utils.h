@@ -76,6 +76,13 @@ PyObject *PyList_Copy(PyObject *iterable, Py_ssize_t len);
 PyObject *PyList_Concat(PyObject *list1, PyObject *list2);
 
 /**
+ * @brief Return a list containing an empty PySet, NULL if an error has occurred.
+ * 
+ * @return PyObject* a new PyList, NULL if an error occurred
+ */
+PyObject *PyList_NewEmptySet(void);
+
+/**
  * @brief Return a list of subsets of size size from the set set, NULL if an error has occurred.
  * 
  * @param set a PySet
@@ -83,6 +90,15 @@ PyObject *PyList_Concat(PyObject *list1, PyObject *list2);
  * @return PyObject* a new PyList, NULL if an error occurred
  */
 PyObject *PySet_SubSets(PyObject *set, Py_ssize_t size);
+
+/**
+ * @brief Return a list of all subsets (empty set not included) from the set set sorted by size (in ascending order),
+ * NULL if an error has occurred.
+ * 
+ * @param set a PySet
+ * @return PyObject* a new PyList, NULL if an error occurred
+ */
+PyObject *PySet_PowersetWihtoutEmptySet(PyObject *set);
 
 /**
  * @brief Return True if the list contains a set that is subset of the set superset,
