@@ -3158,18 +3158,16 @@ _QBAFramework_candidate_argument(QBAFrameworkObject *self, QBAFrameworkObject *o
 static inline PyObject *
 _QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
 {
-    // If empty set is a SSI Explanation return it
-    PyObject *empty_set = PySet_New(NULL);
-    if (empty_set == NULL) {
+    // If strength consistent return a list with empty set
+    int strength_consistent = _QBAFramework_are_strength_consistent(self, other, arg1, arg2);
+    if (strength_consistent < 0) {
         return NULL;
     }
-    
-    int isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, empty_set, arg1, arg2);
-    if (isSSIExplanation < 0) {
-        Py_DECREF(empty_set);
-        return NULL;
-    }
-    if (isSSIExplanation) {
+    if (strength_consistent) {
+        PyObject *empty_set = PySet_New(NULL);
+        if (empty_set == NULL) {
+            return NULL;
+        }
         PyObject *list = PyList_New(1);
         if (list == NULL) {
             Py_DECREF(empty_set);
@@ -3178,8 +3176,6 @@ _QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         PyList_SET_ITEM(list, 0, empty_set);
         return list;
     }
-
-    Py_DECREF(empty_set);
 
     // Obtain the influential arguments (arguments that attack/support arg1 or arg2, directly or indirectly)
     PyObject *self_influential_arguments = _QBAFramework_influential_arguments_set(self, arg1, arg2);
@@ -3243,7 +3239,7 @@ _QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
     // Find SSI Explanations trying with size from 1 to length of candidate_arguments
     Py_ssize_t max_size = PySet_GET_SIZE(candidate_arguments);
     PyObject *subsets, *explanations, *set;
-    int contains_subset;
+    int contains_subset, isSSIExplanation;
 
     explanations = PyList_New(0);
     if (explanations == NULL) {
@@ -3251,52 +3247,49 @@ _QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         return NULL;
     }
 
-    for (Py_ssize_t size = 1; size <= max_size; size++) {
-        subsets = PySet_SubSets(candidate_arguments, size);
-        if (subsets == NULL) {
-            Py_DECREF(candidate_arguments); Py_DECREF(explanations);
-            return NULL;
-        }
+    subsets = PySet_PowersetWithoutEmptySet(candidate_arguments);
+    if (subsets == NULL) {
+        Py_DECREF(candidate_arguments); Py_DECREF(explanations);
+        return NULL;
+    }
 
-        iterator = PyObject_GetIter(subsets);
-        if (iterator == NULL) {
+    iterator = PyObject_GetIter(subsets);
+    if (iterator == NULL) {
+        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
+        return NULL;
+    }
+
+    while ((set = PyIter_Next(iterator))) {
+        contains_subset = PyList_ContainsSubset(explanations, set);
+        if (contains_subset < 0) {
             Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
+            Py_DECREF(set); Py_DECREF(iterator);
             return NULL;
         }
-
-        while ((set = PyIter_Next(iterator))) {
-            contains_subset = PyList_ContainsSubset(explanations, set);
-            if (contains_subset < 0) {
+        
+        if (!contains_subset) { // If set is not a superset of any explanation
+            isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, set, arg1, arg2);
+            if (isSSIExplanation < 0) {
                 Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
                 Py_DECREF(set); Py_DECREF(iterator);
                 return NULL;
             }
-            
-            if (!contains_subset) { // If set is not a superset of any explanation
-                isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, set, arg1, arg2);
-                if (isSSIExplanation < 0) {
+
+            if (isSSIExplanation) {
+                if (PyList_Append(explanations, set) < 0) {
                     Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
                     Py_DECREF(set); Py_DECREF(iterator);
                     return NULL;
                 }
-
-                if (isSSIExplanation) {
-                    if (PyList_Append(explanations, set) < 0) {
-                        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
-                        Py_DECREF(set); Py_DECREF(iterator);
-                        return NULL;
-                    }
-                    Py_INCREF(set);
-                }
+                Py_INCREF(set);
             }
-
-            Py_DECREF(set);
         }
 
-        Py_DECREF(iterator);
-        Py_DECREF(subsets);
-
+        Py_DECREF(set);
     }
+
+    Py_DECREF(iterator);
+    Py_DECREF(subsets);
 
     Py_DECREF(candidate_arguments);
 
@@ -3343,18 +3336,16 @@ QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, PyObject *args, Py
 static inline PyObject *
 _QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
 {
-    // If empty set is a CSI Explanation return it
-    PyObject *empty_set = PySet_New(NULL);
-    if (empty_set == NULL) {
+    // If strength consistent return a list with empty set
+    int strength_consistent = _QBAFramework_are_strength_consistent(self, other, arg1, arg2);
+    if (strength_consistent < 0) {
         return NULL;
     }
-    
-    int isCSIExplanation = _QBAFramework_isCSIExplanation(self, other, empty_set, arg1, arg2);
-    if (isCSIExplanation < 0) {
-        Py_DECREF(empty_set);
-        return NULL;
-    }
-    if (isCSIExplanation) {
+    if (strength_consistent) {
+        PyObject *empty_set = PySet_New(NULL);
+        if (empty_set == NULL) {
+            return NULL;
+        }
         PyObject *list = PyList_New(1);
         if (list == NULL) {
             Py_DECREF(empty_set);
@@ -3363,8 +3354,6 @@ _QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         PyList_SET_ITEM(list, 0, empty_set);
         return list;
     }
-
-    Py_DECREF(empty_set);
 
     // Obtain the influential arguments (arguments that attack/support arg1 or arg2, directly or indirectly)
     PyObject *self_influential_arguments = _QBAFramework_influential_arguments_set(self, arg1, arg2);
@@ -3428,7 +3417,7 @@ _QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
     // Find CSI Explanations trying with size from 1 to length of candidate_arguments
     Py_ssize_t max_size = PySet_GET_SIZE(candidate_arguments);
     PyObject *subsets, *explanations, *set;
-    int contains_subset;
+    int contains_subset, isCSIExplanation;
 
     explanations = PyList_New(0);
     if (explanations == NULL) {
@@ -3436,52 +3425,50 @@ _QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         return NULL;
     }
 
-    for (Py_ssize_t size = 1; size <= max_size; size++) {
-        subsets = PySet_SubSets(candidate_arguments, size);
-        if (subsets == NULL) {
-            Py_DECREF(candidate_arguments); Py_DECREF(explanations);
-            return NULL;
-        }
+    subsets = PySet_PowersetWithoutEmptySet(candidate_arguments);
+    if (subsets == NULL) {
+        Py_DECREF(candidate_arguments); Py_DECREF(explanations);
+        return NULL;
+    }
 
-        iterator = PyObject_GetIter(subsets);
-        if (iterator == NULL) {
+    iterator = PyObject_GetIter(subsets);
+    if (iterator == NULL) {
+        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
+        return NULL;
+    }
+
+    while ((set = PyIter_Next(iterator))) {
+        contains_subset = PyList_ContainsSubset(explanations, set);
+        if (contains_subset < 0) {
             Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
+            Py_DECREF(set); Py_DECREF(iterator);
             return NULL;
         }
-
-        while ((set = PyIter_Next(iterator))) {
-            contains_subset = PyList_ContainsSubset(explanations, set);
-            if (contains_subset < 0) {
+        
+        if (!contains_subset) { // If set is not a superset of any explanation
+            isCSIExplanation = _QBAFramework_isCSIExplanation(self, other, set, arg1, arg2);
+            if (isCSIExplanation < 0) {
                 Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
                 Py_DECREF(set); Py_DECREF(iterator);
                 return NULL;
             }
-            
-            if (!contains_subset) { // If set is not a superset of any explanation
-                isCSIExplanation = _QBAFramework_isCSIExplanation(self, other, set, arg1, arg2);
-                if (isCSIExplanation < 0) {
+
+            if (isCSIExplanation) {
+                if (PyList_Append(explanations, set) < 0) {
                     Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
                     Py_DECREF(set); Py_DECREF(iterator);
                     return NULL;
                 }
-
-                if (isCSIExplanation) {
-                    if (PyList_Append(explanations, set) < 0) {
-                        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(candidate_arguments);
-                        Py_DECREF(set); Py_DECREF(iterator);
-                        return NULL;
-                    }
-                    Py_INCREF(set);
-                }
+                Py_INCREF(set);
             }
-
-            Py_DECREF(set);
         }
 
-        Py_DECREF(iterator);
-        Py_DECREF(subsets);
-
+        Py_DECREF(set);
     }
+
+    Py_DECREF(iterator);
+    Py_DECREF(subsets);
+
 
     Py_DECREF(candidate_arguments);
 
@@ -3528,18 +3515,16 @@ QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, PyObject *args, Py
 static inline PyObject *
 _QBAFramework_minimalNSIExplanations(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *arg1, PyObject *arg2)
 {
-    // If empty set is a NSI Explanation return it
-    PyObject *empty_set = PySet_New(NULL);
-    if (empty_set == NULL) {
+    // If strength consistent return a list with empty set
+    int strength_consistent = _QBAFramework_are_strength_consistent(self, other, arg1, arg2);
+    if (strength_consistent < 0) {
         return NULL;
     }
-    
-    int isNSIExplanation = _QBAFramework_isNSIExplanation(self, other, empty_set, arg1, arg2);
-    if (isNSIExplanation < 0) {
-        Py_DECREF(empty_set);
-        return NULL;
-    }
-    if (isNSIExplanation) {
+    if (strength_consistent) {
+        PyObject *empty_set = PySet_New(NULL);
+        if (empty_set == NULL) {
+            return NULL;
+        }
         PyObject *list = PyList_New(1);
         if (list == NULL) {
             Py_DECREF(empty_set);
@@ -3549,161 +3534,141 @@ _QBAFramework_minimalNSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         return list;
     }
 
-    Py_DECREF(empty_set);
-
-    // Obtain the influential arguments (arguments that attack/support arg1 or arg2, directly or indirectly)
-    PyObject *self_influential_arguments = _QBAFramework_influential_arguments_set(self, arg1, arg2);
-    if (self_influential_arguments == NULL) {
+    PyObject *explanations = PyList_New(0);
+    if (explanations == NULL) {
         return NULL;
     }
-
-    PyObject *other_influential_arguments = _QBAFramework_influential_arguments_set(other, arg1, arg2);
-    if (other_influential_arguments == NULL) {
-        Py_DECREF(self_influential_arguments);
-        return NULL;
-    }
-
-    PyObject *influential_arguments = PySet_Union(self_influential_arguments, other_influential_arguments);
-    if (influential_arguments == NULL) {
-        Py_DECREF(self_influential_arguments); Py_DECREF(other_influential_arguments);
-        return NULL;
-    }
-
-    Py_DECREF(self_influential_arguments);
-    Py_DECREF(other_influential_arguments);
-
-    // Filter the candidate arguments (arguments that are 'different' in self and other)
-    PyObject *candidate_arguments = PySet_New(NULL);
-    if (candidate_arguments == NULL) {
-        Py_DECREF(influential_arguments);
-        return NULL;
-    }
-
-    PyObject *iterator = PyObject_GetIter(influential_arguments);
-    PyObject *argument;
-    int candidate;
-
-    if (iterator == NULL) {
-        Py_DECREF(influential_arguments); Py_DECREF(candidate_arguments);
-        return NULL;
-    }
-
-    while ((argument = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-        candidate = _QBAFramework_candidate_argument(self, other, argument);
-        if (candidate < 0) {
-            Py_DECREF(influential_arguments); Py_DECREF(candidate_arguments);
-            Py_DECREF(argument); Py_DECREF(iterator);
-            return NULL;
-        }
-        
-        if (candidate) {
-            if (PySet_Add(candidate_arguments, argument) < 0) {
-                Py_DECREF(influential_arguments); Py_DECREF(candidate_arguments);
-                Py_DECREF(argument); Py_DECREF(iterator);
-                return NULL;
-            }
-            Py_INCREF(argument);
-        }
-
-        Py_DECREF(argument);
-    }
-
-    Py_DECREF(iterator);
-    Py_DECREF(influential_arguments);
 
     PyObject *minimalSSIExplanations = _QBAFramework_minimalSSIExplanations(self, other, arg1, arg2);
     if (minimalSSIExplanations == NULL) {
-        Py_DECREF(candidate_arguments);
+        Py_DECREF(explanations);
         return NULL;
     }
 
-    // Find NSI Explanations trying with size from 1 to length of candidate_arguments
-    Py_ssize_t max_size = PySet_GET_SIZE(candidate_arguments);
-    PyObject *subsets, *explanations, *set;
+    PyObject *minimalSSIExplanations_unionset = PyListOfPySet_Union(minimalSSIExplanations); // Union of all arguments in minimal SSI Explanations
+    if (minimalSSIExplanations_unionset == NULL) {
+        Py_DECREF(explanations); Py_DECREF(minimalSSIExplanations);
+        return NULL;
+    }
+
+    PyObject *subsets = PySet_PowersetWithoutEmptySet(minimalSSIExplanations_unionset);
+    Py_DECREF(minimalSSIExplanations_unionset);
+    if (subsets == NULL) {
+        Py_DECREF(minimalSSIExplanations); Py_DECREF(explanations);
+        return NULL;
+    }
+
+    // Discard sets that have an empty intersection with at least one minimal SSI Explanation
+    PyObject *filtered_subsets = PyList_New(0);
+    if (filtered_subsets == NULL) {
+        Py_DECREF(minimalSSIExplanations); Py_DECREF(explanations);
+        Py_DECREF(subsets);
+        return NULL;
+    }
+
+    PyObject *iterator = PyObject_GetIter(subsets);
+    PyObject *set;
+    if (iterator == NULL) {
+        Py_DECREF(minimalSSIExplanations); Py_DECREF(explanations);
+        Py_DECREF(subsets); Py_DECREF(filtered_subsets);
+        return NULL;
+    }
+
+    while ((set = PyIter_Next(iterator))) {
+        int contains_disjoint = PyList_ContainsDisjoint(minimalSSIExplanations, set);
+        if (contains_disjoint < 0) {
+            Py_DECREF(minimalSSIExplanations); Py_DECREF(explanations);
+            Py_DECREF(subsets); Py_DECREF(filtered_subsets);
+            Py_DECREF(iterator); Py_DECREF(set);
+            return NULL;
+        }
+        
+        if (!contains_disjoint) {
+            if (PyList_Append(filtered_subsets, set) < 0) {
+                Py_DECREF(minimalSSIExplanations); Py_DECREF(explanations);
+                Py_DECREF(subsets); Py_DECREF(filtered_subsets);
+                Py_DECREF(iterator); Py_DECREF(set);
+                return NULL;
+            }
+            Py_INCREF(set);
+        }
+
+        Py_DECREF(set);
+    }
+    Py_DECREF(iterator);
+
+    Py_DECREF(subsets);
+    subsets = filtered_subsets;
+
+    // Find NSI Explanations
     int contains_subset;
     int isSSIExplanation;
     int contains_subset_SSIExplanation;
 
-    explanations = PyList_New(0);
-    if (explanations == NULL) {
-        Py_DECREF(candidate_arguments); Py_DECREF(minimalSSIExplanations);
+    iterator = PyObject_GetIter(subsets);
+    if (iterator == NULL) {
+        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations);
         return NULL;
     }
 
-    for (Py_ssize_t size = 1; size <= max_size; size++) {
-        subsets = PySet_SubSets(candidate_arguments, size);
-        if (subsets == NULL) {
-            Py_DECREF(candidate_arguments); Py_DECREF(minimalSSIExplanations); Py_DECREF(explanations);
+    while ((set = PyIter_Next(iterator))) {
+        contains_subset = PyList_ContainsSubset(explanations, set);
+        if (contains_subset < 0) {
+            Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations);
+            Py_DECREF(set); Py_DECREF(iterator);
             return NULL;
         }
-
-        iterator = PyObject_GetIter(subsets);
-        if (iterator == NULL) {
-            Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
-            return NULL;
-        }
-
-        while ((set = PyIter_Next(iterator))) {
-            contains_subset = PyList_ContainsSubset(explanations, set);
-            if (contains_subset < 0) {
-                Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
+        
+        if (!contains_subset) { // If set is not a superset of any explanation
+            isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, set, arg1, arg2);
+            if (isSSIExplanation < 0) {
+                Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations);
                 Py_DECREF(set); Py_DECREF(iterator);
                 return NULL;
             }
-            
-            if (!contains_subset) { // If set is not a superset of any explanation
-                isSSIExplanation = _QBAFramework_isSSIExplanation(self, other, set, arg1, arg2);
-                if (isSSIExplanation < 0) {
-                    Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
+
+            if (isSSIExplanation) { // If set is SSI Explanation
+
+                PyObject *self_arguments_union_other_arguments = PySet_Union(self->arguments, other->arguments);
+                if (self_arguments_union_other_arguments == NULL) {
+                    Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations);
+                    Py_DECREF(set); Py_DECREF(iterator);
+                    return NULL;
+                }
+                PyObject *self_arguments_union_other_arguments_difference_set = PySet_Difference(self_arguments_union_other_arguments, set);
+                Py_DECREF(self_arguments_union_other_arguments);
+                if (self_arguments_union_other_arguments_difference_set == NULL) {
+                    Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations);
                     Py_DECREF(set); Py_DECREF(iterator);
                     return NULL;
                 }
 
-                if (isSSIExplanation) { // If set is SSI Explanation
+                contains_subset_SSIExplanation = PyList_ContainsSubset(minimalSSIExplanations, self_arguments_union_other_arguments_difference_set);
+                Py_DECREF(self_arguments_union_other_arguments_difference_set);
+                if (contains_subset_SSIExplanation < 0) {
+                    Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations);
+                    Py_DECREF(set); Py_DECREF(iterator);
+                    return NULL;
+                }
 
-                    PyObject *self_arguments_union_other_arguments = PySet_Union(self->arguments, other->arguments);
-                    if (self_arguments_union_other_arguments == NULL) {
-                        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
+                if (!contains_subset_SSIExplanation) { // If it does not exist a SSI Explanation that is subset of self->arguments.union(other->arguments).difference(set)
+                    if (PyList_Append(explanations, set) < 0) {
+                        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations);
                         Py_DECREF(set); Py_DECREF(iterator);
                         return NULL;
                     }
-                    PyObject *self_arguments_union_other_arguments_difference_set = PySet_Difference(self_arguments_union_other_arguments, set);
-                    Py_DECREF(self_arguments_union_other_arguments);
-                    if (self_arguments_union_other_arguments_difference_set == NULL) {
-                        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
-                        Py_DECREF(set); Py_DECREF(iterator);
-                        return NULL;
-                    }
-
-                    contains_subset_SSIExplanation = PyList_ContainsSubset(minimalSSIExplanations, self_arguments_union_other_arguments_difference_set);
-                    Py_DECREF(self_arguments_union_other_arguments_difference_set);
-                    if (contains_subset_SSIExplanation < 0) {
-                        Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
-                        Py_DECREF(set); Py_DECREF(iterator);
-                        return NULL;
-                    }
-
-                    if (!contains_subset_SSIExplanation) { // If it does not exist a SSI Explanation that is subset of self->arguments.union(other->arguments).difference(set)
-                        if (PyList_Append(explanations, set) < 0) {
-                            Py_DECREF(explanations); Py_DECREF(subsets); Py_DECREF(minimalSSIExplanations); Py_DECREF(candidate_arguments);
-                            Py_DECREF(set); Py_DECREF(iterator);
-                            return NULL;
-                        }
-                        Py_INCREF(set);
-                    }
+                    Py_INCREF(set);
                 }
             }
-
-            Py_DECREF(set);
         }
 
-        Py_DECREF(iterator);
-        Py_DECREF(subsets);
-
+        Py_DECREF(set);
     }
 
+    Py_DECREF(iterator);
+    Py_DECREF(subsets);
+
     Py_DECREF(minimalSSIExplanations);
-    Py_DECREF(candidate_arguments);
 
     return explanations;
 }
