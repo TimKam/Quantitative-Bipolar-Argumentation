@@ -114,7 +114,7 @@ PyObject *PySet_SubSets(PyObject *set, Py_ssize_t size);
  * @param set a PySet
  * @return PyObject* a new PyList, NULL if an error occurred
  */
-PyObject *PySet_PowersetWihtoutEmptySet(PyObject *set);
+PyObject *PySet_PowersetWithoutEmptySet(PyObject *set);
 
 /**
  * @brief Return True if the list contains a set that is subset of the set superset,

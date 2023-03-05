@@ -3247,7 +3247,7 @@ _QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         return NULL;
     }
 
-    subsets = PySet_PowersetWihtoutEmptySet(candidate_arguments);
+    subsets = PySet_PowersetWithoutEmptySet(candidate_arguments);
     if (subsets == NULL) {
         Py_DECREF(candidate_arguments); Py_DECREF(explanations);
         return NULL;
@@ -3425,7 +3425,7 @@ _QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         return NULL;
     }
 
-    subsets = PySet_PowersetWihtoutEmptySet(candidate_arguments);
+    subsets = PySet_PowersetWithoutEmptySet(candidate_arguments);
     if (subsets == NULL) {
         Py_DECREF(candidate_arguments); Py_DECREF(explanations);
         return NULL;
@@ -3613,7 +3613,7 @@ _QBAFramework_minimalNSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
         return NULL;
     }
 
-    subsets = PySet_PowersetWihtoutEmptySet(candidate_arguments);
+    subsets = PySet_PowersetWithoutEmptySet(candidate_arguments);
     if (subsets == NULL) {
         Py_DECREF(candidate_arguments); Py_DECREF(minimalSSIExplanations); Py_DECREF(explanations);
         return NULL;

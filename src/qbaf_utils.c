@@ -624,7 +624,7 @@ PyListOfPySet_FromPySetOfPyFrozenSet(PyObject *set)
  * @return PyObject* a new PyList, NULL if an error occurred
  */
 PyObject *
-PySet_PowersetWihtoutEmptySet(PyObject *set)
+PySet_PowersetWithoutEmptySet(PyObject *set)
 {
     Py_ssize_t set_size = PySet_GET_SIZE(set);
 
