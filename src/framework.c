@@ -961,7 +961,6 @@ QBAFramework_add_argument(QBAFrameworkObject *self, PyObject *args, PyObject *kw
     Py_DECREF(initial_strength);
 
     if (PySet_Add(self->arguments, argument) < 0) {
-        Py_DECREF(argument);
         return NULL;
     }
 
@@ -1560,7 +1559,6 @@ _QBAFramework_incycle_arguments(QBAFrameworkObject *self, PyObject *argument, Py
     }
 
     if (PySet_Add(visiting, argument) < 0) {    // We add the argument to visiting
-        Py_DECREF(argument);
         return NULL;
     }
     PyObject *attack_patients, *support_patients;
@@ -2936,7 +2934,6 @@ _QBAFramework_influential_arguments(QBAFrameworkObject *self, PyObject *argument
     }
 
     if (PySet_Add(visiting, argument) < 0) {    // We add the argument to visiting
-        Py_DECREF(argument);
         return NULL;
     }
     PyObject *attack_agents, *support_agents;

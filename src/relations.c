@@ -204,7 +204,6 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
         }
         // Add patient to the set
         if (PySet_Add(set, patient) < 0) {
-            Py_DECREF(patient);
             break;
         }
 
@@ -214,7 +213,6 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
         }
         // Add agent to the set
         if (PySet_Add(set, agent) < 0) {
-            Py_DECREF(agent);
             break;
         }
         
@@ -482,7 +480,6 @@ _QBAFARelations_add(QBAFARelationsObject *self, PyObject *agent, PyObject *patie
     }
     // Add patient to the set
     if (PySet_Add(set, patient) < 0) {
-        Py_DECREF(patient);
         return -1;
     }
 
@@ -492,7 +489,6 @@ _QBAFARelations_add(QBAFARelationsObject *self, PyObject *agent, PyObject *patie
     }
     // Add agent to the set
     if (PySet_Add(set, agent) < 0) {
-        Py_DECREF(agent);
         return -1;
     }
 
