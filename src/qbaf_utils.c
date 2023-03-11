@@ -132,6 +132,8 @@ PySet_Union(PyObject *set1, PyObject *set2)
             Py_DECREF(item); Py_DECREF(iterator);
             return NULL;
         }
+
+        Py_DECREF(item);
     }
 
     Py_DECREF(iterator);
@@ -181,9 +183,9 @@ PySet_Intersection(PyObject *set1, PyObject *set2)
                 Py_DECREF(item); Py_DECREF(iterator);
                 return NULL;
             }
-        } else {
-            Py_DECREF(item);
         }
+        
+        Py_DECREF(item);
     }
 
     Py_DECREF(iterator);
@@ -225,9 +227,9 @@ PySet_Difference(PyObject *set1, PyObject *set2)
                 Py_DECREF(item); Py_DECREF(iterator);
                 return NULL;
             }
-        } else {
-            Py_DECREF(item);
         }
+
+        Py_DECREF(item);
     }
 
     Py_DECREF(iterator);
@@ -447,6 +449,7 @@ PyListOfPySet_Union(PyObject *list) {
                 return NULL;
             }
 
+            Py_DECREF(item);
         }
         Py_DECREF(set_iterator);
 
@@ -502,8 +505,11 @@ PySet_SubSets(PyObject *set, Py_ssize_t size)
                 Py_DECREF(item); Py_DECREF(iterator);
                 return NULL;
             }
+
             PyList_SET_ITEM(list, index, new_set);
             index++;
+
+            Py_DECREF(item);
         }
         Py_DECREF(iterator);
         
@@ -549,7 +555,6 @@ PySet_SubSets(PyObject *set, Py_ssize_t size)
                 Py_DECREF(iterator); Py_DECREF(subset);
                 return NULL;
             }
-            Py_INCREF(item);
 
             if (PyList_Append(list, subset) < 0) {
                 Py_DECREF(list); Py_DECREF(myset);
@@ -557,6 +562,8 @@ PySet_SubSets(PyObject *set, Py_ssize_t size)
                 Py_DECREF(iterator); Py_DECREF(subset);
                 return NULL;
             }
+            
+            Py_DECREF(subset);
         }
         Py_DECREF(iterator);
 
@@ -687,9 +694,8 @@ PySet_PowersetWithoutEmptySet(PyObject *set)
                         Py_DECREF(set_iterator); Py_DECREF(item);
                         return NULL;
                     }
-                    Py_INCREF(item);
 
-                    PyObject *new_set = PyFrozenSet_New(subset);
+                    PyObject *new_set = PyFrozenSet_New(subset);    // New reference
                     if (new_set == NULL) {
                         Py_DECREF(subsets); Py_DECREF(frozen_sets);
                         Py_DECREF(subset_iterator); Py_DECREF(subset);
@@ -704,6 +710,7 @@ PySet_PowersetWithoutEmptySet(PyObject *set)
                         Py_DECREF(new_set);
                         return NULL;
                     }
+                    Py_DECREF(new_set);                             // Dec reference
 
                     if (PySet_Discard(subset, item) < 0) { // Restore the subset
                         Py_DECREF(subsets); Py_DECREF(frozen_sets);

@@ -130,6 +130,7 @@ PyDict_GetItemDefaultPySet_New(PyObject *dict, PyObject *key)
             Py_DECREF(set);
             return NULL;
         }
+        Py_DECREF(set);
         return set;
     }
     return PyDict_GetItemWithError(dict, key);
@@ -201,10 +202,8 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
         if (set == NULL) {
             break;
         }
-        Py_INCREF(patient);
         // Add patient to the set
         if (PySet_Add(set, patient) < 0) {
-            Py_DECREF(patient);
             break;
         }
 
@@ -212,10 +211,8 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
         if (set == NULL) {
             break;
         }
-        Py_INCREF(agent);
         // Add agent to the set
         if (PySet_Add(set, agent) < 0) {
-            Py_DECREF(agent);
             break;
         }
         
@@ -475,15 +472,14 @@ _QBAFARelations_add(QBAFARelationsObject *self, PyObject *agent, PyObject *patie
         Py_DECREF(tuple);
         return -1;
     }
+    Py_DECREF(tuple);
 
     set = PyDict_GetItemDefaultPySet_New(self->agent_patients, agent);  // Return borrowed reference
     if (set == NULL) {
         return -1;
     }
-    Py_INCREF(patient);
     // Add patient to the set
     if (PySet_Add(set, patient) < 0) {
-        Py_DECREF(patient);
         return -1;
     }
 
@@ -491,10 +487,8 @@ _QBAFARelations_add(QBAFARelationsObject *self, PyObject *agent, PyObject *patie
     if (set == NULL) {
         return -1;
     }
-    Py_INCREF(agent);
     // Add agent to the set
     if (PySet_Add(set, agent) < 0) {
-        Py_DECREF(agent);
         return -1;
     }
 
@@ -1164,9 +1158,8 @@ _QBAFARelations_patients_set(QBAFARelationsObject *self, PyObject *agent) {
         return NULL;
     if (!contains) {
         PyObject *set = PySet_New(NULL);
-        Py_INCREF(agent);
         if (PyDict_SetItem(self->agent_patients, agent, set) < 0) {
-            Py_DECREF(agent); Py_XDECREF(set);
+            Py_XDECREF(set);
             return NULL;
         }
         Py_XDECREF(set);
