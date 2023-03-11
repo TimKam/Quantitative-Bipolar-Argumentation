@@ -961,7 +961,6 @@ QBAFramework_add_argument(QBAFrameworkObject *self, PyObject *args, PyObject *kw
 
     Py_DECREF(initial_strength);
 
-    Py_INCREF(argument);
     if (PySet_Add(self->arguments, argument) < 0) {
         Py_DECREF(argument);
         return NULL;
@@ -1561,7 +1560,6 @@ _QBAFramework_incycle_arguments(QBAFrameworkObject *self, PyObject *argument, Py
         return list;
     }
 
-    Py_INCREF(argument);
     if (PySet_Add(visiting, argument) < 0) {    // We add the argument to visiting
         Py_DECREF(argument);
         return NULL;
@@ -1673,6 +1671,7 @@ _QBAFramework_isacyclic(QBAFrameworkObject *self)
     while (PySet_GET_SIZE(not_visited) > 0) {
         argument = PySet_Pop(not_visited);  // New reference. Unchecked errors
         PySet_Add(not_visited, argument);   // We return the argument to the set
+        Py_DECREF(argument);
 
         incycle = _QBAFramework_incycle_arguments(self, argument, not_visited, visiting);
         if (incycle == NULL) {
@@ -2936,7 +2935,6 @@ _QBAFramework_influential_arguments(QBAFrameworkObject *self, PyObject *argument
         return list;
     }
 
-    Py_INCREF(argument);
     if (PySet_Add(visiting, argument) < 0) {    // We add the argument to visiting
         Py_DECREF(argument);
         return NULL;
@@ -3228,9 +3226,9 @@ _QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
                 Py_DECREF(argument); Py_DECREF(iterator);
                 return NULL;
             }
-        } else {
-            Py_DECREF(argument);
         }
+
+        Py_DECREF(argument);
     }
 
     Py_DECREF(iterator);
@@ -3406,9 +3404,9 @@ _QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
                 Py_DECREF(argument); Py_DECREF(iterator);
                 return NULL;
             }
-        } else {
-            Py_DECREF(argument);
         }
+        
+        Py_DECREF(argument);
     }
 
     Py_DECREF(iterator);

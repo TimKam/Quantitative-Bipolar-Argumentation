@@ -201,7 +201,6 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
         if (set == NULL) {
             break;
         }
-        Py_INCREF(patient);
         // Add patient to the set
         if (PySet_Add(set, patient) < 0) {
             Py_DECREF(patient);
@@ -212,7 +211,6 @@ QBAFARelations_init(QBAFARelationsObject *self, PyObject *args, PyObject *kwds)
         if (set == NULL) {
             break;
         }
-        Py_INCREF(agent);
         // Add agent to the set
         if (PySet_Add(set, agent) < 0) {
             Py_DECREF(agent);
@@ -475,12 +473,12 @@ _QBAFARelations_add(QBAFARelationsObject *self, PyObject *agent, PyObject *patie
         Py_DECREF(tuple);
         return -1;
     }
+    Py_DECREF(tuple);
 
     set = PyDict_GetItemDefaultPySet_New(self->agent_patients, agent);  // Return borrowed reference
     if (set == NULL) {
         return -1;
     }
-    Py_INCREF(patient);
     // Add patient to the set
     if (PySet_Add(set, patient) < 0) {
         Py_DECREF(patient);
@@ -491,7 +489,6 @@ _QBAFARelations_add(QBAFARelationsObject *self, PyObject *agent, PyObject *patie
     if (set == NULL) {
         return -1;
     }
-    Py_INCREF(agent);
     // Add agent to the set
     if (PySet_Add(set, agent) < 0) {
         Py_DECREF(agent);
