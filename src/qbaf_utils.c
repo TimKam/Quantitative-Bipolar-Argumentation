@@ -562,6 +562,8 @@ PySet_SubSets(PyObject *set, Py_ssize_t size)
                 Py_DECREF(iterator); Py_DECREF(subset);
                 return NULL;
             }
+            
+            Py_DECREF(subset);
         }
         Py_DECREF(iterator);
 

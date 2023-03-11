@@ -3276,7 +3276,6 @@ _QBAFramework_minimalSSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
                     Py_DECREF(set); Py_DECREF(iterator);
                     return NULL;
                 }
-                Py_INCREF(set);
             }
         }
 
@@ -3454,7 +3453,6 @@ _QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
                     Py_DECREF(set); Py_DECREF(iterator);
                     return NULL;
                 }
-                Py_INCREF(set);
             }
         }
 
@@ -3585,7 +3583,6 @@ _QBAFramework_minimalNSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
                 Py_DECREF(iterator); Py_DECREF(set);
                 return NULL;
             }
-            Py_INCREF(set);
         }
 
         Py_DECREF(set);
@@ -3652,7 +3649,6 @@ _QBAFramework_minimalNSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
                         Py_DECREF(set); Py_DECREF(iterator);
                         return NULL;
                     }
-                    Py_INCREF(set);
                 }
             }
         }
