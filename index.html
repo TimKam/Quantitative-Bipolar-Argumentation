@@ -1,0 +1,866 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Welcome to QBAF-Py’s documentation! &#8212; qbaf-py 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="welcome-to-qbaf-py-s-documentation">
+<h1>Welcome to QBAF-Py’s documentation!<a class="headerlink" href="#welcome-to-qbaf-py-s-documentation" title="Permalink to this heading">¶</a></h1>
+<p>QBAF-Py is a library for drawing inferences from Quantitative Bipolar Argumentation Frameworks (QBAFs) and explaining them. The library is written in CPython (C with a Python API) to facilitate speed and efficiency.</p>
+<span class="target" id="module-qbaf"></span><p>Module that creates a QBAFArgument type.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qbaf.QBAFARelations">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qbaf.</span></span><span class="sig-name descname"><span class="pre">QBAFARelations</span></span><a class="headerlink" href="#qbaf.QBAFARelations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing a set of Relations (Agent, Patient) of type QBAFArgument.
+Every Relation has an Agent (the initiator of an action)
+and a Patient (the entity undergoing the effect of an action).
+Example of (Agent, Patient): (Attacker, Attacked) or (Supporter, Supported).</p>
+<p>Note: Every time the type QBAFArgument is written,
+any type that is hashable can be used.</p>
+<p>QBAFARelations(relations)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>relations</strong> (<em>Union</em><em>[</em><em>list</em><em>, </em><em>set</em><em>]</em>) – A collection of (Agent: QBAFArgument, Patient: QBAFArgument)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFARelations.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patient</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFARelations.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the relation (agent, patient). If it is contained it does nothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>agent</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – The initiator of an action</p></li>
+<li><p><strong>patient</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – The entity undergoing the effect of an action</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFARelations.agents">
+<span class="sig-name descname"><span class="pre">agents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patient</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFARelations.agents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the agents that initiate a certain action (e.g. attack, support)
+which effects are undergone by the patient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>patient</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – The entity undergoing the effect of the action</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of QBAFArgment that initiate the action</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFARelations.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patient</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFARelations.contains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the relation (agent, patient) is contained. False, otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>agent</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – The initiator of an action</p></li>
+<li><p><strong>patient</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – The entity undergoing the effect of an action</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if contained, False if not contained</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFARelations.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFARelations.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a shallow copy of self.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFARelations.isdisjoint">
+<span class="sig-name descname"><span class="pre">isdisjoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFARelations.isdisjoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if self has no relation in common with other. False, otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#qbaf.QBAFARelations" title="qbaf.QBAFARelations"><em>QBAFARelations</em></a>) – other instance of QBAFARelations</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if disjointed, False if not disjointed</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFARelations.patients">
+<span class="sig-name descname"><span class="pre">patients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFARelations.patients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the patients that undergo the effect of a certain action (e.g. attack, support)
+initiated by the agent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>agent</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – The initiator of the action</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of QBAFArgment that undergo the effect of the action</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFARelations.relations">
+<span class="sig-name descname"><span class="pre">relations</span></span><a class="headerlink" href="#qbaf.QBAFARelations.relations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set of argument relations (Agent, Patient).</p>
+<p>Getter: Return a copy of the QBAFARelation’s set of relations
+Type: set of (QBAFArgument, QBAFArgument)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFARelations.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patient</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFARelations.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removed the relation (agent, patient). If it is not contained it does nothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>agent</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – The initiator of an action</p></li>
+<li><p><strong>patient</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – The entity undergoing the effect of an action</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qbaf.QBAFArgument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qbaf.</span></span><span class="sig-name descname"><span class="pre">QBAFArgument</span></span><a class="headerlink" href="#qbaf.QBAFArgument" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class represents an argument of a QBAF.
+It has an unmodifiable string name that is used as id, and a string description.</p>
+<p>QBAFArgument(name: str, description=””)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The name that will be used as identifier of the argument</p></li>
+<li><p><strong>description</strong> (<em>str</em><em>, </em><em>optional</em>) – The description of the argument. Defaults to “”</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFArgument.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#qbaf.QBAFArgument.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>The description of the argument.</p>
+<p>Getter: Return the argument’s description
+Setter: Set the argument’s description
+Type: str</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFArgument.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#qbaf.QBAFArgument.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the argument. Also used as id of the argument.</p>
+<p>Getter: Return the argument’s name
+Type: str</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qbaf.QBAFramework">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qbaf.</span></span><span class="sig-name descname"><span class="pre">QBAFramework</span></span><a class="headerlink" href="#qbaf.QBAFramework" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class represents a Quantitative Bipolar Argumentation Framework (QBAF).</p>
+<p>A QBAF consists of a set of arguments, Attack relations between arguments,
+Support relations between arguments and each argument has an initial strength.</p>
+<p>Each argument has a final strength which is calculated as the result of an influence
+function that combines the initial strength and the aggregation result.
+The aggregation result is obtained as the result of applying an aggregation function
+to the supporters of the argument minus the result of applying the same aggregation
+function to the attackers of the argument.</p>
+<p>Note that every time the type QBAFArgument is written, any type that is hashable can be used.</p>
+<p>The semantics of a QBAF are associated with the way the final strengths are calculated.
+There are some predefined semantics (The default is ‘basic_model’), but custom semantics
+can be created by implementing your own aggregation function and influence function.</p>
+<dl class="simple">
+<dt>Predefined semantics: ‘basic_model’, ‘QuadraticEnergy_model’, ‘SquaredDFQuAD_model’,</dt><dd><p>‘EulerBasedTop_model’, ‘EulerBased_model’ and ‘DFQuAD_model’.</p>
+</dd>
+<dt>QBAFramework(arguments, initial_strengths, attack_relations, support_relations,</dt><dd><p>disjoint_relations=True, semantics=None,
+aggregation_function=None, influence_function=None,
+min_strength=-1.7976931348623157e+308, max_strength=1.7976931348623157e+308)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arguments</strong> (<em>list</em>) – a list of QBAFArgument</p></li>
+<li><p><strong>initial_strengths</strong> (<em>list</em>) – a list of floats corresponding to each argument of arguments</p></li>
+<li><p><strong>attack_relations</strong> (<em>Union</em><em>[</em><em>set</em><em>,</em><em>list</em><em>]</em>) – a collection of (attacker: QBAFArgument, attacked: QBAFArgument)</p></li>
+<li><p><strong>support_relations</strong> (<em>Union</em><em>[</em><em>set</em><em>,</em><em>list</em><em>]</em>) – a collection of (supporter: QBAFArgument, supported: QBAFArgument)</p></li>
+<li><p><strong>disjoint_relations</strong> (<em>bool</em><em>, </em><em>optional</em>) – True if the Attack relations and the Support relations must be disjoint.
+Defaults to True.</p></li>
+<li><p><strong>semantics</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the predifined semantics to be used to calculate the final strengths.
+Defaults to None. If the aggregation function and the influence function are None it defaults to ‘basic_model’.</p></li>
+<li><p><strong>aggregation_function</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Function to combine two final strengths.
+Defaults to None.</p></li>
+<li><p><strong>influence_function</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Function to combine the initial strength
+and the aggregation result. Defaults to None.</p></li>
+<li><p><strong>min_strength</strong> (<em>float</em><em>, </em><em>optional</em>) – The minimum value an initial strength can have. Defaults to -1.7976931348623157e+308.
+It can only be modified when the semantics are custom</p></li>
+<li><p><strong>max_strength</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum value an initial strength can have. Defaults to 1.7976931348623157e+308.
+It can only be modified when the semantics are custom</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.add_argument">
+<span class="sig-name descname"><span class="pre">add_argument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_strength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.add_argument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an argument to the Framework. If it already exists it does nothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>argument</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument</p></li>
+<li><p><strong>initial_strength</strong> (<em>float</em><em>, </em><em>optional</em>) – the initial strength of the argument. Defaults to 0.0.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.add_attack_relation">
+<span class="sig-name descname"><span class="pre">add_attack_relation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attacker</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attacked</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.add_attack_relation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the Attack relation (attacker, attacked) to the Framework.
+The relation’s arguments must be contained in the Framework’s arguments.
+If the Attack relation already exists, this method does nothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attacker</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is attacking</p></li>
+<li><p><strong>attacked</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is being attacked</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.add_support_relation">
+<span class="sig-name descname"><span class="pre">add_support_relation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">supporter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supported</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.add_support_relation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the Support relation (supporter, supported) to the Framework.
+The relation’s arguments must be contained in the Framework’s arguments.
+If the Support relation already exists, this method does nothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>supporter</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is supporting</p></li>
+<li><p><strong>supported</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is being supported</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.are_strength_consistent">
+<span class="sig-name descname"><span class="pre">are_strength_consistent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.are_strength_consistent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the argument arg1 and the argument arg2 are strength consistent
+w.r.t the Framework self and the Framework other.
+Both arguments must be contained in both Frameworks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – a Framework</p></li>
+<li><p><strong>arg1</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – first argument</p></li>
+<li><p><strong>arg2</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – second argument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if strength consistent, False if strength inconsistent</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.arguments">
+<span class="sig-name descname"><span class="pre">arguments</span></span><a class="headerlink" href="#qbaf.QBAFramework.arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set of arguments of the Framework.</p>
+<p>Getter: Return a copy of the QBAFramework’s set of arguments</p>
+<p>Type: set of QBAFArgument</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.attack_relations">
+<span class="sig-name descname"><span class="pre">attack_relations</span></span><a class="headerlink" href="#qbaf.QBAFramework.attack_relations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attack relations of the Framework.</p>
+<p>Getter: Return the QBAFramework’s attack relations</p>
+<p>Type: QBAFARelations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.attackedBy">
+<span class="sig-name descname"><span class="pre">attackedBy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attacker</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.attackedBy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the arguments that are being attacked by the argument attacker.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>attacker</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is attacking</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the arguments that are being attacked</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.attackersOf">
+<span class="sig-name descname"><span class="pre">attackersOf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attacked</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.attackersOf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the arguments that are attacking the argument attacked.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>attacked</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is being attacked</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the arguments that are attacking</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.contains_argument">
+<span class="sig-name descname"><span class="pre">contains_argument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.contains_argument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the argument is contained in the Framework. False if it is not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argument</strong> (<a class="reference internal" href="#qbaf.QBAFARelations" title="qbaf.QBAFARelations"><em>QBAFARelations</em></a>) – the argument</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if contained, False if not contained</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.contains_attack_relation">
+<span class="sig-name descname"><span class="pre">contains_attack_relation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.contains_attack_relation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the Attack relation (attacker, attacked) is contained
+in the Framework. False if it is not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attacker</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is attacking</p></li>
+<li><p><strong>attacked</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is being attacked</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if contained, False if not contained</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.contains_support_relation">
+<span class="sig-name descname"><span class="pre">contains_support_relation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.contains_support_relation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the Support relation (supporter, supported) is contained
+in the Framework. False if it is not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>supporter</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is supporting</p></li>
+<li><p><strong>supported</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is being supported</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if contained, False if not contained</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a shallow copy of self.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.disjoint_relations">
+<span class="sig-name descname"><span class="pre">disjoint_relations</span></span><a class="headerlink" href="#qbaf.QBAFramework.disjoint_relations" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the attack/support relations must be disjoint, False if they do not have to.</p>
+<p>Getter: Return if the attack/support relations must be disjoint or not</p>
+<p>Setter: Set if the attack/support relations must be disjoint or not</p>
+<p>Type: bool</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.final_strength">
+<span class="sig-name descname"><span class="pre">final_strength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.final_strength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the final strength of the argument.
+If the framework has been modified from the last time the final strengths were calculated
+they are calculated again. Otherwise, it returns the already calculated final strength.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argument</strong> (<a class="reference internal" href="#qbaf.QBAFARelations" title="qbaf.QBAFARelations"><em>QBAFARelations</em></a>) – the argument</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the initial strength</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.final_strengths">
+<span class="sig-name descname"><span class="pre">final_strengths</span></span><a class="headerlink" href="#qbaf.QBAFramework.final_strengths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Final strengths of the arguments of the Framework.</p>
+<dl class="simple">
+<dt>Getter: Calculate and return the QBAFramework’s final strengths.</dt><dd><p>If the Framework has not been modified since last time they were calculated,
+a copy of the previously calculated final strengths is returned.</p>
+</dd>
+</dl>
+<p>Type: dict of QBAFArgument: float</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.initial_strength">
+<span class="sig-name descname"><span class="pre">initial_strength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.initial_strength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the initial strength of the argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argument</strong> (<a class="reference internal" href="#qbaf.QBAFARelations" title="qbaf.QBAFARelations"><em>QBAFARelations</em></a>) – the argument</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the initial strength</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.initial_strengths">
+<span class="sig-name descname"><span class="pre">initial_strengths</span></span><a class="headerlink" href="#qbaf.QBAFramework.initial_strengths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initial strengths of the arguments of the Framework.</p>
+<p>Getter: Return a copy of the QBAFramework’s initial strengths</p>
+<p>Type: dict of QBAFArgument: float</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.isCSIExplanation">
+<span class="sig-name descname"><span class="pre">isCSIExplanation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.isCSIExplanation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the Set of arguments set is Counterfactual Strength Inconsistency (CSI) Explanation
+of the argument arg1 and the argument arg2 w.r.t. the framework self and the framework other.
+Both arguments must be contained in both Frameworks.
+All arguments in set must be contained in at least one of the Frameworks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – a Framework</p></li>
+<li><p><strong>set</strong> (<em>set</em>) – a set of arguments</p></li>
+<li><p><strong>arg1</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – first argument</p></li>
+<li><p><strong>arg2</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – second argument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if CSI Explanation, False if not CSI Explanation</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.isNSIExplanation">
+<span class="sig-name descname"><span class="pre">isNSIExplanation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.isNSIExplanation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the Set of arguments set is Necessary Strength Inconsistency (NSI) Explanation
+of the argument arg1 and the argument arg2 w.r.t. the framework self and the framework other.
+Both arguments must be contained in both Frameworks.
+All arguments in set must be contained in at least one of the Frameworks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – a Framework</p></li>
+<li><p><strong>set</strong> (<em>set</em>) – a set of arguments</p></li>
+<li><p><strong>arg1</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – first argument</p></li>
+<li><p><strong>arg2</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – second argument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if NSI Explanation, False if not NSI Explanation</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.isSSIExplanation">
+<span class="sig-name descname"><span class="pre">isSSIExplanation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.isSSIExplanation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the Set of arguments set is Sufficient Strength Inconsistency (SSI) Explanation
+of the argument arg1 and the argument arg2 w.r.t. the framework self and the framework other.
+Both arguments must be contained in both Frameworks.
+All arguments in set must be contained in at least one of the Frameworks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – a Framework</p></li>
+<li><p><strong>set</strong> (<em>set</em>) – a set of arguments</p></li>
+<li><p><strong>arg1</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – first argument</p></li>
+<li><p><strong>arg2</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – second argument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if SSI Explanation, False if not SSI Explanation</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.isacyclic">
+<span class="sig-name descname"><span class="pre">isacyclic</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.isacyclic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the Attack/Support relations of the Framework have no cycles.
+False otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if acyclic, False if not acyclic</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.max_strength">
+<span class="sig-name descname"><span class="pre">max_strength</span></span><a class="headerlink" href="#qbaf.QBAFramework.max_strength" title="Permalink to this definition">¶</a></dt>
+<dd><p>The maximun value an initial strength can have in the Framework.</p>
+<p>Getter: Return the QBAFramework’s maximum strength.</p>
+<p>Type: float</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.min_strength">
+<span class="sig-name descname"><span class="pre">min_strength</span></span><a class="headerlink" href="#qbaf.QBAFramework.min_strength" title="Permalink to this definition">¶</a></dt>
+<dd><p>The minimun value an initial strength can have in the Framework.</p>
+<p>Getter: Return the QBAFramework’s minimum strength.</p>
+<p>Type: float</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.minimalCSIExplanations">
+<span class="sig-name descname"><span class="pre">minimalCSIExplanations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.minimalCSIExplanations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the sets of arguments that are a subset-minimal CSI Explanation
+of the argument arg1 and the argument arg2 w.r.t. the Framework self and the Framework other.
+Both arguments must be contained in both Frameworks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – a Framework</p></li>
+<li><p><strong>arg1</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – first argument</p></li>
+<li><p><strong>arg2</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – second argument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of set of arguments</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.minimalNSIExplanations">
+<span class="sig-name descname"><span class="pre">minimalNSIExplanations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.minimalNSIExplanations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the sets of arguments that are a subset-minimal NSI Explanation
+of the argument arg1 and the argument arg2 w.r.t. the Framework self and the Framework other.
+Both arguments must be contained in both Frameworks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – a Framework</p></li>
+<li><p><strong>arg1</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – first argument</p></li>
+<li><p><strong>arg2</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – second argument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of set of arguments</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.minimalSSIExplanations">
+<span class="sig-name descname"><span class="pre">minimalSSIExplanations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.minimalSSIExplanations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the sets of arguments that are a subset-minimal SSI Explanation
+of the argument arg1 and the argument arg2 w.r.t. the Framework self and the Framework other.
+Both arguments must be contained in both Frameworks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – a Framework</p></li>
+<li><p><strong>arg1</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – first argument</p></li>
+<li><p><strong>arg2</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – second argument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of set of arguments</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.modify_initial_strength">
+<span class="sig-name descname"><span class="pre">modify_initial_strength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_strength</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.modify_initial_strength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modify the initial strength of the argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>argument</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument to be modified</p></li>
+<li><p><strong>initial_strength</strong> (<em>float</em>) – the new value of initial strength</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.remove_argument">
+<span class="sig-name descname"><span class="pre">remove_argument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.remove_argument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the argument from the Framework. If it does not exist it does nothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argument</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.remove_attack_relation">
+<span class="sig-name descname"><span class="pre">remove_attack_relation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attacker</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attacked</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.remove_attack_relation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the Attack relation (attacker, attacked) from the Framework.
+If the Attack relation does not exist, this method does nothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attacker</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is attacking</p></li>
+<li><p><strong>attacked</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is being attacked</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.remove_support_relation">
+<span class="sig-name descname"><span class="pre">remove_support_relation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">supporter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supported</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.remove_support_relation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the Support relation (supporter, supported) from the Framework.
+If the Support relation does not exist, this method does nothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>supporter</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is supporting</p></li>
+<li><p><strong>supported</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is being supported</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.reversal">
+<span class="sig-name descname"><span class="pre">reversal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.reversal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the reversal Framework of the Framework self to the Framework other
+w.r.t. the Set of arguments set.
+All arguments in set must be contained in at least one of the Frameworks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – a Framework</p></li>
+<li><p><strong>set</strong> (<em>set</em>) – a set of arguments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a new Framework</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework">QBAFramework</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.semantics">
+<span class="sig-name descname"><span class="pre">semantics</span></span><a class="headerlink" href="#qbaf.QBAFramework.semantics" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the semantics used to calculate the final strengths of the Framework.
+If the semantics are custom (not predefined) then its value is None.</p>
+<p>Getter: Return the QBAFramework’s semantics name. None if it is custom.</p>
+<p>Type: str</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.support_relations">
+<span class="sig-name descname"><span class="pre">support_relations</span></span><a class="headerlink" href="#qbaf.QBAFramework.support_relations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Support relations of the Framework.</p>
+<p>Getter: Return the QBAFramework’s support relations</p>
+<p>Type: QBAFARelations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.supportedBy">
+<span class="sig-name descname"><span class="pre">supportedBy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">supporter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.supportedBy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the arguments that are being supported by the argument supporter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>supporter</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is supporting</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the arguments that are being supported</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.supportersOf">
+<span class="sig-name descname"><span class="pre">supportersOf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">supported</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf.QBAFramework.supportersOf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the arguments that are supporting the argument supported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>supported</strong> (<a class="reference internal" href="#qbaf.QBAFArgument" title="qbaf.QBAFArgument"><em>QBAFArgument</em></a>) – the argument that is being supported</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the arguments that are supporting</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">qbaf-py</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, José Ruiz Alarcón, Timotheus Kampik.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
