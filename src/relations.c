@@ -130,6 +130,7 @@ PyDict_GetItemDefaultPySet_New(PyObject *dict, PyObject *key)
             Py_DECREF(set);
             return NULL;
         }
+        Py_DECREF(set);
         return set;
     }
     return PyDict_GetItemWithError(dict, key);
@@ -1161,9 +1162,8 @@ _QBAFARelations_patients_set(QBAFARelationsObject *self, PyObject *agent) {
         return NULL;
     if (!contains) {
         PyObject *set = PySet_New(NULL);
-        Py_INCREF(agent);
         if (PyDict_SetItem(self->agent_patients, agent, set) < 0) {
-            Py_DECREF(agent); Py_XDECREF(set);
+            Py_XDECREF(set);
             return NULL;
         }
         Py_XDECREF(set);

@@ -202,6 +202,9 @@ PyDict_FromLists(PyObject *keys, PyObject *values) {
             Py_DECREF(dict);
             return NULL;
         }
+
+        Py_DECREF(value_item);
+        Py_DECREF(key_item);
     }
 
     Py_DECREF(key_iterator);
@@ -830,9 +833,7 @@ QBAFramework_modify_initial_strengths(QBAFrameworkObject *self, PyObject *args, 
         return NULL;
     }
 
-    Py_INCREF(argument);
     if (PyDict_SetItem(self->initial_strengths, argument, initial_strength) < 0) {
-        Py_DECREF(argument);
         Py_DECREF(initial_strength);
         return NULL;
     }
@@ -952,9 +953,7 @@ QBAFramework_add_argument(QBAFrameworkObject *self, PyObject *args, PyObject *kw
     }
 
     // the new argument, initial_strength is added
-    Py_INCREF(argument);
     if (PyDict_SetItem(self->initial_strengths, argument, initial_strength) < 0) {
-        Py_DECREF(argument);
         Py_DECREF(initial_strength);
         return NULL;
     }
@@ -1822,9 +1821,8 @@ _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argum
 
     // final_strengths[argument] = final_strength
     PyObject *pyfinal_strength = PyFloat_FromDouble(final_strength);    // New reference
-    Py_INCREF(argument);
     if (PyDict_SetItem(self->final_strengths, argument, pyfinal_strength) < 0) {
-        Py_DECREF(argument); Py_XDECREF(pyfinal_strength);
+        Py_XDECREF(pyfinal_strength);
         return -1.0;
     }
     Py_XDECREF(pyfinal_strength);
@@ -2384,6 +2382,8 @@ _QBAFramework_reversal(QBAFrameworkObject *self, QBAFrameworkObject *other, PyOb
             Py_DECREF(arg); Py_DECREF(other_arguments_intersection_set);
             return NULL;
         }
+
+        Py_DECREF(arg);
     }
     Py_DECREF(iterator);
     Py_DECREF(other_arguments_intersection_set);
@@ -3405,7 +3405,7 @@ _QBAFramework_minimalCSIExplanations(QBAFrameworkObject *self, QBAFrameworkObjec
                 return NULL;
             }
         }
-        
+
         Py_DECREF(argument);
     }
 
