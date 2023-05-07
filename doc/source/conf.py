@@ -9,7 +9,7 @@ import sys
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'qbaf-py'
-copyright = '2022, José Ruiz Alarcón, Timotheus Kampik'
+copyright = '2023, José Ruiz Alarcón, Timotheus Kampik'
 author = 'José Ruiz Alarcón, Timotheus Kampik'
 release = '0.0.1'
 

@@ -2,7 +2,7 @@
 ![CI status](https://github.com/TimKam/Quantitative-Bipolar-Argumentation/actions/workflows/actions.yml/badge.svg)
 
 This project provides _QBAF-Py_, a library for drawing inferences from Quantitative Bipolar Argumentation Frameworks (QBAFs) and explaining them.
-The library is written in CPython (C with a Python API) to facilitate speed and efficiency.
+The library core is written in CPython (C with a Python API) to facilitate speed and efficiency.
 
 ## Requirements & Installation
 Installing *QBAF-Py* requires [pip](https://pypi.org/project/pip/).
@@ -14,6 +14,9 @@ pip install .
 ```
 
 Note: To install on Windows, Microsoft Visual C++ 14.0 or greater might be required.
+
+_QBAF-Py_ features an optional basic visualization module for QBAFs and some explanation types.
+Install it with `pip install -e .[Visualizer]` and note that it is required for running the examples provided in the [Jupyter notebook](examples.ipynb).
 
 ## Dependencies
 *QBAF-Py* does not have any dependencies!
