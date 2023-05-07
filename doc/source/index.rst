@@ -7,6 +7,14 @@ Welcome to QBAF-Py's documentation!
 ===================================
 QBAF-Py is a library for drawing inferences from Quantitative Bipolar Argumentation Frameworks (QBAFs) and explaining them. The library is written in CPython (C with a Python API) to facilitate speed and efficiency.
 
+Core API
+########
+
 .. automodule:: qbaf
    :members:
+
+Visualization Support
+#####################
+
+   .. autofunction:: qbaf_visualizer.Visualizer.visualize
 
