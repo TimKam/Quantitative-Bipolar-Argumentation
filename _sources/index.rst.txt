@@ -18,6 +18,7 @@ Contribution Functions
 
    .. autofunction:: qbaf_ctrbs.removal.determine_removal_ctrb
    .. autofunction:: qbaf_ctrbs.intrinsic_removal.determine_iremoval_ctrb
+   .. autofunction:: qbaf_ctrbs.shapley.determine_shapley_ctrb
    .. autofunction:: qbaf_ctrbs.utils.restrict
 
 Visualization Support
