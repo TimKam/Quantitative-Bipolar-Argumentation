@@ -1,4 +1,3 @@
-import pytest
 from qbaf import QBAFramework
 from qbaf_ctrbs.utils import restrict
 
