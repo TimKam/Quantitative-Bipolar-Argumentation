@@ -1,5 +1,5 @@
 from qbaf import QBAFramework
-from qbaf_ctrbs.removal import determine_removal_ctrb
+from qbaf_ctrbs.shapley import determine_shapley_ctrb
 
 def test_removal():
     args = ['a', 'b', 'c']
@@ -10,6 +10,6 @@ def test_removal():
     atts = [('b', 'a')]
     supps = [('c', 'b')]
     qbaf = QBAFramework(args, initial_strengths, atts, supps, semantics='basic_model')
-    assert determine_removal_ctrb('a', 'b', qbaf) == -2
-    assert determine_removal_ctrb('a', 'c', qbaf) == -1
-    assert determine_removal_ctrb('b', 'a', qbaf) == 0
+    assert determine_shapley_ctrb('a', 'b', qbaf) == -1.5
+    assert determine_shapley_ctrb('a', 'c', qbaf) == -0.5
+    assert determine_shapley_ctrb('b', 'a', qbaf) == 0
