@@ -802,9 +802,117 @@ If the semantics are custom (not predefined) then its value is None.</p>
 </section>
 <section id="contribution-functions">
 <h2>Contribution Functions<a class="headerlink" href="#contribution-functions" title="Permalink to this heading">¶</a></h2>
+<blockquote>
+<div><dl class="py function">
+<dt class="sig sig-object py" id="qbaf_ctrbs.removal.determine_removal_ctrb">
+<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.removal.</span></span><span class="sig-name descname"><span class="pre">determine_removal_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf_ctrbs.removal.determine_removal_ctrb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the removal contribution of a contributor
+to a topic argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
+<li><p><strong>contributor</strong> (<em>string</em>) – The contributing argument</p></li>
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The contribution of the contributor to the topic</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_ctrbs.intrinsic_removal.determine_iremoval_ctrb">
+<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.intrinsic_removal.</span></span><span class="sig-name descname"><span class="pre">determine_iremoval_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf_ctrbs.intrinsic_removal.determine_iremoval_ctrb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the intrinsic removal contribution of a contributor
+to a topic argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
+<li><p><strong>contributor</strong> (<em>string</em>) – The contributing argument</p></li>
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The contribution of the contributor to the topic</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_ctrbs.shapley.determine_shapley_ctrb">
+<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.shapley.</span></span><span class="sig-name descname"><span class="pre">determine_shapley_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf_ctrbs.shapley.determine_shapley_ctrb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the shapley contribution of a contributor
+to a topic argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
+<li><p><strong>contributor</strong> (<em>string</em>) – The contributing argument</p></li>
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The contribution of the contributor to the topic</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_ctrbs.utils.restrict">
+<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.utils.</span></span><span class="sig-name descname"><span class="pre">restrict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf_ctrbs.utils.restrict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restricts the given QBAF to the provided set of arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – QBAF that is to be restricted</p></li>
+<li><p><strong>arguments</strong> (<em>list</em>) – Arguments the QBAF is to be restricted to (all other arguments will be removed)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>restricted QBAF</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework">QBAFramework</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
 </section>
 <section id="visualization-support">
 <h2>Visualization Support<a class="headerlink" href="#visualization-support" title="Permalink to this heading">¶</a></h2>
+<blockquote>
+<div><dl class="py function">
+<dt class="sig sig-object py" id="qbaf_visualizer.Visualizer.visualize">
+<span class="sig-prename descclassname"><span class="pre">qbaf_visualizer.Visualizer.</span></span><span class="sig-name descname"><span class="pre">visualize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">explanations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_fs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf_visualizer.Visualizer.visualize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a QBAF and renders it as a graph</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that is supposed to be rendered</p></li>
+<li><p><strong>explanations</strong> (<em>List</em>) – List of sets of explanation arguments that are supposed to be highlighted</p></li>
+<li><p><strong>with_fs</strong> (<em>Bool</em>) – Set to <cite>True</cite> if final strenghts should be rendered as well.
+Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>round_to</strong> (<em>int</em>) – Number of decimals the strengths should be rounded to before rendering.
+Defaults to <cite>2</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
 </section>
 </section>
 
