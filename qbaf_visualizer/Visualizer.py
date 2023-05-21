@@ -1,3 +1,6 @@
+import networkx as nx
+from networkx.drawing.nx_agraph import graphviz_layout
+
 from qbaf import QBAFramework
 
 def visualize(qbaf: QBAFramework, explanations=[], with_fs=False, round_to=2):
