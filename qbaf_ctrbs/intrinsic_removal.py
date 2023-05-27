@@ -24,7 +24,7 @@ def determine_iremoval_ctrb(topic, contributor, qbaf):
     initial_strengths = [qbaf.initial_strengths[argument] for argument in arguments]
     qbaf_with = QBAFramework(arguments, initial_strengths,
                             attackers, supporters,
-                            qbaf.semantics)
+                            semantics=qbaf.semantics)
     qbaf_without = restrict(qbaf_with, qbaf.arguments - {contributor})
     fs_with = qbaf_with.final_strengths[topic]
     fs_without = qbaf_without.final_strengths[topic]
