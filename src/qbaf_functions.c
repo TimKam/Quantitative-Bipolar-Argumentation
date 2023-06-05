@@ -76,10 +76,49 @@ double sum(PyObject *attacker_strengths, PyObject *supporter_strengths)
  */
 double product(PyObject *attacker_strengths, PyObject *supporter_strengths)
 {
-    // TODO
-    PyErr_SetString(PyExc_NotImplementedError,
-                        "aggregation function 'product' not implemented");
-    return -1.0;
+    double attackers_aggregation = 1;
+    double supporters_aggregation = 1;
+
+    PyObject *iterator = PyObject_GetIter(attacker_strengths);
+    PyObject *item;
+
+    if (iterator == NULL) {
+        return -1.0;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        double strength = PyFloat_AsDouble(item);
+        Py_DECREF(item);
+        if (strength == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+
+        attackers_aggregation = attackers_aggregation * (1 - strength);
+    }
+
+    Py_DECREF(iterator);
+
+    iterator = PyObject_GetIter(supporter_strengths);
+
+    if (iterator == NULL) {
+        return -1.0;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        double strength = PyFloat_AsDouble(item);
+        Py_DECREF(item);
+        if (strength == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+
+        supporters_aggregation = supporters_aggregation * (1 - strength);
+    }
+
+    Py_DECREF(iterator);
+
+    return attackers_aggregation - supporters_aggregation;
 }
 
 /**
@@ -110,7 +149,7 @@ double top(PyObject *attacker_strengths, PyObject *supporter_strengths)
             return -1;
         }
 
-        attackers_aggregation = attackers_aggregation + strength;
+        attackers_aggregation = max(attackers_aggregation, strength);
     }
 
     Py_DECREF(iterator);

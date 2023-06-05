@@ -198,10 +198,16 @@ def test_custom_semantics():
     assert qbf.final_strengths != custom.final_strengths
 
 def test_default_semantics():
-    args,initial_strengths,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
+    args,initial_strengths,att,supp = ['a', 'b', 'c', 'd'], [0.1, 0.1, 0.5, 0.3], [('a', 'c'), ('d', 'c')], [('a', 'b')]
     qbf = QBAFramework(args,initial_strengths, att, supp, semantics="basic_model")
     qbf2 = QBAFramework(args,initial_strengths, att, supp, semantics="QuadraticEnergy_model")
+    qbf3 = QBAFramework(args,initial_strengths, att, supp, semantics="SquaredDFQuAD_model")
+    qbf4 = QBAFramework(args,initial_strengths, att, supp, semantics="EulerBasedTop_model")
+    qbf5 = QBAFramework(args,initial_strengths, att, supp, semantics="EulerBased_model")
+    qbf6 = QBAFramework(args,initial_strengths, att, supp, semantics="DFQuAD_model")
     assert qbf.final_strengths != qbf2.final_strengths
+    assert qbf3.final_strengths != qbf6.final_strengths
+    assert qbf4.final_strengths != qbf5.final_strengths
 
 # TEST ARGUMENTS
 
