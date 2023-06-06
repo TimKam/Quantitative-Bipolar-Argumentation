@@ -118,25 +118,25 @@ def test_custom_semantics_input():
 
     QBAFramework(args,initial_strengths, att, supp,
                     semantics=None,
-                    aggregation_function=lambda w1, w2 : w1 + w2,
+                    aggregation_function=lambda att_s, supp_s : sum(supp_s) - sum(att_s),
                     influence_function=lambda w, s : w + s,
                     min_strength=-10,
                     max_strength=10)
 
     QBAFramework(args,initial_strengths, att, supp,
-                    aggregation_function=lambda w1, w2 : w1 + w2,
+                    aggregation_function=lambda att_s, supp_s : sum(supp_s) - sum(att_s),
                     influence_function=lambda w, s : w + s,
                     min_strength=-10,
                     max_strength=10)
 
     QBAFramework(args,initial_strengths, att, supp,
-                    aggregation_function=lambda w1, w2 : w1 + w2,
+                    aggregation_function=lambda att_s, supp_s : sum(supp_s) - sum(att_s),
                     influence_function=lambda w, s : w + s)
     
     with pytest.raises(ValueError):
         QBAFramework(args,initial_strengths, att, supp,
                     semantics="basic_model",
-                    aggregation_function=lambda w1, w2 : w1 + w2,
+                    aggregation_function=lambda att_s, supp_s : sum(supp_s) - sum(att_s),
                     influence_function=lambda w, s : w + s,
                     min_strength=-10,
                     max_strength=10)
@@ -144,7 +144,7 @@ def test_custom_semantics_input():
     with pytest.raises(ValueError):
         QBAFramework(args,initial_strengths, att, supp,
                     semantics=None,
-                    aggregation_function=lambda w1, w2 : w1 + w2,
+                    aggregation_function=lambda att_s, supp_s : sum(supp_s) - sum(att_s),
                     influence_function=None,
                     min_strength=-10,
                     max_strength=10)
@@ -182,7 +182,7 @@ def test_custom_semantics():
     qbf = QBAFramework(args,initial_strengths, att, supp, semantics="basic_model")
     custom = QBAFramework(args,initial_strengths, att, supp,
                                 semantics=None,
-                                aggregation_function=lambda w1, w2 : w1 + w2,
+                                aggregation_function=lambda att_s, supp_s : sum(supp_s) - sum(att_s),
                                 influence_function=lambda w, s : w + s,
                                 min_strength=-10,
                                 max_strength=10)
@@ -191,17 +191,23 @@ def test_custom_semantics():
 
     custom = QBAFramework(args,initial_strengths, att, supp,
                                 semantics=None,
-                                aggregation_function=lambda w1, w2 : w1 + w2,
+                                aggregation_function=lambda att_s, supp_s : sum(supp_s) - sum(att_s),
                                 influence_function=lambda w, s : w - s,
                                 min_strength=-10,
                                 max_strength=10)
     assert qbf.final_strengths != custom.final_strengths
 
 def test_default_semantics():
-    args,initial_strengths,att,supp = ['a', 'b', 'c'], [1, 1, 5], [('a', 'c')], [('a', 'b')]
+    args,initial_strengths,att,supp = ['a', 'b', 'c', 'd'], [0.1, 0.1, 0.5, 0.3], [('a', 'c'), ('d', 'c')], [('a', 'b')]
     qbf = QBAFramework(args,initial_strengths, att, supp, semantics="basic_model")
     qbf2 = QBAFramework(args,initial_strengths, att, supp, semantics="QuadraticEnergy_model")
+    qbf3 = QBAFramework(args,initial_strengths, att, supp, semantics="SquaredDFQuAD_model")
+    qbf4 = QBAFramework(args,initial_strengths, att, supp, semantics="EulerBasedTop_model")
+    qbf5 = QBAFramework(args,initial_strengths, att, supp, semantics="EulerBased_model")
+    qbf6 = QBAFramework(args,initial_strengths, att, supp, semantics="DFQuAD_model")
     assert qbf.final_strengths != qbf2.final_strengths
+    assert qbf3.final_strengths != qbf6.final_strengths
+    assert qbf4.final_strengths != qbf5.final_strengths
 
 # TEST ARGUMENTS
 
