@@ -209,8 +209,7 @@ Support relations between arguments and each argument has an initial strength.</
 <p>Each argument has a final strength which is calculated as the result of an influence
 function that combines the initial strength and the aggregation result.
 The aggregation result is obtained as the result of applying an aggregation function
-to the supporters of the argument minus the result of applying the same aggregation
-function to the attackers of the argument.</p>
+to the final strengths of the attackers and the final strengths of supporters.</p>
 <p>Note that every time the type QBAFArgument is written, any type that is hashable can be used.</p>
 <p>The semantics of a QBAF are associated with the way the final strengths are calculated.
 There are some predefined semantics (The default is ‘basic_model’), but custom semantics
@@ -234,7 +233,7 @@ min_strength=-1.7976931348623157e+308, max_strength=1.7976931348623157e+308)</p>
 Defaults to True.</p></li>
 <li><p><strong>semantics</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the predifined semantics to be used to calculate the final strengths.
 Defaults to None. If the aggregation function and the influence function are None it defaults to ‘basic_model’.</p></li>
-<li><p><strong>aggregation_function</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Function to combine two final strengths.
+<li><p><strong>aggregation_function</strong> (<em>Callable</em><em>[</em><em>[</em><em>list</em><em>, </em><em>list</em><em>]</em><em>, </em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Function to combine the final strengths of the attackers and the supporters.
 Defaults to None.</p></li>
 <li><p><strong>influence_function</strong> (<em>Callable</em><em>[</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Function to combine the initial strength
 and the aggregation result. Defaults to None.</p></li>
