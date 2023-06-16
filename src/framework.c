@@ -2508,6 +2508,12 @@ _QBAFramework_isSSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
         return -1;
     }
 
+    if (!_QBAFramework_isacyclic(reversal)) {
+        PyErr_WarnEx(PyExc_Warning, "Acyclic reversal of a QBAF was found when checking if it was a SSI Explanation. "
+                                    "False was returned instead.", 1);
+        return FALSE;
+    }
+
     are_strength_consistent = _QBAFramework_are_strength_consistent(other, (QBAFrameworkObject*)reversal, arg1, arg2);
     Py_DECREF(reversal);
     if (are_strength_consistent < 0) {
@@ -2534,6 +2540,12 @@ _QBAFramework_isCSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
     PyObject *reversal = _QBAFramework_reversal(self, other, set);
     if (reversal == NULL) {
         return -1;
+    }
+
+    if (!_QBAFramework_isacyclic(reversal)) {
+        PyErr_WarnEx(PyExc_Warning, "Acyclic reversal of a QBAF was found when checking if it was a CSI Explanation. "
+                                    "False was returned instead.", 1);
+        return FALSE;
     }
 
     int are_strength_consistent = _QBAFramework_are_strength_consistent(other, (QBAFrameworkObject*)reversal, arg1, arg2);
