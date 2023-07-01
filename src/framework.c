@@ -3999,7 +3999,7 @@ PyDoc_STRVAR(contains_argument_doc,
 );
 
 PyDoc_STRVAR(contains_attack_relation_doc,
-"contains_attack_relation(self, argument)\n"
+"contains_attack_relation(self, attacker, attacked)\n"
 "--\n"
 "\n"
 "Return True if the Attack relation (attacker, attacked) is contained\n"
@@ -4014,7 +4014,7 @@ PyDoc_STRVAR(contains_attack_relation_doc,
 );
 
 PyDoc_STRVAR(contains_support_relation_doc,
-"contains_support_relation(self, argument)\n"
+"contains_support_relation(self, supporter, supported)\n"
 "--\n"
 "\n"
 "Return True if the Support relation (supporter, supported) is contained\n"
