@@ -2511,6 +2511,7 @@ _QBAFramework_isSSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
     if (!_QBAFramework_isacyclic(reversal)) {
         PyErr_WarnEx(PyExc_Warning, "Acyclic reversal of a QBAF was found when checking if it was a SSI Explanation. "
                                     "False was returned instead.", 1);
+        Py_DECREF(reversal);
         return FALSE;
     }
 
@@ -2545,6 +2546,7 @@ _QBAFramework_isCSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
     if (!_QBAFramework_isacyclic(reversal)) {
         PyErr_WarnEx(PyExc_Warning, "Acyclic reversal of a QBAF was found when checking if it was a CSI Explanation. "
                                     "False was returned instead.", 1);
+        Py_DECREF(reversal);
         return FALSE;
     }
 
