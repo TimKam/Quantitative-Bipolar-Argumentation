@@ -2511,6 +2511,7 @@ _QBAFramework_isSSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
     if (!_QBAFramework_isacyclic(reversal)) {
         PyErr_WarnEx(PyExc_Warning, "Acyclic reversal of a QBAF was found when checking if it was a SSI Explanation. "
                                     "False was returned instead.", 1);
+        Py_DECREF(reversal);
         return FALSE;
     }
 
@@ -2545,6 +2546,7 @@ _QBAFramework_isCSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
     if (!_QBAFramework_isacyclic(reversal)) {
         PyErr_WarnEx(PyExc_Warning, "Acyclic reversal of a QBAF was found when checking if it was a CSI Explanation. "
                                     "False was returned instead.", 1);
+        Py_DECREF(reversal);
         return FALSE;
     }
 
@@ -4009,7 +4011,7 @@ PyDoc_STRVAR(contains_argument_doc,
 );
 
 PyDoc_STRVAR(contains_attack_relation_doc,
-"contains_attack_relation(self, argument)\n"
+"contains_attack_relation(self, attacker, attacked)\n"
 "--\n"
 "\n"
 "Return True if the Attack relation (attacker, attacked) is contained\n"
@@ -4024,7 +4026,7 @@ PyDoc_STRVAR(contains_attack_relation_doc,
 );
 
 PyDoc_STRVAR(contains_support_relation_doc,
-"contains_support_relation(self, argument)\n"
+"contains_support_relation(self, supporter, supported)\n"
 "--\n"
 "\n"
 "Return True if the Support relation (supporter, supported) is contained\n"
