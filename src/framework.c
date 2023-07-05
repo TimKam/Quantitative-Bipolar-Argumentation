@@ -57,7 +57,7 @@ typedef struct {
     int       disjoint_relations;   /* 1 if the attack/support relations must be disjoint, 0 if they do not have to */
     char     *semantics;            /* name of the semantic model */
     double  (*influence_function)(double, double);   /* influence function that is going to be used to calcualte the final strengths */
-    double  (*aggregation_function)(double, double); /* aggregation function that is going to be used to calcualte the final strengths */
+    double  (*aggregation_function)(PyObject*, PyObject*); /* aggregation function that is going to be used to calcualte the final strengths */
     double    min_strength;           /* min value for the initial strengths */
     double    max_strength;           /* max value for the initial strengths */
     PyObject *influence_function_callable;   /* influence function given from python */
@@ -569,22 +569,22 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 }
 
 /**
- * @brief Return the result of aggregating the strengths w1 and w2 in the Framework self,
- * -1.0 in an error has occurred.
+ * @brief Return the result of aggregating function in the Framework self,
+ * -1.0 if an error has occurred.
  * 
  * @param self a QBAFramework
- * @param w1 a double
- * @param w2 another double
- * @return double result of the aggregation of w1 and w2, -1.0 if an error occurred
+ * @param attacker_strengths PyList of attackers' final strengths
+ * @param supporter_strengths PyList of supporters' final strengths
+ * @return double result of the aggregation function, -1.0 if an error occurred
  */
 static inline
-double _QBAFramework_aggregation_function(QBAFrameworkObject *self, double w1, double w2)
+double _QBAFramework_aggregation_function(QBAFrameworkObject *self, PyObject *attacker_strengths, PyObject *supporter_strengths)
 {
     if (self->aggregation_function != NULL)
-        return self->aggregation_function(w1, w2);
+        return self->aggregation_function(attacker_strengths, supporter_strengths);
     
     if (self->aggregation_function_callable != NULL) {
-        PyObject *pyfloat = PyObject_CallFunction(self->aggregation_function_callable, "dd", w1, w2);
+        PyObject *pyfloat = PyObject_CallFunction(self->aggregation_function_callable, "OO", attacker_strengths, supporter_strengths);
         if (pyfloat == NULL)
             return -1;
         double aggregation = PyFloat_AsDouble(pyfloat);
@@ -1723,6 +1723,8 @@ QBAFramework_isacyclic(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
 static double
 _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argument)
 {
+
+    // Check if it has been calculated already
     int contains = PyDict_Contains(self->final_strengths, argument);
     if (contains < 0) {
         return -1.0;
@@ -1731,87 +1733,116 @@ _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argum
         return PyFloat_AsDouble(PyDict_GetItem(self->final_strengths, argument));
     }
 
-    double initial_strength = PyFloat_AsDouble(PyDict_GetItem(self->initial_strengths, argument));
-    double attackers_aggregation = 0;
-    double supporters_aggregation = 0;
-
+    // Obtain final strength of attackers
     PyObject *attackers = _QBAFARelations_agents((QBAFARelationsObject*)self->attack_relations, argument);
+    if (attackers == NULL) {
+        return -1.0;
+    }
+
     PyObject *iterator = PyObject_GetIter(attackers);
     PyObject *item;
 
     if (iterator == NULL) {
-        Py_XDECREF(attackers);
+        Py_DECREF(attackers);
+        return -1.0;
+    }
+    Py_ssize_t size = PyObject_Size(attackers);
+    if (size == -1) {
+        Py_DECREF(attackers);
+        Py_DECREF(iterator);
         return -1.0;
     }
 
-    // if len(attackers) > 0: attackers_aggregation = attackers[0]
-    item = PyIter_Next(iterator);
-    if (item != NULL) {
-        attackers_aggregation = _QBAFramework_calculate_final_strength(self, item);
-        Py_DECREF(item);
-        if (attackers_aggregation == -1.0 && PyErr_Occurred()) {
-            Py_DECREF(attackers); Py_DECREF(iterator);
-            return -1.0;
-        }
+    PyObject *attacker_strengths = PyList_New(size);
+    if (attacker_strengths == NULL) {
+        Py_DECREF(attackers);
+        Py_DECREF(iterator);
+        return -1.0;
     }
-
-    // for item in attackers[1:]:
+    
+    Py_ssize_t index = 0;
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-        double item_final_strength = _QBAFramework_calculate_final_strength(self, item);
+        double strength = _QBAFramework_calculate_final_strength(self, item);
         Py_DECREF(item);
-        if (item_final_strength == -1.0 && PyErr_Occurred()) {
-            Py_DECREF(attackers); Py_DECREF(iterator);
+        if (strength == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(iterator);
+            Py_DECREF(attackers);
+            Py_DECREF(attacker_strengths);
             return -1.0;
         }
-        attackers_aggregation = _QBAFramework_aggregation_function(self, attackers_aggregation, item_final_strength);
-        if (attackers_aggregation == -1.0 && PyErr_Occurred()) {
-            Py_DECREF(attackers); Py_DECREF(iterator);
-            return -1.0;
-        }
+
+        PyList_SET_ITEM(attacker_strengths, index, PyFloat_FromDouble(strength));
+
+        index++;
     }
 
-    Py_DECREF(attackers);
     Py_DECREF(iterator);
+    Py_DECREF(attackers);
 
+    // Obtain final strength of supporters
     PyObject *supporters = _QBAFARelations_agents((QBAFARelationsObject*)self->support_relations, argument);
+    if (supporters == NULL) {
+        Py_DECREF(attacker_strengths);
+        return -1.0;
+    }
     iterator = PyObject_GetIter(supporters);
 
     if (iterator == NULL) {
-        Py_XDECREF(supporters);
+        Py_DECREF(attacker_strengths);
+        Py_DECREF(supporters);
+        return -1.0;
+    }
+    size = PyObject_Size(supporters);
+    if (size == -1) {
+        Py_DECREF(attacker_strengths);
+        Py_DECREF(iterator);
+        Py_DECREF(supporters);
         return -1.0;
     }
 
-    // if len(supporters) > 0: supporters_aggregation = supporters[0]
-    item = PyIter_Next(iterator);
-    if (item != NULL) {
-        supporters_aggregation = _QBAFramework_calculate_final_strength(self, item);
-        Py_DECREF(item);
-        if (supporters_aggregation == -1.0 && PyErr_Occurred()) {
-            Py_DECREF(supporters); Py_DECREF(iterator);
-            return -1.0;
-        }
+    PyObject *supporter_strengths = PyList_New(size);
+    if (supporter_strengths == NULL) {
+        Py_DECREF(attacker_strengths);
+        Py_DECREF(iterator);
+        Py_DECREF(supporters);
+        return -1.0;
     }
-
-    // for item in supporters[1:]:
+    
+    index = 0;
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-        double item_final_strength = _QBAFramework_calculate_final_strength(self, item);
+        double strength = _QBAFramework_calculate_final_strength(self, item);
         Py_DECREF(item);
-        if (item_final_strength == -1.0 && PyErr_Occurred()) {
-            Py_DECREF(supporters); Py_DECREF(iterator);
+        if (strength == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(attacker_strengths);
+            Py_DECREF(iterator);
+            Py_DECREF(supporters);
+            Py_DECREF(supporter_strengths);
             return -1.0;
         }
-        supporters_aggregation = _QBAFramework_aggregation_function(self, supporters_aggregation, item_final_strength);
-        if (supporters_aggregation == -1.0 && PyErr_Occurred()) {
-            Py_DECREF(supporters); Py_DECREF(iterator);
-            return -1.0;
-        }
+
+        PyList_SET_ITEM(supporter_strengths, index, PyFloat_FromDouble(strength));
+
+        index++;
+    } 
+
+    Py_DECREF(iterator);
+    Py_DECREF(supporters);
+
+    // Obtain result from aggregation function
+    double aggregation = _QBAFramework_aggregation_function(self, attacker_strengths, supporter_strengths);
+    Py_DECREF(attacker_strengths);
+    Py_DECREF(supporter_strengths);
+    if (aggregation == -1.0 && PyErr_Occurred()) {
+        return -1.0;
     }
 
-    Py_DECREF(supporters);
-    Py_DECREF(iterator);
+    // Obtain initial strength
+    double initial_strength = PyFloat_AsDouble(PyDict_GetItem(self->initial_strengths, argument));
+    if (initial_strength == -1.0 && PyErr_Occurred()) {
+        return -1.0;
+    }
 
-    double aggregation = supporters_aggregation - attackers_aggregation;
-
+    // calculate final strength;
     double final_strength = _QBAFramework_influence_function(self, initial_strength, aggregation);
     if (final_strength == -1.0 && PyErr_Occurred()) {
         return -1.0;
@@ -2477,6 +2508,13 @@ _QBAFramework_isSSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
         return -1;
     }
 
+    if (!_QBAFramework_isacyclic(reversal)) {
+        PyErr_WarnEx(PyExc_Warning, "Acyclic reversal of a QBAF was found when checking if it was a SSI Explanation. "
+                                    "False was returned instead.", 1);
+        Py_DECREF(reversal);
+        return FALSE;
+    }
+
     are_strength_consistent = _QBAFramework_are_strength_consistent(other, (QBAFrameworkObject*)reversal, arg1, arg2);
     Py_DECREF(reversal);
     if (are_strength_consistent < 0) {
@@ -2503,6 +2541,13 @@ _QBAFramework_isCSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
     PyObject *reversal = _QBAFramework_reversal(self, other, set);
     if (reversal == NULL) {
         return -1;
+    }
+
+    if (!_QBAFramework_isacyclic(reversal)) {
+        PyErr_WarnEx(PyExc_Warning, "Acyclic reversal of a QBAF was found when checking if it was a CSI Explanation. "
+                                    "False was returned instead.", 1);
+        Py_DECREF(reversal);
+        return FALSE;
     }
 
     int are_strength_consistent = _QBAFramework_are_strength_consistent(other, (QBAFrameworkObject*)reversal, arg1, arg2);
@@ -3966,7 +4011,7 @@ PyDoc_STRVAR(contains_argument_doc,
 );
 
 PyDoc_STRVAR(contains_attack_relation_doc,
-"contains_attack_relation(self, argument)\n"
+"contains_attack_relation(self, attacker, attacked)\n"
 "--\n"
 "\n"
 "Return True if the Attack relation (attacker, attacked) is contained\n"
@@ -3981,7 +4026,7 @@ PyDoc_STRVAR(contains_attack_relation_doc,
 );
 
 PyDoc_STRVAR(contains_support_relation_doc,
-"contains_support_relation(self, argument)\n"
+"contains_support_relation(self, supporter, supported)\n"
 "--\n"
 "\n"
 "Return True if the Support relation (supporter, supported) is contained\n"
@@ -4311,8 +4356,7 @@ PyDoc_STRVAR(QBAFramework_doc,
 "Each argument has a final strength which is calculated as the result of an influence\n"
 "function that combines the initial strength and the aggregation result.\n"
 "The aggregation result is obtained as the result of applying an aggregation function\n"
-"to the supporters of the argument minus the result of applying the same aggregation\n"
-"function to the attackers of the argument.\n"
+"to the final strengths of the attackers and the final strengths of supporters.\n"
 "\n"
 "Note that every time the type QBAFArgument is written, any type that is hashable can be used.\n"
 "\n"
@@ -4337,7 +4381,7 @@ PyDoc_STRVAR(QBAFramework_doc,
 "        Defaults to True.\n"
 "    semantics (str, optional): Name of the predifined semantics to be used to calculate the final strengths.\n"
 "        Defaults to None. If the aggregation function and the influence function are None it defaults to 'basic_model'.\n"
-"    aggregation_function (Callable[[float, float], float], optional): Function to combine two final strengths.\n"
+"    aggregation_function (Callable[[list, list], float], optional): Function to combine the final strengths of the attackers and the supporters.\n"
 "        Defaults to None.\n"
 "    influence_function (Callable[[float, float], float], optional): Function to combine the initial strength\n"
 "        and the aggregation result. Defaults to None.\n"

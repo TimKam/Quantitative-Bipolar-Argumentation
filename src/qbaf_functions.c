@@ -12,39 +12,168 @@
 #define max(a,b) (((a)>(b))?(a):(b))
 
 /**
- * @brief Given two strengths w1 and w2 return their sum.
+ * @brief Given the final strengths of attackers and supporters, return the result of the aggregation function 'sum'.
+ * Return -1 if an error has occurred.
  * 
- * @param w1 a double
- * @param w2 another double
- * @return double the sum of w1 and w2
+ * @param attacker_strengths PyList of attackers' final strengths
+ * @param supporter_strengths PyList of supporters' final strengths
+ * @return double the result of the aggregation function 'sum', -1 if an error has occurred.
  */
-double sum(double w1, double w2)
+double sum(PyObject *attacker_strengths, PyObject *supporter_strengths)
 {
-    return w1 + w2;
+    double attackers_aggregation = 0;
+    double supporters_aggregation = 0;
+
+    PyObject *iterator = PyObject_GetIter(attacker_strengths);
+    PyObject *item;
+
+    if (iterator == NULL) {
+        return -1.0;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        double strength = PyFloat_AsDouble(item);
+        Py_DECREF(item);
+        if (strength == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+
+        attackers_aggregation = attackers_aggregation + strength;
+    }
+
+    Py_DECREF(iterator);
+
+    iterator = PyObject_GetIter(supporter_strengths);
+
+    if (iterator == NULL) {
+        return -1.0;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        double strength = PyFloat_AsDouble(item);
+        Py_DECREF(item);
+        if (strength == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+
+        supporters_aggregation = supporters_aggregation + strength;
+    }
+
+    Py_DECREF(iterator);
+
+    return supporters_aggregation - attackers_aggregation;
 }
 
 /**
- * @brief Given two strengths w1 and w2 return their product.
+ * @brief Given the final strengths of attackers and supporters, return the result of the aggregation function 'product'.
+ * Return -1 if an error has occurred.
  * 
- * @param w1 a double
- * @param w2 another double
- * @return double the product of w1 and w2
+ * @param attacker_strengths PyList of attackers' final strengths
+ * @param supporter_strengths PyList of supporters' final strengths
+ * @return double the result of the aggregation function 'product', -1 if an error has occurred.
  */
-double product(double w1, double w2)
+double product(PyObject *attacker_strengths, PyObject *supporter_strengths)
 {
-    return w1 * w2;
+    double attackers_aggregation = 1;
+    double supporters_aggregation = 1;
+
+    PyObject *iterator = PyObject_GetIter(attacker_strengths);
+    PyObject *item;
+
+    if (iterator == NULL) {
+        return -1.0;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        double strength = PyFloat_AsDouble(item);
+        Py_DECREF(item);
+        if (strength == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+
+        attackers_aggregation = attackers_aggregation * (1 - strength);
+    }
+
+    Py_DECREF(iterator);
+
+    iterator = PyObject_GetIter(supporter_strengths);
+
+    if (iterator == NULL) {
+        return -1.0;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        double strength = PyFloat_AsDouble(item);
+        Py_DECREF(item);
+        if (strength == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+
+        supporters_aggregation = supporters_aggregation * (1 - strength);
+    }
+
+    Py_DECREF(iterator);
+
+    return attackers_aggregation - supporters_aggregation;
 }
 
 /**
- * @brief Given two strengths w1 and w2 return the maximum.
+ * @brief Given the final strengths of attackers and supporters, return the result of the aggregation function 'top'.
+ * Return -1 if an error has occurred.
  * 
- * @param w1 a double
- * @param w2 another double
- * @return double maximum of w1 and w2
+ * @param attacker_strengths PyList of attackers' final strengths
+ * @param supporter_strengths PyList of supporters' final strengths
+ * @return double the result of the aggregation function 'top', -1 if an error has occurred.
  */
-double top(double w1, double w2)
+double top(PyObject *attacker_strengths, PyObject *supporter_strengths)
 {
-    return max(w1, w2);
+    double attackers_aggregation = 0;
+    double supporters_aggregation = 0;
+
+    PyObject *iterator = PyObject_GetIter(attacker_strengths);
+    PyObject *item;
+
+    if (iterator == NULL) {
+        return -1.0;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        double strength = PyFloat_AsDouble(item);
+        Py_DECREF(item);
+        if (strength == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+
+        attackers_aggregation = max(attackers_aggregation, strength);
+    }
+
+    Py_DECREF(iterator);
+
+    iterator = PyObject_GetIter(supporter_strengths);
+
+    if (iterator == NULL) {
+        return -1.0;
+    }
+
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        double strength = PyFloat_AsDouble(item);
+        Py_DECREF(item);
+        if (strength == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(iterator);
+            return -1;
+        }
+
+        supporters_aggregation = max(supporters_aggregation, strength);
+    }
+
+    Py_DECREF(iterator);
+
+    return supporters_aggregation - attackers_aggregation;
 }
 
 /**

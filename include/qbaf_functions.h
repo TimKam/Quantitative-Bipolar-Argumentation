@@ -11,31 +11,34 @@
 #include <Python.h>
 
 /**
- * @brief Given two strengths w1 and w2 return their sum.
+ * @brief Given the final strengths of attackers and supporters, return the result of the aggregation function 'sum'.
+ * Return -1 if an error has occurred.
  * 
- * @param w1 a double
- * @param w2 another double
- * @return double the sum of w1 and w2
+ * @param attacker_strengths PyList of attackers' final strengths
+ * @param supporter_strengths PyList of supporters' final strengths
+ * @return double the result of the aggregation function 'sum', -1 if an error has occurred.
  */
-double sum(double w1, double w2);
+double sum(PyObject *attacker_strengths, PyObject *supporter_strengths);
 
 /**
- * @brief Given two strengths w1 and w2 return their product.
+ * @brief Given the final strengths of attackers and supporters, return the result of the aggregation function 'product'.
+ * Return -1 if an error has occurred.
  * 
- * @param w1 a double
- * @param w2 another double
- * @return double the product of w1 and w2
+ * @param attacker_strengths PyList of attackers' final strengths
+ * @param supporter_strengths PyList of supporters' final strengths
+ * @return double the result of the aggregation function 'product', -1 if an error has occurred.
  */
-double product(double w1, double w2);
+double product(PyObject *attacker_strengths, PyObject *supporter_strengths);
 
 /**
- * @brief Given two strengths w1 and w2 return the maximum.
+ * @brief Given the final strengths of attackers and supporters, return the result of the aggregation function 'top'.
+ * Return -1 if an error has occurred.
  * 
- * @param w1 a double
- * @param w2 another double
- * @return double maximum of w1 and w2
+ * @param attacker_strengths PyList of attackers' final strengths
+ * @param supporter_strengths PyList of supporters' final strengths
+ * @return double the result of the aggregation function 'top', -1 if an error has occurred.
  */
-double top(double w1, double w2);
+double top(PyObject *attacker_strengths, PyObject *supporter_strengths);
 
 /**
  * @brief Return the influence result of the basic model.
