@@ -1,7 +1,7 @@
 from qbaf import QBAFramework
 from qbaf_ctrbs.shapley import determine_shapley_ctrb
 
-def test_removal():
+def test_shapley():
     args = ['a', 'b', 'c']
     is_a = 2
     is_b = 1
