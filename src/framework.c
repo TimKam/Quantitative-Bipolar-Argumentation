@@ -3737,6 +3737,352 @@ QBAFramework_minimalNSIExplanations(QBAFrameworkObject *self, PyObject *args, Py
 }
 
 /**
+ * @brief Return information regarding the modifications of a set of arguments that are explanation
+ * w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF), NULL if encountered an error.
+ * 
+ * @param self an instance of QBAFramework
+ * @param other a different instance of QBAFramework
+ * @param set a PySet of QBAFArgument, which is subset of self->arguments UNION other->arguments
+ * @return PyObject* new PyTuple, NULL if an error occurred
+ */
+static PyObject *
+_QBAFramework_change_info(QBAFrameworkObject *self, QBAFrameworkObject *other, PyObject *set)
+{
+    PyObject *removed_arguments = PyList_New(0);
+    PyObject *added_arguments = PyList_New(0);
+    PyObject *modified_strength_arguments = PyList_New(0);
+    PyObject *removed_attack_relations = PyList_New(0);
+    PyObject *added_attack_relations = PyList_New(0);
+    PyObject *removed_support_relations = PyList_New(0);
+    PyObject *added_support_relations = PyList_New(0);
+
+    PyObject *tuple = PyTuple_Pack(7, removed_arguments, added_arguments, modified_strength_arguments, 
+                                        removed_attack_relations, added_attack_relations,
+                                        removed_support_relations, added_support_relations);
+
+    Py_XDECREF(removed_arguments);
+    Py_XDECREF(added_arguments);
+    Py_XDECREF(modified_strength_arguments);
+    Py_XDECREF(removed_attack_relations);
+    Py_XDECREF(added_attack_relations);
+    Py_XDECREF(removed_support_relations);
+    Py_XDECREF(added_support_relations);
+
+    if (tuple == NULL) {
+        return NULL;
+    }
+    
+    PyObject *iterator = PyObject_GetIter(set);
+    PyObject *argument;
+    
+    if (iterator == NULL) {
+        Py_DECREF(tuple);
+        return NULL;
+    }
+
+    while ((argument = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        Py_DECREF(argument);
+
+        int self_contains_argument = PySet_Contains(self->arguments, argument);
+        if (self_contains_argument < 0) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            return NULL;
+        }
+
+        int other_contains_argument = PySet_Contains(other->arguments, argument);
+        if (other_contains_argument < 0) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            return NULL;
+        }
+
+        // Update modified_strength_arguments, added_arguments and removed_arguments
+        if (self_contains_argument && other_contains_argument) {
+            PyObject *self_initial_strength = PyDict_GetItem(self->initial_strengths, argument);
+            if (self_initial_strength == NULL) {
+                Py_DECREF(tuple); Py_DECREF(iterator);
+                return NULL;
+            }
+            PyObject *other_initial_strength = PyDict_GetItem(other->initial_strengths, argument);
+            if (other_initial_strength == NULL) {
+                Py_DECREF(tuple); Py_DECREF(iterator);
+                Py_DECREF(self_initial_strength);
+                return NULL;
+            }
+            int equal_strength = PyObject_RichCompareBool(self_initial_strength, other_initial_strength, Py_EQ);
+            Py_DECREF(self_initial_strength);
+            Py_DECREF(other_initial_strength);
+            if (equal_strength < 0) {
+                Py_DECREF(tuple); Py_DECREF(iterator);
+                return NULL;
+            }
+            if (!equal_strength) {
+                if (PyList_Append(modified_strength_arguments, argument) < 0) {
+                    Py_DECREF(tuple); Py_DECREF(iterator);
+                    return NULL;
+                }
+            }
+        } else if (self_contains_argument && !other_contains_argument) {
+            if (PyList_Append(added_arguments, argument) < 0) {
+                Py_DECREF(tuple); Py_DECREF(iterator);
+                return NULL;
+            }
+        } else if (!self_contains_argument && other_contains_argument) {
+            if (PyList_Append(removed_arguments, argument) < 0) {
+                Py_DECREF(tuple); Py_DECREF(iterator);
+                return NULL;
+            }
+        }
+        
+        // Update added_attack_relations and removed_attack_relations
+        PyObject *self_attacked = _QBAFARelations_patients_set((QBAFARelationsObject*)self->attack_relations, argument); // Borrowed reference
+        if (self_attacked == NULL) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            return NULL;
+        }
+        PyObject *other_attacked = _QBAFARelations_patients_set((QBAFARelationsObject*)other->attack_relations, argument); // Borrowed reference
+        if (other_attacked == NULL) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            return NULL;
+        }
+        
+        PyObject *added_attacked_arguments = PySet_Difference(self_attacked, other_attacked);
+        if (added_attacked_arguments == NULL) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            return NULL;
+        }
+
+        PyObject *attacked_iterator = PyObject_GetIter(added_attacked_arguments);
+        PyObject *attacked;
+
+        if (attacked_iterator == NULL) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            Py_DECREF(added_attacked_arguments);
+            return NULL;
+        }
+
+        while ((attacked = PyIter_Next(attacked_iterator))) {
+            Py_DECREF(attacked);
+            PyObject *attack_relation = PyTuple_Pack(2, argument, attacked);
+            if (attack_relation == NULL) {
+                Py_DECREF(tuple); Py_DECREF(iterator);
+                Py_DECREF(added_attacked_arguments);
+                Py_DECREF(attacked_iterator);
+                return NULL;
+            }
+            if (PyList_Append(added_attack_relations, attack_relation) < 0) {
+                Py_DECREF(tuple); Py_DECREF(iterator);
+                Py_DECREF(added_attacked_arguments);
+                Py_DECREF(attacked_iterator);
+                Py_DECREF(attack_relation);
+                return NULL;
+            }
+            Py_DECREF(attack_relation);
+        }
+
+        Py_DECREF(attacked_iterator);
+        Py_DECREF(added_attacked_arguments);
+
+        PyObject *removed_attacked_arguments = PySet_Difference(other_attacked, self_attacked);
+        if (removed_attacked_arguments == NULL) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            return NULL;
+        }
+
+        attacked_iterator = PyObject_GetIter(removed_attacked_arguments);
+
+        if (attacked_iterator == NULL) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            Py_DECREF(removed_attacked_arguments);
+            return NULL;
+        }
+
+        while ((attacked = PyIter_Next(attacked_iterator))) {
+            Py_DECREF(attacked);
+            PyObject *attack_relation = PyTuple_Pack(2, argument, attacked);
+            if (attack_relation == NULL) {
+                Py_DECREF(tuple); Py_DECREF(iterator);
+                Py_DECREF(removed_attacked_arguments);
+                Py_DECREF(attacked_iterator);
+                return NULL;
+            }
+            if (PyList_Append(removed_attack_relations, attack_relation) < 0) {
+                Py_DECREF(tuple); Py_DECREF(iterator);
+                Py_DECREF(removed_attacked_arguments);
+                Py_DECREF(attacked_iterator);
+                Py_DECREF(attack_relation);
+                return NULL;
+            }
+            Py_DECREF(attack_relation);
+        } 
+
+        Py_DECREF(attacked_iterator);
+        Py_DECREF(removed_attacked_arguments);
+        
+        // Update added_support_relations and removed_support_relations
+        PyObject *self_supported = _QBAFARelations_patients_set((QBAFARelationsObject*)self->support_relations, argument); // Borrowed reference
+        if (self_supported == NULL) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            return NULL;
+        }
+        PyObject *other_supported = _QBAFARelations_patients_set((QBAFARelationsObject*)other->support_relations, argument); // Borrowed reference
+        if (other_supported == NULL) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            return NULL;
+        }
+        
+        PyObject *added_supported_arguments = PySet_Difference(self_supported, other_supported);
+        if (added_supported_arguments == NULL) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            return NULL;
+        }
+
+        PyObject *supported_iterator = PyObject_GetIter(added_supported_arguments);
+        PyObject *supported;
+
+        if (supported_iterator == NULL) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            Py_DECREF(added_supported_arguments);
+            return NULL;
+        }
+
+        while ((supported = PyIter_Next(supported_iterator))) {
+            Py_DECREF(supported);
+            PyObject *support_relation = PyTuple_Pack(2, argument, supported);
+            if (support_relation == NULL) {
+                Py_DECREF(tuple); Py_DECREF(iterator);
+                Py_DECREF(added_supported_arguments);
+                Py_DECREF(supported_iterator);
+                return NULL;
+            }
+            if (PyList_Append(added_support_relations, support_relation) < 0) {
+                Py_DECREF(tuple); Py_DECREF(iterator);
+                Py_DECREF(added_supported_arguments);
+                Py_DECREF(supported_iterator);
+                Py_DECREF(support_relation);
+                return NULL;
+            }
+            Py_DECREF(support_relation);
+        }
+
+        Py_DECREF(supported_iterator);
+        Py_DECREF(added_supported_arguments);
+
+        PyObject *removed_supported_arguments = PySet_Difference(other_supported, self_supported);
+        if (removed_supported_arguments == NULL) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            return NULL;
+        }
+
+        supported_iterator = PyObject_GetIter(removed_supported_arguments);
+
+        if (supported_iterator == NULL) {
+            Py_DECREF(tuple); Py_DECREF(iterator);
+            Py_DECREF(removed_supported_arguments);
+            return NULL;
+        }
+
+        while ((supported = PyIter_Next(supported_iterator))) {
+            Py_DECREF(supported);
+            PyObject *support_relation = PyTuple_Pack(2, argument, supported);
+            if (support_relation == NULL) {
+                Py_DECREF(tuple); Py_DECREF(iterator);
+                Py_DECREF(removed_supported_arguments);
+                Py_DECREF(supported_iterator);
+                return NULL;
+            }
+            if (PyList_Append(removed_support_relations, support_relation) < 0) {
+                Py_DECREF(tuple); Py_DECREF(iterator);
+                Py_DECREF(removed_supported_arguments);
+                Py_DECREF(supported_iterator);
+                Py_DECREF(support_relation);
+                return NULL;
+            }
+            Py_DECREF(support_relation);
+        }
+
+        Py_DECREF(supported_iterator);
+        Py_DECREF(removed_supported_arguments);
+        
+    }
+
+    Py_DECREF(iterator);
+
+    return tuple;
+}
+
+/**
+ * @brief Return information regarding the modifications of a set of arguments that are explanation
+ * w.r.t. QBAFramework self (QBF') and QBAFramework other (QBF), NULL if encountered an error.
+ * 
+ * @param self an instance of QBAFramework
+ * @param args the argument values (other: QBAFramework, set: PySet of QBAFArgument)
+ * @param kwds the argument names
+ * @return PyObject* new PyTuple, NULL if an error occurred
+ */
+static PyObject *
+QBAFramework_change_info(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"other", "set", NULL};
+    PyObject *other, *set;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|", kwlist,
+                                     &other, &set))
+        return NULL;
+    
+    // Check other is a QBAFramework
+    if (!PyObject_TypeCheck(other, Py_TYPE(self))) {
+        PyErr_SetString(PyExc_TypeError, "other must be an instance of QBAFramework");
+        return NULL;
+    }
+
+    // Check set is a PySet or a PyList. If a PyList, create a Pyset.
+    if (PySet_Check(set)) {
+        Py_INCREF(set);
+    } else if (PyList_Check(set)) {
+        set = PySet_New(set); // new reference
+        if (set == NULL) {
+            return NULL;
+        }
+    } else {
+        PyErr_SetString(PyExc_TypeError, "argument set must be an instance of set or list");
+        return NULL;
+    }
+
+    // Check all items of PySet are in self->arguments UNION other->arguments
+    PyObject *self_arguments_union_other_arguments = PySet_Union(self->arguments, ((QBAFrameworkObject*)other)->arguments);
+    if (self_arguments_union_other_arguments == NULL) {
+        Py_DECREF(set);
+        return NULL;
+    }
+    PyObject *iterator = PyObject_GetIter(set);
+    PyObject *item;
+    int contains;
+    if (iterator == NULL) {
+        Py_DECREF(set); Py_DECREF(self_arguments_union_other_arguments);
+        return NULL;
+    }
+    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+        contains = PySet_Contains(self_arguments_union_other_arguments, item);
+        if (contains < 0) {
+            Py_DECREF(set); Py_DECREF(self_arguments_union_other_arguments);
+            Py_DECREF(item); Py_DECREF(iterator);
+            return NULL;
+        }
+        if (!contains) {
+            Py_DECREF(set); Py_DECREF(self_arguments_union_other_arguments);
+            Py_DECREF(item); Py_DECREF(iterator);
+            PyErr_SetString(PyExc_ValueError, "every item of set must be contained in self.arguments UNION other.arguments");
+            return NULL;
+        }
+        Py_DECREF(item);
+    }
+    Py_DECREF(iterator);
+    Py_DECREF(self_arguments_union_other_arguments);
+
+    return _QBAFramework_change_info(self, other, set);
+}
+
+/**
  * @brief Return the comparison result between two QBAFramework, NULL if an error has occurred.
  * 
  * @param self instance of QBAFramework
@@ -4258,6 +4604,23 @@ PyDoc_STRVAR(minimalNSIExplanations_doc,
 "    list: list of set of arguments\n"
 );
 
+PyDoc_STRVAR(change_info_doc,
+"change_info(self, other, explanation)\n"
+"--\n"
+"\n"
+"Return information regarding the modifications of the set of arguments explanation\n"
+"in the framework self w.r.t. the framework other.\n"
+"All arguments in set must be contained in at least one of the Frameworks.\n"
+"\n"
+"Args:\n"
+"    other (QBAFramework): a Framework\n"
+"    explanation (set): a set of arguments\n"
+"\n"
+"Returns:\n"
+"    tuple: removed_arguments, added_arguments, modified_strength_arguments, removed_attack_relations,\n"
+"           added_attack_relations, removed_support_relations, added_support_relations\n"
+);
+
 /**
  * @brief List of functions of the class QBAFramework
  * 
@@ -4343,6 +4706,9 @@ static PyMethodDef QBAFramework_methods[] = {
     },
     {"minimalNSIExplanations", (PyCFunctionWithKeywords) QBAFramework_minimalNSIExplanations, METH_VARARGS | METH_KEYWORDS,
     minimalNSIExplanations_doc
+    },
+    {"change_info", (PyCFunctionWithKeywords) QBAFramework_change_info, METH_VARARGS | METH_KEYWORDS,
+    change_info_doc
     },
     {NULL}  /* Sentinel */
 };

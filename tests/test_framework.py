@@ -793,3 +793,19 @@ def test_minimalNSIExplanations_output():
 
     assert qbf_.minimalNSIExplanations(qbfa, 'b', 'c') == [{'d', 'e'}]
     assert qbfa.minimalNSIExplanations(qbf_, 'b', 'c') == [{'e'}]
+
+# Test change_info
+
+def test_change_info():
+    qbf1 = QBAFramework(['a', 'b', 'c'], [1,1,1], [('a', 'b')], [('a', 'c')])
+    qbf2 = QBAFramework(['a', 'b', 'd'], [1,0.5,1], [('a', 'd')], [('a', 'b')])
+    (removed_arguments, added_arguments, modified_strength_arguments, 
+        removed_attack_relations, added_attack_relations,
+        removed_support_relations, added_support_relations) = qbf2.change_info(qbf1, {'a', 'b', 'c', 'd'})
+    assert removed_arguments == ['c']
+    assert added_arguments == ['d']
+    assert modified_strength_arguments == ['b']
+    assert removed_attack_relations == [('a', 'b')]
+    assert added_attack_relations == [('a', 'd')]
+    assert removed_support_relations == [('a', 'c')]
+    assert added_support_relations == [('a', 'b')]
