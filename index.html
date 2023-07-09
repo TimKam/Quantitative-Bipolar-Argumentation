@@ -895,6 +895,29 @@ to a topic argument.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="qbaf_ctrbs.gradient.determine_gradient_ctrb">
+<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.gradient.</span></span><span class="sig-name descname"><span class="pre">determine_gradient_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.4901161193847656e-08</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf_ctrbs.gradient.determine_gradient_ctrb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the gradient contribution of a contributor
+to a topic argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
+<li><p><strong>contributor</strong> (<em>string</em>) – The contributing argument</p></li>
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em>) – Epsilon used by the approximator. Defaults to 1.4901161193847656e-08.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The contribution of the contributor to the topic</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="qbaf_ctrbs.utils.restrict">
 <span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.utils.</span></span><span class="sig-name descname"><span class="pre">restrict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf_ctrbs.utils.restrict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restricts the given QBAF to the provided set of arguments.</p>
