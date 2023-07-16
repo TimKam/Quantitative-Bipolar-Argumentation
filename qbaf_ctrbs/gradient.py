@@ -31,6 +31,10 @@ def determine_gradient_ctrb(topic, contributor, qbaf, epsilon=1.4901161193847656
         return qbaf_changed.final_strength(topic)
     
     contributor_strength = qbaf.final_strength(contributor)
-    strength_epsilon = func(contributor_strength + epsilon, qbaf)
     strength_base = func(contributor_strength, qbaf)
-    return (strength_epsilon - strength_base) / epsilon
+    try:
+        strength_epsilon = func(contributor_strength + epsilon, qbaf)
+        return (strength_epsilon - strength_base) / epsilon
+    except ValueError:
+        strength_epsilon = func(contributor_strength - epsilon, qbaf)
+        return (strength_base - strength_epsilon) / epsilon
