@@ -9,6 +9,7 @@ def test_gradient():
     qbaf = QBAFramework(args, initial_strengths, atts, supps, semantics='DFQuAD_model')
     assert round(determine_gradient_ctrb('e', 'a', qbaf), 7) == 0
 
+
 def test_initial_vs_final_gradient():
     # test bug fix: epsilon used to be applied to contributor's final strength
     args = ['a', 'b', 'c', 'd']
@@ -20,6 +21,7 @@ def test_initial_vs_final_gradient():
     ctrb_d_to_a = determine_gradient_ctrb('a', 'd', qbaf)
     assert round(ctrb_b_to_a, 7) == round(0.2078368291258812, 7)
     assert round(ctrb_d_to_a, 7) == round(-0.028916746377944946, 7)
+
 
 def test_gradient_edge_case():
     args = ['a', 'b', 'c']

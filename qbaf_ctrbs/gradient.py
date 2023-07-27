@@ -31,7 +31,6 @@ def determine_gradient_ctrb(topic, contributor, qbaf, epsilon=1.4901161193847656
         return qbaf_changed.final_strength(topic)
     
     contributor_strength = qbaf.initial_strength(contributor)
-
     strength_base = func(contributor_strength, qbaf)
     try:
         strength_epsilon = func(contributor_strength + epsilon, qbaf)
