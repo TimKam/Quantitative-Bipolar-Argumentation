@@ -17,3 +17,15 @@ def test_gradient_edge_case():
     qbaf = QBAFramework(args, initial_strengths, atts, supps, semantics="DFQuAD_model")
     assert determine_gradient_ctrb('a', 'b', qbaf) == 0
     assert determine_gradient_ctrb('a', 'c', qbaf) == 0
+
+def test_gradient_top_edge_case():
+    # if two contributors with maximum strength (and only them) attack or support a topic argument,
+    # their contributions are expected to zero.
+    args = ['a', 'b', 'c']
+    initial_strengths = [0.1, 1, 1]
+    atts = [('b', 'a'), ('c', 'a')]
+    supps = []
+    qbaf = QBAFramework(args, initial_strengths, atts, supps, semantics="EulerBasedTop_model")
+    assert determine_gradient_ctrb('a', 'c', qbaf) == 0
+    assert determine_gradient_ctrb('a', 'b', qbaf) == 0
+    
