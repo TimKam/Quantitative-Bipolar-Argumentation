@@ -144,7 +144,7 @@ double top(PyObject *attacker_strengths, PyObject *supporter_strengths)
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
         double strength = PyFloat_AsDouble(item);
         Py_DECREF(item);
-        if (strength == -1.0 && PyErr_Occurred()) {
+        if (strength > 1 || strength < -1 || (strength == -1.0 && PyErr_Occurred())) {
             Py_DECREF(iterator);
             return -1;
         }
