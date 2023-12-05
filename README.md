@@ -52,4 +52,4 @@ To test the package locally, first install the test requirements (`pip install -
 ## Acknowledgements
 **Authors**: José Ruiz Alarcón - [@Ruiz968](https://github.com/Ruiz968), Timotheus Kampik - [@TimKam](https://github.com/TimKam)
 
-This project is mainly based on the paper called *Explaining Change in Quantitative Bipolar Argumentation* (Kampik & Čyras, [2022](https://ebooks.iospress.nl/doi/10.3233/FAIA220152)).
+This project is mainly based on the paper  [Change in quantitative bipolar argumentation: Sufficient, necessary, and counterfactual explanations](https://www.sciencedirect.com/science/article/pii/S0888613X23001974) (Kampik, Čyras & Ruiz Alarcón, 2024).
