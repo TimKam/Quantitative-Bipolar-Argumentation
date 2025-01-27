@@ -6,7 +6,7 @@ def determine_removal_ctrb(topic, contributors, qbaf):
 
     Args:
         topic (string): The topic argument
-        contributor (string or set): The contributing argument(s)
+        contributors (string or set): The contributing argument(s)
         qbaf (QBAFramework): The QBAF that contains topic and contributor
 
     Returns:
