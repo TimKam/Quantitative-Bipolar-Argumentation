@@ -34,12 +34,6 @@ def determine_shapley_ctrb(topic, contributors, qbaf):
         qbaf_without = restrict(qbaf, [arg for arg in qbaf.arguments if arg in lsubset + [topic]])
         qbaf_with = restrict(qbaf, [arg for arg in qbaf.arguments if arg in lsubset + [topic, *contributors]])
         weight = (math.factorial(len(lsubset)) * math.factorial(len(qbaf.arguments)-1-len(lsubset)-len(contributors)))/math.factorial(len(qbaf.arguments)-1-len(contributors)+1)
-
-        print("------------------------------")
-        print(f"{lsubset} ({len(lsubset)})")
-        print(f"{str(math.factorial(len(lsubset)) * math.factorial(len(qbaf.arguments)-1-len(lsubset)-len(contributors)))}/{str(math.factorial(len(qbaf.arguments)-1-len(contributors)+1))} * {str((qbaf_with.final_strengths[topic] - qbaf_without.final_strengths[topic]))}")
-        print("------------------------------")
-
         sub_ctrb = weight * (qbaf_with.final_strengths[topic] - qbaf_without.final_strengths[topic])
         sub_ctrbs.append(sub_ctrb)
     return sum(sub_ctrbs)
