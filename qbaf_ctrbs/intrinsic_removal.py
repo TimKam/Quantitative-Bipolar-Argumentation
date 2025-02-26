@@ -13,13 +13,13 @@ def determine_iremoval_ctrb(topic, contributors, qbaf):
     Returns:
         float: The contribution of the contributor to the topic
     """
+    if not isinstance(contributors, set):
+        contributors = {contributors}
     if topic in contributors:
         raise Exception (
             'An argument\'s intrinsic removal contribution to itself cannot be determined.')
     if not all(item in qbaf.arguments for item in [topic, *contributors]):
         raise Exception ('Topic and contributor must be in the QBAF.')
-    if not isinstance(contributors, set):
-        contributors = {contributors}
     attackers = [(source, target) for source, target in qbaf.attack_relations.relations if (source in contributors or target not in contributors)]
     supporters = [(source, target) for source, target in qbaf.support_relations.relations if (source in contributors or target not in contributors)]
     arguments = list(qbaf.arguments)
