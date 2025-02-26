@@ -19,13 +19,13 @@ def determine_shapley_ctrb(topic, contributors, qbaf):
     Returns:
         float: The contribution of the contributor to the topic
     """
+    if not isinstance(contributors, set):
+        contributors = {contributors}
     if topic in contributors:
         raise Exception (
             'An argument\'s shapley contribution to itself cannot be determined.')
     if not all(item in qbaf.arguments for item in [topic, *contributors]):
             raise Exception ('Topic and contributor must be in the QBAF.')
-    if not isinstance(contributors, set):
-        contributors = {contributors}
     sub_ctrbs = []
     reduced_args = [arg for arg in qbaf.arguments if arg not in [*contributors, topic]]
     subsets = determine_powerset(reduced_args)
