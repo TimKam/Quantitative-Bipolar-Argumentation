@@ -906,16 +906,17 @@ results in two players: {a} and {b, c}.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="qbaf_ctrbs.gradient.determine_gradient_ctrb">
-<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.gradient.</span></span><span class="sig-name descname"><span class="pre">determine_gradient_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.4901161193847656e-08</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf_ctrbs.gradient.determine_gradient_ctrb" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.gradient.</span></span><span class="sig-name descname"><span class="pre">determine_gradient_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon=1.4901161193847656e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation_fn=&lt;built-in</span> <span class="pre">function</span> <span class="pre">max&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf_ctrbs.gradient.determine_gradient_ctrb" title="Link to this definition">¶</a></dt>
 <dd><p>Determines the gradient contribution of a contributor
-to a topic argument.</p>
+or a set of contributors to a topic argument.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
-<li><p><strong>contributor</strong> (<em>string</em>) – The contributing argument</p></li>
+<li><p><strong>contributors</strong> (<em>string</em><em> or </em><em>set</em>) – The contributing argument(s)</p></li>
 <li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
 <li><p><strong>epsilon</strong> (<em>float</em>) – Epsilon used by the approximator. Defaults to 1.4901161193847656e-08.</p></li>
+<li><p><strong>aggregation_fn</strong> (<em>function</em>) – Function to aggregate gradient contributions. Defaults to max.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
