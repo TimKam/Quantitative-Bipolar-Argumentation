@@ -1,22 +1,25 @@
 from qbaf import QBAFramework
 
-def determine_gradient_ctrb(topic, contributor, qbaf, epsilon=1.4901161193847656e-08):
+def determine_gradient_ctrb(topic, contributors, qbaf, epsilon=1.4901161193847656e-08, aggregation_fn=max):
     """Determines the gradient contribution of a contributor
-    to a topic argument.
+    or a set of contributors to a topic argument.
 
     Args:
         topic (string): The topic argument
-        contributor (string): The contributing argument
+        contributors (string or set): The contributing argument(s)
         qbaf (QBAFramework): The QBAF that contains topic and contributor
         epsilon (float): Epsilon used by the approximator. Defaults to 1.4901161193847656e-08.
+        aggregation_fn (function): Function to aggregate gradient contributions. Defaults to max.
 
     Returns:
         float: The contribution of the contributor to the topic
     """
-    if not topic in qbaf.arguments or not contributor in qbaf.arguments:
-        raise Exception ('Topic and contributor must be in the QBAF.')
+    if not isinstance(contributors, set):
+        contributors = {contributors}
+    if not all(item in qbaf.arguments for item in [topic, *contributors]):
+            raise Exception ('Topic and contributor must be in the QBAF.')
     
-    def func(contributor_strength, qbaf):
+    def func(contributor, contributor_strength, qbaf):
         initial_strengths = []
         argument_list = list(qbaf.arguments)
         for arg in argument_list:
@@ -30,11 +33,15 @@ def determine_gradient_ctrb(topic, contributor, qbaf, epsilon=1.4901161193847656
                                     semantics=qbaf.semantics)
         return qbaf_changed.final_strength(topic)
     
-    contributor_strength = qbaf.initial_strength(contributor)
-    strength_base = func(contributor_strength, qbaf)
-    try:
-        strength_epsilon = func(contributor_strength + epsilon, qbaf)
-        return (strength_epsilon - strength_base) / epsilon
-    except ValueError:
-        strength_epsilon = func(contributor_strength - epsilon, qbaf)
-        return (strength_base - strength_epsilon) / epsilon
+    all_contributors_strength = [(contributor, qbaf.initial_strength(contributor)) for contributor in contributors]
+
+    attribution_list = []
+    for contributor, contributor_strength in all_contributors_strength:
+        strength_base = func(contributor, contributor_strength, qbaf)
+        try:
+            strength_epsilon = func(contributor, contributor_strength + epsilon, qbaf)
+            attribution_list.append(((strength_epsilon - strength_base) / epsilon))
+        except ValueError:
+            strength_epsilon = func(contributor, contributor_strength - epsilon, qbaf)
+            attribution_list.append(((strength_base - strength_epsilon) / epsilon))    
+    return aggregation_fn(attribution_list)
