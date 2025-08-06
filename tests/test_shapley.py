@@ -56,17 +56,21 @@ def test_grouped_partition_for_two_contributors():
 
 def test_error_on_invalid_partition():
     qbaf = make_qbaf()
-    bad_partition = [{'a'}, {'b'}] # Missing {'b'}.
+    bad_partition = [{'a'}, {'b'}] # Missing {'c'}.
     with pytest.raises(Exception): determine_partitioned_shapley_ctrb('a', {'b'}, bad_partition, qbaf)
 
-    bad_partition = [{'a'}, {'c'}] # Missing {'c'}.
-    with pytest.raises(Exception): determine_partitioned_shapley_ctrb('a', {'b'}, bad_partition, qbaf)
+    bad_partition = [{'a'}, {'c'}] # Missing {'b'}.
+    with pytest.raises(Exception): determine_partitioned_shapley_ctrb('a', {'c'}, bad_partition, qbaf)
 
     bad_partition = [{'a'}, {'b'}, {'c'}, {'d'}] # Extra {'d'}.
     with pytest.raises(Exception): determine_partitioned_shapley_ctrb('a', {'b'}, bad_partition, qbaf)
 
     bad_partition = [{'a'}, {'b', 'c'}, {'c'}] # Not disjoint.
-    with pytest.raises(Exception): determine_partitioned_shapley_ctrb('a', {'b'}, bad_partition, qbaf)
+    with pytest.raises(Exception): determine_partitioned_shapley_ctrb('a', {'b', 'c'}, bad_partition, qbaf)
+
+    # Contributor not in partition.
+    bad_partition = [{'a'}, {'b'}, {'c'}]
+    with pytest.raises(Exception): determine_partitioned_shapley_ctrb('a', {'b','c'}, bad_partition, qbaf)
 
 def test_single_arg_partition():
     qbaf = make_qbaf()
@@ -79,6 +83,6 @@ def test_multi_arg_partition():
     qbaf = make_qbaf()
     partition = [{'a', 'b'}, {'c'}]
     assert determine_partitioned_shapley_ctrb('c', {'a', 'b'}, partition, qbaf) == 0
-    
+
     partition = [{'a'}, {'b', 'c'}]
     assert determine_partitioned_shapley_ctrb('a', {'b', 'c'}, partition, qbaf) == -2
