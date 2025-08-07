@@ -22,8 +22,7 @@ def determine_shapley_ctrb(topic, contributors, qbaf):
     if not isinstance(contributors, set):
         contributors = {contributors}
     if topic in contributors:
-        raise Exception (
-            'An argument\'s shapley contribution to itself cannot be determined.')
+        raise Exception ('An argument\'s shapley contribution to itself cannot be determined.')
     if not all(item in qbaf.arguments for item in [topic, *contributors]):
             raise Exception ('Topic and contributor must be in the QBAF.')
     sub_ctrbs = []
@@ -33,7 +32,8 @@ def determine_shapley_ctrb(topic, contributors, qbaf):
         lsubset = list(subset)
         qbaf_without = restrict(qbaf, [arg for arg in qbaf.arguments if arg in lsubset + [topic]])
         qbaf_with = restrict(qbaf, [arg for arg in qbaf.arguments if arg in lsubset + [topic, *contributors]])
-        weight = (math.factorial(len(lsubset)) * math.factorial(len(qbaf.arguments)-1-len(lsubset)-len(contributors)))/math.factorial(len(qbaf.arguments)-1-len(contributors)+1)
+        weight = (math.factorial(len(lsubset)) * math.factorial((len(qbaf.arguments) - 1) - len(lsubset) - len(contributors))
+                  ) / math.factorial(len(qbaf.arguments) - 1 - len(contributors) + 1)
         sub_ctrb = weight * (qbaf_with.final_strengths[topic] - qbaf_without.final_strengths[topic])
         sub_ctrbs.append(sub_ctrb)
     return sum(sub_ctrbs)
@@ -56,8 +56,7 @@ def determine_partitioned_shapley_ctrb(topic, contributors, partition, qbaf):
     if not isinstance(contributors, set):
         contributors = {contributors}
     if topic in contributors:
-        raise Exception (
-            'An argument\'s shapley contribution to itself cannot be determined.')
+        raise Exception ('An argument\'s shapley contribution to itself cannot be determined.')
     if not all(item in qbaf.arguments for item in [topic, *contributors]):
             raise Exception ('Topic and contributor must be in the QBAF.')
     if ({topic} not in partition) or (contributors not in partition):
@@ -80,7 +79,8 @@ def determine_partitioned_shapley_ctrb(topic, contributors, partition, qbaf):
         targets |= contributors
         qbaf_with = restrict(qbaf, list(targets))
 
-        weight = (math.factorial(len(subset)) * math.factorial(len(qbaf.arguments)-1-len(subset)-len(contributors)))/math.factorial(len(qbaf.arguments)-1-len(contributors)+1)
+        weight = (math.factorial(len(subset)) * math.factorial((len(partition) - 1) - len(subset) - 1)
+                  ) / math.factorial(len(partition) - 1)
         sub_ctrb = weight * (qbaf_with.final_strengths[topic] - qbaf_without.final_strengths[topic])
         sub_ctrbs.append(sub_ctrb)
     return sum(sub_ctrbs)
