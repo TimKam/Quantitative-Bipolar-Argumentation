@@ -586,7 +586,7 @@ PySet_SubSets(PyObject *set, Py_ssize_t size)
  * @param set a PySet of PyFrozenSet
  * @return PyObject* a new PyList of PySet, NULL if an error occurred
  */
-inline PyObject *
+PyObject *
 PyListOfPySet_FromPySetOfPyFrozenSet(PyObject *set)
 {
     PyObject *iterator;

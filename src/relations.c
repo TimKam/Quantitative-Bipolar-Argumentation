@@ -381,7 +381,7 @@ QBAFARelations_agents(QBAFARelationsObject *self, PyObject *args, PyObject *kwds
  * @param self instance of QBAFARelations
  * @param agent instance of QBAFArgument
  * @param patient instance of QBAFArgument
- * @return PyObject* 1 if is contained, 0 if not contained, -1 if an error has occurred
+ * @return int 1 if is contained, 0 if not contained, -1 if an error has occurred
  */
 int
 _QBAFARelations_contains(QBAFARelationsObject *self, PyObject *agent, PyObject *patient)
@@ -394,7 +394,7 @@ _QBAFARelations_contains(QBAFARelationsObject *self, PyObject *agent, PyObject *
     if (tuple == NULL) {
         Py_DECREF(agent);
         Py_DECREF(patient);
-        return NULL;
+        return -1;
     }
     
     int contains = PySet_Contains(self->relations, tuple); // QBAFARelations___contains__(self, tuple);
@@ -844,19 +844,19 @@ PyDoc_STRVAR(isdisjoint_doc,
  * 
  */
 static PyMethodDef QBAFARelations_methods[] = {
-    {"patients", (PyCFunctionWithKeywords) QBAFARelations_patients, METH_VARARGS | METH_KEYWORDS,
+    {"patients", (PyCFunction) QBAFARelations_patients, METH_VARARGS | METH_KEYWORDS,
     patients_doc
     },
-    {"agents", (PyCFunctionWithKeywords) QBAFARelations_agents, METH_VARARGS | METH_KEYWORDS,
+    {"agents", (PyCFunction) QBAFARelations_agents, METH_VARARGS | METH_KEYWORDS,
     agents_doc
     },
-    {"contains", (PyCFunctionWithKeywords) QBAFARelations_contains, METH_VARARGS | METH_KEYWORDS,
+    {"contains", (PyCFunction) QBAFARelations_contains, METH_VARARGS | METH_KEYWORDS,
     contains_doc
     },
-    {"add", (PyCFunctionWithKeywords) QBAFARelations_add, METH_VARARGS | METH_KEYWORDS,
+    {"add", (PyCFunction) QBAFARelations_add, METH_VARARGS | METH_KEYWORDS,
     add_doc
     },
-    {"remove", (PyCFunctionWithKeywords) QBAFARelations_remove, METH_VARARGS | METH_KEYWORDS, 
+    {"remove", (PyCFunction) QBAFARelations_remove, METH_VARARGS | METH_KEYWORDS, 
     remove_doc
     },
     {"__copy__", (PyCFunction) QBAFARelations_copy, METH_NOARGS,
@@ -865,7 +865,7 @@ static PyMethodDef QBAFARelations_methods[] = {
     {"copy", (PyCFunction) QBAFARelations_copy, METH_NOARGS,
     copy_doc
     },
-    {"isdisjoint", (PyCFunctionWithKeywords) QBAFARelations_isDisjoint, METH_VARARGS | METH_KEYWORDS, 
+    {"isdisjoint", (PyCFunction) QBAFARelations_isDisjoint, METH_VARARGS | METH_KEYWORDS, 
     isdisjoint_doc
     },
     {NULL}  /* Sentinel */
