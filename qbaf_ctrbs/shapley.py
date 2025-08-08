@@ -18,26 +18,13 @@ def determine_shapley_ctrb(topic, contributors, qbaf):
 
     Returns:
         float: The contribution of the contributor to the topic
-    """
-    if not isinstance(contributors, set):
-        contributors = {contributors}
-    if topic in contributors:
-        raise Exception ('An argument\'s shapley contribution to itself cannot be determined.')
-    if not all(item in qbaf.arguments for item in [topic, *contributors]):
-            raise Exception ('Topic and contributor must be in the QBAF.')
-    sub_ctrbs = []
-    reduced_args = [arg for arg in qbaf.arguments if arg not in [*contributors, topic]]
-    subsets = determine_powerset(reduced_args)
-    for subset in subsets:
-        lsubset = list(subset)
-        qbaf_without = restrict(qbaf, [arg for arg in qbaf.arguments if arg in lsubset + [topic]])
-        qbaf_with = restrict(qbaf, [arg for arg in qbaf.arguments if arg in lsubset + [topic, *contributors]])
-        weight = (math.factorial(len(lsubset)) * math.factorial((len(qbaf.arguments) - 1) - len(lsubset) - len(contributors))
-                  ) / math.factorial(len(qbaf.arguments) - 1 - len(contributors) + 1)
-        sub_ctrb = weight * (qbaf_with.final_strengths[topic] - qbaf_without.final_strengths[topic])
-        sub_ctrbs.append(sub_ctrb)
-    return sum(sub_ctrbs)
 
+    This is a wrapper around determine_partitioned_shapley_ctrb.
+    It partitions qbaf.arguments into singletons,
+    except for contributors which form one set, then calls determine_partitioned_shapley_ctrb.
+    """
+    partition = {frozenset([a]) for a in qbaf.arguments if a not in contributors and a != topic} | {frozenset([topic]), frozenset(contributors)}
+    return determine_partitioned_shapley_ctrb(topic, contributors, partition, qbaf)
 
 
 def determine_partitioned_shapley_ctrb(topic, contributors, partition, qbaf):
