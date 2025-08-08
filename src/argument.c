@@ -205,7 +205,7 @@ QBAFArgument_richcompare(QBAFArgumentObject *self, PyObject *other, int op)
  * @param self the QBAFArgument object
  * @return PyObject* a object with the hash
  */
-static PyObject *
+static Py_hash_t
 QBAFArgument_hashfunc(QBAFArgumentObject *self)
 {
     return PyObject_Hash(self->name);
