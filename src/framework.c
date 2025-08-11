@@ -4626,52 +4626,52 @@ PyDoc_STRVAR(change_info_doc,
  * 
  */
 static PyMethodDef QBAFramework_methods[] = {
-    {"modify_initial_strength", (PyCFunctionWithKeywords) QBAFramework_modify_initial_strengths, METH_VARARGS | METH_KEYWORDS,
+    {"modify_initial_strength", (PyCFunction) QBAFramework_modify_initial_strengths, METH_VARARGS | METH_KEYWORDS,
     modify_initial_strength_doc
     },
-    {"initial_strength", (PyCFunctionWithKeywords) QBAFramework_initial_strength, METH_VARARGS | METH_KEYWORDS,
+    {"initial_strength", (PyCFunction) QBAFramework_initial_strength, METH_VARARGS | METH_KEYWORDS,
     initial_strength_doc
     },
-    {"final_strength", (PyCFunctionWithKeywords) QBAFramework_final_strength, METH_VARARGS | METH_KEYWORDS,
+    {"final_strength", (PyCFunction) QBAFramework_final_strength, METH_VARARGS | METH_KEYWORDS,
     final_strength_doc
     },
-    {"add_argument", (PyCFunctionWithKeywords) QBAFramework_add_argument, METH_VARARGS | METH_KEYWORDS,
+    {"add_argument", (PyCFunction) QBAFramework_add_argument, METH_VARARGS | METH_KEYWORDS,
     add_argument_doc
     },
-    {"remove_argument", (PyCFunctionWithKeywords) QBAFramework_remove_argument, METH_VARARGS | METH_KEYWORDS,
+    {"remove_argument", (PyCFunction) QBAFramework_remove_argument, METH_VARARGS | METH_KEYWORDS,
     remove_argument_doc
     },
-    {"add_attack_relation", (PyCFunctionWithKeywords) QBAFramework_add_attack_relation, METH_VARARGS | METH_KEYWORDS,
+    {"add_attack_relation", (PyCFunction) QBAFramework_add_attack_relation, METH_VARARGS | METH_KEYWORDS,
     add_attack_relation_doc
     },
-    {"add_support_relation", (PyCFunctionWithKeywords) QBAFramework_add_support_relation, METH_VARARGS | METH_KEYWORDS,
+    {"add_support_relation", (PyCFunction) QBAFramework_add_support_relation, METH_VARARGS | METH_KEYWORDS,
     add_support_relation_doc
     },
-    {"remove_attack_relation", (PyCFunctionWithKeywords) QBAFramework_remove_attack_relation, METH_VARARGS | METH_KEYWORDS,
+    {"remove_attack_relation", (PyCFunction) QBAFramework_remove_attack_relation, METH_VARARGS | METH_KEYWORDS,
     remove_attack_relation_doc
     },
-    {"remove_support_relation", (PyCFunctionWithKeywords) QBAFramework_remove_support_relation, METH_VARARGS | METH_KEYWORDS,
+    {"remove_support_relation", (PyCFunction) QBAFramework_remove_support_relation, METH_VARARGS | METH_KEYWORDS,
     remove_support_relation_doc
     },
-    {"contains_argument", (PyCFunctionWithKeywords) QBAFramework_contains_argument, METH_VARARGS | METH_KEYWORDS,
+    {"contains_argument", (PyCFunction) QBAFramework_contains_argument, METH_VARARGS | METH_KEYWORDS,
     contains_argument_doc
     },
-    {"contains_attack_relation", (PyCFunctionWithKeywords) QBAFramework_contains_attack_relation, METH_VARARGS | METH_KEYWORDS,
+    {"contains_attack_relation", (PyCFunction) QBAFramework_contains_attack_relation, METH_VARARGS | METH_KEYWORDS,
     contains_attack_relation_doc
     },
-    {"contains_support_relation", (PyCFunctionWithKeywords) QBAFramework_contains_support_relation, METH_VARARGS | METH_KEYWORDS,
+    {"contains_support_relation", (PyCFunction) QBAFramework_contains_support_relation, METH_VARARGS | METH_KEYWORDS,
     contains_support_relation_doc
     },
-    {"attackedBy", (PyCFunctionWithKeywords) QBAFramework_attackedBy, METH_VARARGS | METH_KEYWORDS,
+    {"attackedBy", (PyCFunction) QBAFramework_attackedBy, METH_VARARGS | METH_KEYWORDS,
     attackedBy_doc
     },
-    {"attackersOf", (PyCFunctionWithKeywords) QBAFramework_attackersOf, METH_VARARGS | METH_KEYWORDS,
+    {"attackersOf", (PyCFunction) QBAFramework_attackersOf, METH_VARARGS | METH_KEYWORDS,
     attackersOf_doc
     },
-    {"supportedBy", (PyCFunctionWithKeywords) QBAFramework_supportedBy, METH_VARARGS | METH_KEYWORDS,
+    {"supportedBy", (PyCFunction) QBAFramework_supportedBy, METH_VARARGS | METH_KEYWORDS,
     supportedBy_doc
     },
-    {"supportersOf", (PyCFunctionWithKeywords) QBAFramework_supportersOf, METH_VARARGS | METH_KEYWORDS,
+    {"supportersOf", (PyCFunction) QBAFramework_supportersOf, METH_VARARGS | METH_KEYWORDS,
     supportersOf_doc
     },
     {"__copy__", (PyCFunction) QBAFramework_copy, METH_NOARGS,
@@ -4683,31 +4683,31 @@ static PyMethodDef QBAFramework_methods[] = {
     {"isacyclic", (PyCFunction) QBAFramework_isacyclic, METH_NOARGS,
     isacyclic_doc
     },
-    {"are_strength_consistent", (PyCFunctionWithKeywords) QBAFramework_are_strength_consistent, METH_VARARGS | METH_KEYWORDS,
+    {"are_strength_consistent", (PyCFunction) QBAFramework_are_strength_consistent, METH_VARARGS | METH_KEYWORDS,
     are_strength_consistent_doc
     },
-    {"reversal", (PyCFunctionWithKeywords) QBAFramework_reversal, METH_VARARGS | METH_KEYWORDS,
+    {"reversal", (PyCFunction) QBAFramework_reversal, METH_VARARGS | METH_KEYWORDS,
     reversal_doc
     },
-    {"isSSIExplanation", (PyCFunctionWithKeywords) QBAFramework_isSSIExplanation, METH_VARARGS | METH_KEYWORDS,
+    {"isSSIExplanation", (PyCFunction) QBAFramework_isSSIExplanation, METH_VARARGS | METH_KEYWORDS,
     isSSIExplanation_doc
     },
-    {"isCSIExplanation", (PyCFunctionWithKeywords) QBAFramework_isCSIExplanation, METH_VARARGS | METH_KEYWORDS,
+    {"isCSIExplanation", (PyCFunction) QBAFramework_isCSIExplanation, METH_VARARGS | METH_KEYWORDS,
     isCSIExplanation_doc
     },
-    {"isNSIExplanation", (PyCFunctionWithKeywords) QBAFramework_isNSIExplanation, METH_VARARGS | METH_KEYWORDS,
+    {"isNSIExplanation", (PyCFunction) QBAFramework_isNSIExplanation, METH_VARARGS | METH_KEYWORDS,
     isNSIExplanation_doc
     },
-    {"minimalSSIExplanations", (PyCFunctionWithKeywords) QBAFramework_minimalSSIExplanations, METH_VARARGS | METH_KEYWORDS,
+    {"minimalSSIExplanations", (PyCFunction) QBAFramework_minimalSSIExplanations, METH_VARARGS | METH_KEYWORDS,
     minimalSSIExplanations_doc
     },
-    {"minimalCSIExplanations", (PyCFunctionWithKeywords) QBAFramework_minimalCSIExplanations, METH_VARARGS | METH_KEYWORDS,
+    {"minimalCSIExplanations", (PyCFunction) QBAFramework_minimalCSIExplanations, METH_VARARGS | METH_KEYWORDS,
     minimalCSIExplanations_doc
     },
-    {"minimalNSIExplanations", (PyCFunctionWithKeywords) QBAFramework_minimalNSIExplanations, METH_VARARGS | METH_KEYWORDS,
+    {"minimalNSIExplanations", (PyCFunction) QBAFramework_minimalNSIExplanations, METH_VARARGS | METH_KEYWORDS,
     minimalNSIExplanations_doc
     },
-    {"change_info", (PyCFunctionWithKeywords) QBAFramework_change_info, METH_VARARGS | METH_KEYWORDS,
+    {"change_info", (PyCFunction) QBAFramework_change_info, METH_VARARGS | METH_KEYWORDS,
     change_info_doc
     },
     {NULL}  /* Sentinel */

@@ -10,6 +10,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
+
 /**
  * @brief Return True if they are disjoint, False if they are not, and -1 if an error is encountered.
  * 
@@ -106,6 +107,14 @@ PyObject *PyListOfPySet_Union(PyObject *list);
  * @return PyObject* a new PyList, NULL if an error occurred
  */
 PyObject *PySet_SubSets(PyObject *set, Py_ssize_t size);
+
+/**
+ * @brief Return a list of set given a set of frozenset, NULL if an error has occurred.
+ * 
+ * @param set a PySet of PyFrozenSet
+ * @return PyObject* a new PyList of PySet, NULL if an error occurred
+ */
+PyObject *PyListOfPySet_FromPySetOfPyFrozenSet(PyObject *set);
 
 /**
  * @brief Return a list of all subsets (empty set not included) from the set set sorted by size (in ascending order),
