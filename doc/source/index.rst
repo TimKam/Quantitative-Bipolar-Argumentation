@@ -19,6 +19,7 @@ Contribution Functions
    .. autofunction:: qbaf_ctrbs.removal.determine_removal_ctrb
    .. autofunction:: qbaf_ctrbs.intrinsic_removal.determine_iremoval_ctrb
    .. autofunction:: qbaf_ctrbs.shapley.determine_shapley_ctrb
+   .. autofunction:: qbaf_ctrbs.shapley.determine_partitioned_shapley_ctrb
    .. autofunction:: qbaf_ctrbs.gradient.determine_gradient_ctrb
    .. autofunction:: qbaf_ctrbs.utils.restrict
 
