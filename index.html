@@ -902,6 +902,32 @@ results in two players: {a} and {b, c}.</p>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
+<p>This is a wrapper around determine_partitioned_shapley_ctrb.
+It partitions qbaf.arguments into singletons,
+except for contributors which form one set, then calls determine_partitioned_shapley_ctrb.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_ctrbs.shapley.determine_partitioned_shapley_ctrb">
+<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.shapley.</span></span><span class="sig-name descname"><span class="pre">determine_partitioned_shapley_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qbaf_ctrbs.shapley.determine_partitioned_shapley_ctrb" title="Link to this definition">¶</a></dt>
+<dd><p>Determines the shapley contribution of a contributor
+or a set of contributors to a topic argument for a given argument partition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
+<li><p><strong>contributors</strong> (<em>string</em><em> or </em><em>set</em>) – The contributing argument(s)</p></li>
+<li><p><strong>partition</strong> (<em>set</em>) – The argument partitioning</p></li>
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The contribution of the contributor to the topic</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
