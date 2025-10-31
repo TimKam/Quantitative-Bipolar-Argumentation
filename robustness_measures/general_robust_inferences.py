@@ -1,6 +1,6 @@
 # Check Robustness w.r.t. arbitrary collection of updates
 
-from qbaf import QBAFrameworks 
+from qbaf import QBAFramework 
 
 def check_general_robust_inferences ( qbaf_0, QBAFUpdates, a, b ):
 
