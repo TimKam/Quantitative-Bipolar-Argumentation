@@ -1,6 +1,6 @@
 from qbaf import QBAFramework, QBAFARelations
-from Robust_Inferences.expansion_based_robust_inferences import *
-from Robust_Explanations.general_robust_explanations import *
+from robustness_measures.expansion_based_robust_inferences import *
+from robustness_measures.general_robust_explanations import *
 
 
 """

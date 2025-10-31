@@ -1,4 +1,4 @@
-from Robust_Inferences. general_robust_inferences import check_general_robust_inferences
+from robustness_measures. general_robust_inferences import check_general_robust_inferences
 from qbaf import QBAFramework
 from itertools import product
 

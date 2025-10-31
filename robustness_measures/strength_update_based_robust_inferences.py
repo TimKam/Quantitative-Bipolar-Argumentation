@@ -11,7 +11,7 @@ import numpy as np
 from itertools import product
 
 from qbaf import QBAFramework, QBAFARelations
-from Robust_Inferences. general_robust_inferences import check_general_robust_inferences
+from robustness_measures. general_robust_inferences import check_general_robust_inferences
 
 """
  This function returns a list of dictornaries:

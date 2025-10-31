@@ -1,6 +1,6 @@
 from qbaf import QBAFramework, QBAFARelations
-from Robust_Inferences.strength_update_based_robust_inferences import *
-from Robustly_Inconsistent.general_robustly_inconsistent import check_general_robustly_inconsistent
+from robustness_measures.strength_update_based_robust_inferences import *
+from robustness_measures.general_robustly_inconsistent import check_general_robustly_inconsistent
 
 
 """
