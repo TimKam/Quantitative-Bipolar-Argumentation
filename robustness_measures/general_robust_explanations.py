@@ -1,4 +1,4 @@
-from qbaf import QBAFramework, QBAFARelation
+from qbaf import QBAFramework
 
 """
  Function to check whether an 'explanation' is robust over the collection
