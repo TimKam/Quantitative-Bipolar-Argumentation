@@ -138,4 +138,6 @@ def check_expansion_based_robust_inferences ( qbaf_initial, qbaf_final, inferenc
 
   qbaf_collection = generate_expansion_based_qbaf_collection ( qbaf_initial, qbaf_final )
 
+  qbaf_collection. remove ( qbaf_final)
+
   return check_general_robust_inferences ( qbaf_initial, qbaf_collection, inference_1, inference_2  )
