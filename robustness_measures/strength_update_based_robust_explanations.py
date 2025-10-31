@@ -1,4 +1,4 @@
-from qbaf import QBAFramework, QBAFARelations
+from qbaf import QBAFramework
 from robustness_measures.strength_update_based_robust_inferences import *
 
 
