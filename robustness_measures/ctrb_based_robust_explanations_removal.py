@@ -110,7 +110,7 @@ def check_ctrb_based_robust_CSI_explanations ( qbaf, explanation, epsilon, qbaf_
  'inference_1' and 'inference_2'.
 """
 
-def check_ctrb_based_robust_SSI_explanations ( qbaf, explanation, epsilon, qbaf_collection, inference_1, inference_2 ) :
+def check_ctrb_based_robust_NSI_explanations ( qbaf, explanation, epsilon, qbaf_collection, inference_1, inference_2 ) :
 
   for x in qbaf_collection :
 
