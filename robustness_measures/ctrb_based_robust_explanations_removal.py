@@ -86,7 +86,7 @@ def check_ctrb_based_robust_CSI_explanations ( qbaf, explanation, epsilon, qbaf_
 
         c = 0
 
-        for y in qbaf. minialCSIExplanations ( x, inference_1, inference_2 ) :
+        for y in qbaf. minimalCSIExplanations ( x, inference_1, inference_2 ) :
 
             arg_list = return_difference ( y, explanation )
             sum = influence_towards_inferences ( qbaf, x, arg_list, inference_1, inference_2 )
@@ -116,7 +116,7 @@ def check_ctrb_based_robust_NSI_explanations ( qbaf, explanation, epsilon, qbaf_
 
     c = 0
 
-    for y in qbaf. minialNSIExplanations ( x, inference_1, inference_2 ) :
+    for y in qbaf. minimalNSIExplanations ( x, inference_1, inference_2 ) :
 
       arg_list = return_difference ( y, explanation )
       sum = influence_towards_inferences ( qbaf, x, arg_list, inference_1, inference_2 )
