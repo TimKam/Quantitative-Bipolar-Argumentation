@@ -1,12 +1,21 @@
 from qbaf import QBAFramework, QBAFARelations
 
-"""
- Function to check whether a QBAF is robustly inconsistence over the collection
- of qbafs 'qbaf_collection', i.e. it checks whether there is always a change of
- inference between qbaf and x in 'qbaf_collection'.
-"""
+
 
 def check_general_robustly_inconsistent ( qbaf, qbaf_collection, inference_1, inference_2 ) :
+  """check whether a QBAF is robustly inconsistent over the collection
+     of qbafs qbaf_collection.
+
+  Args:
+      qbaf (QBAFramewrok): The initial QBAF.
+      qbaf_collection (list): The list of QBAFs against which robustness is measured.
+      inference_1 (string): The first inference.
+      influence_2 (string): The second inference. 
+
+  Returns:
+      bool: The final truth value of the above described check.
+  """
+ 
 
   for x in qbaf_collection :
 

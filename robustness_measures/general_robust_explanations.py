@@ -1,12 +1,22 @@
 from qbaf import QBAFramework
 
-"""
- Function to check whether an 'explanation' is robust over the collection
- of qbafs 'qbaf_collection', i.e. it checks whether 'explanation' is a SSI
- explanation for each change of inference from 'qbaf' to x in 'qbaf_collection'.
-"""
-
 def check_robust_SSI_explanations_general ( explanation, qbaf, qbaf_collection, inference_1, inference_2 ):
+  """checks whether an explanation is generally sufficiently robust w.r.t. 
+     qbaf and qbaf_collection. 
+
+  Args:
+      qbaf (QBAFramewrok): The initial QBAF.
+      qbaf_collection (list): The collection of QBAF updates against which gen. robust sufficieny will be tested.
+      explanation (dictionary): A subset of arguments.
+      inference_1 (string): The first inference.
+      influence_2 (string): The second inference. 
+
+  Returns:
+
+
+      bool: The final truth value of the above described check.
+  """
+
 
   for x in qbaf_collection:
 
@@ -17,13 +27,23 @@ def check_robust_SSI_explanations_general ( explanation, qbaf, qbaf_collection, 
 
 
 
-"""
- Function to check whether an 'explanation' is robust over the collection
- of qbafs 'qbaf_collection', i.e. it checks whether 'explanation' is a CSI
- explanation for each change of inference from 'qbaf' to x in 'qbaf_collection'.
-"""
 
 def check_robust_CSI_explanations_general ( explanation, qbaf, qbaf_collection, inference_1, inference_2 ):
+  """checks whether an explanation is generally counterfactually robust w.r.t. 
+     qbaf and qbaf_collection. 
+
+  Args:
+      qbaf (QBAFramewrok): The initial QBAF.
+      qbaf_collection (list): The collection of QBAF updates against which gen. robust counter-factuality will be tested.
+      explanation (dictionary): A subset of arguments.
+      inference_1 (string): The first inference.
+      influence_2 (string): The second inference. 
+
+  Returns:
+
+
+      bool: The final truth value of the above described check.
+  """
 
   for x in qbaf_collection:
 
@@ -34,13 +54,22 @@ def check_robust_CSI_explanations_general ( explanation, qbaf, qbaf_collection, 
 
 
 
-"""
- Function to check whether an 'explanation' is robust over the collection
- of qbafs 'qbaf_collection', i.e. it checks whether 'explanation' is a SSI
- explanation for each change of inference from 'qbaf' to x in 'qbaf_collection'.
-"""
-
 def check_robust_NSI_explanations_general ( explanation, qbaf, qbaf_collection, inference_1, inference_2 ):
+  """checks whether an explanation is generally necessarily robust w.r.t. 
+     qbaf and qbaf_collection. 
+
+  Args:
+      qbaf (QBAFramewrok): The initial QBAF.
+      qbaf_collection (list): The collection of QBAF updates against which gen. robust necessity will be tested.
+      explanation (dictionary): A subset of arguments.
+      inference_1 (string): The first inference.
+      influence_2 (string): The second inference. 
+
+  Returns:
+
+
+      bool: The final truth value of the above described check.
+  """
 
   for x in qbaf_collection:
 

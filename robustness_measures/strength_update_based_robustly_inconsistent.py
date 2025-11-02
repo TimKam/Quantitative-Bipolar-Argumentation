@@ -3,14 +3,23 @@ from robustness_measures.strength_update_based_robust_inferences import *
 from robustness_measures.general_robustly_inconsistent import check_general_robustly_inconsistent
 
 
-"""
- Function to check whether a QBAF is robustly inconsistence over the collection
- of qbafs 'qbaf_collection' of strength updates, i.e. it checks whether there is always a change of
- inference between qbaf and x in 'qbaf_collection' which a collection of strength updates over 'qbaf'
- and 'argstar'.
-"""
 
 def check_update_based_robustly_inconsistent ( qbaf, argstar, epsilon, inference_1, inference_2 ) :
+  """checks whether a QBAF is robustly inconsistent over the collection
+     of qbafs of initial strength changes by at-most epsilon and w.r.t. the subset of arguments 
+     argstar
+
+  Args:
+      qbaf (QBAFramewrok): The initial QBAF.
+      argstar (list): A subset of arguments suceptible to strength change. 
+      epsilon (float): The range of change for the initial strength in argstar.
+      inference_1 (string): The first inference.
+      influence_2 (string): The second inference. 
+
+  Returns:
+      bool: The final truth value of the above described check.
+  """
+ 
 
   G = generate_strength_update_collection ( qbaf, argstar, epsilon )
 
