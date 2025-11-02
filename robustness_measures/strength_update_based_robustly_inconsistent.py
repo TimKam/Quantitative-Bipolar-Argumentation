@@ -11,7 +11,7 @@ def check_update_based_robustly_inconsistent ( qbaf, argstar, epsilon, inference
 
   Args:
       qbaf (QBAFramewrok): The initial QBAF.
-      argstar (list): A subset of arguments suceptible to strength change. 
+      argstar (list/dictionary): A subset of arguments suceptible to strength change. 
       epsilon (float): The range of change for the initial strength in argstar.
       inference_1 (string): The first inference.
       influence_2 (string): The second inference. 

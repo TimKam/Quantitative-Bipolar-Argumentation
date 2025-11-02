@@ -7,8 +7,8 @@ def return_difference ( explanation_1, explanation_2) :
   lists explanation_1 and explanation_2
 
   Args:
-      explanation_1 (list): The first list of arguments.
-      explanation_1 (list): The first list of arguments.
+      explanation_1 (list/dictionary): The first list of arguments.
+      explanation_1 (list/dictionary): The first list of arguments.
 
   Returns:
       list: The set theoretic difference between arguments
@@ -67,7 +67,7 @@ def check_ctrb_based_robust_SSI_explanations ( qbaf, explanation, epsilon, qbaf_
   Args:
       qbaf (QBAFramewrok): The initial QBAF.
       qbaf_collection (list): a list of QBAF Updates.
-      explanation (dictionary): A subset of arguments.
+      explanation (list/dictionary): A subset of arguments.
       epsilon (list): The degree of tolerance for any explanation'a modification.
       inference_1 (string): The first inference.
       influence_2 (string): The second inference. 
@@ -108,9 +108,9 @@ def check_ctrb_based_robust_CSI_explanations ( qbaf, explanation, epsilon, qbaf_
 
     Args:
       qbaf (QBAFramewrok): The initial QBAF.
-      explanation (dictionary): A subset of arguments.
+      explanation (list/dictionary): A subset of arguments.
       qbaf_collection (list): a list of QBAF Updates.
-      epsilon (list): The degree of tolerance for any explanation'a modification.
+      epsilon (float): The degree of tolerance for any explanation'a modification.
       inference_1 (string): The first inference.
       influence_2 (string): The second inference. 
 
@@ -149,8 +149,8 @@ def check_ctrb_based_robust_NSI_explanations ( qbaf, explanation, epsilon, qbaf_
   Args:
       qbaf (QBAFramewrok): The initial QBAF.
       qbaf_collection (list): a list of QBAF Updates.
-      explanation (dictionary): A subset of arguments.
-      epsilon (list): The degree of tolerance for any explanation'a modification.
+      explanation (list/dictionary): A subset of arguments.
+      epsilon (float): The degree of tolerance for any explanation'a modification.
       inference_1 (string): The first inference.
       influence_2 (string): The second inference. 
 

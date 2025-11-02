@@ -7,7 +7,7 @@ def check_robust_SSI_explanations_general ( explanation, qbaf, qbaf_collection, 
   Args:
       qbaf (QBAFramewrok): The initial QBAF.
       qbaf_collection (list): The collection of QBAF updates against which gen. robust sufficieny will be tested.
-      explanation (dictionary): A subset of arguments.
+      explanation (list/dictionary): A subset of arguments.
       inference_1 (string): The first inference.
       influence_2 (string): The second inference. 
 
@@ -35,7 +35,7 @@ def check_robust_CSI_explanations_general ( explanation, qbaf, qbaf_collection, 
   Args:
       qbaf (QBAFramewrok): The initial QBAF.
       qbaf_collection (list): The collection of QBAF updates against which gen. robust counter-factuality will be tested.
-      explanation (dictionary): A subset of arguments.
+      explanation (list/dictionary): A subset of arguments.
       inference_1 (string): The first inference.
       influence_2 (string): The second inference. 
 
@@ -61,7 +61,7 @@ def check_robust_NSI_explanations_general ( explanation, qbaf, qbaf_collection, 
   Args:
       qbaf (QBAFramewrok): The initial QBAF.
       qbaf_collection (list): The collection of QBAF updates against which gen. robust necessity will be tested.
-      explanation (dictionary): A subset of arguments.
+      explanation (list/dictionary): A subset of arguments.
       inference_1 (string): The first inference.
       influence_2 (string): The second inference. 
 

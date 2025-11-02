@@ -11,7 +11,7 @@ def check_expansion_based_SSI_explanations ( qbaf_initial, qbaf_final, explanati
   Args:
       qbaf_initial (QBAFramewrok): The initial QBAF.
       qbaf_final (QBAFramework): The updated QBAF w.r.t. which the QBAF updates are generated .
-      explanation (dictionary): A subset of arguments.
+      explanation (list/dictionary): A subset of arguments.
       inference_1 (string): The first inference.
       influence_2 (string): The second inference. 
 
@@ -36,7 +36,7 @@ def check_expansion_based_CSI_explanations ( qbaf_initial, qbaf_final, explanati
   Args:
       qbaf_initial (QBAFramewrok): The initial QBAF.
       qbaf_final (QBAFramework): The updated QBAF w.r.t. which the QBAF updates are generated .
-      explanation (dictionary): A subset of arguments.
+      explanation (list/dictionary): A subset of arguments.
       inference_1 (string): The first inference.
       influence_2 (string): The second inference. 
 
@@ -60,7 +60,7 @@ def check_expansion_based_NSI_explanations ( qbaf_initial, qbaf_final, explanati
   Args:
       qbaf_initial (QBAFramewrok): The initial QBAF.
       qbaf_final (QBAFramework): The updated QBAF w.r.t. which the QBAF updates are generated.
-      explanation (dictionary): A subset of arguments.
+      explanation (list/dictionary): A subset of arguments.
       inference_1 (string): The first inference.
       influence_2 (string): The second inference. 
 

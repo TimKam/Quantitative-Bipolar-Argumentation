@@ -68,7 +68,7 @@ def check_strength_update_based_NSI_explanations ( qbaf, argstar, epsilon, expla
 
   Args:
       qbaf (QBAFramewrok): The initial QBAF.
-      argstar (list): The list of arguments which are susceptible to initial strength changes. 
+      argstar (list/dictionary): The list of arguments which are susceptible to initial strength changes. 
       epsilon (float): The tolerance of initial strength change for qbaf.
       explanation (dictionary): A subset of arguments.
       inference_1 (string): The first inference.

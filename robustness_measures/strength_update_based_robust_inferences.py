@@ -13,7 +13,7 @@ def generate_strength_update_values ( qbaf, argstar, epsilon ):
 
   Args:
       qbaf (QBAFramewrok): The considered QBAF.
-      argstar (list): A list of arguments, which are a subset of qbaf's arguments.
+      argstar (list/dictionary): A list of arguments, which are a subset of qbaf's arguments.
       epsilon (float): The degree of change for the initial strength of argstar.
 
   Returns:
@@ -56,7 +56,7 @@ def generate_strength_update( qbaf, args, epsilon ) :
 
   Args:
       qbaf (QBAFramewrok): The considered QBAF.
-      args (list): A list of arguments, which are a subset of qbaf's arguments.
+      args (list/dictionary): A list of arguments, which are a subset of qbaf's arguments.
       epsilon (float): The change for the initial strength of argstar.
 
   Returns:
@@ -95,7 +95,7 @@ def generate_strength_update_collection ( qbaf, argstar, epsilon ) :
 
   Args:
       qbaf (QBAFramewrok): The considered QBAF.
-      argstar (list): A list of arguments, which are a subset of qbaf's arguments.
+      argstar (list/dictionary): A list of arguments, which are a subset of qbaf's arguments.
       epsilon (float): The degree of change for the initial strength of argstar.
 
   Returns:
@@ -120,7 +120,7 @@ def check_update_based_robust_inferences ( qbaf, argstar, epsilon, inference_1, 
 
   Args:
       qbaf (QBAFramewrok): The considered QBAF.
-      argstar (list): A list of arguments, which are a subset of qbaf's arguments.
+      argstar (list/dictionary): A list of arguments, which are a subset of qbaf's arguments.
       epsilon (float): The degree of change for the initial strength of argstar.
       inference_1 (string): The first inference.
       inference_2 (string): The second inference.
