@@ -36,8 +36,8 @@ jobs:
       - name: Install dependencies
         run: |
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install -U sphinx
-          pip install .
+          pip install -U sphinx sphinx-book-theme sphinx-design
+          pip install .[Visualizer]
 
       - run: |
           make -C doc html
