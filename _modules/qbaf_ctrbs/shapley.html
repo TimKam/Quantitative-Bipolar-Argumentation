@@ -1,0 +1,400 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>qbaf_ctrbs.shapley &#8212; qbaf-py 0.0.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=e645c8fa"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/qbaf_ctrbs/shapley';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">QBAF-Py</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/TimKam/Quantitative-Bipolar-Argumentation" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for qbaf_ctrbs.shapley</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qbaf_ctrbs.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">restrict</span><span class="p">,</span> <span class="n">determine_powerset</span>
+
+<div class="viewcode-block" id="determine_shapley_ctrb">
+<a class="viewcode-back" href="../../index.html#qbaf_ctrbs.shapley.determine_shapley_ctrb">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">determine_shapley_ctrb</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">contributors</span><span class="p">,</span> <span class="n">qbaf</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determines the shapley contribution of a contributor</span>
+<span class="sd">    or a set of contributors to a topic argument.</span>
+<span class="sd">    </span>
+<span class="sd">    .. note::</span>
+<span class="sd">        If a set of contributors is provided, its elements are treated </span>
+<span class="sd">        as a single player in the calculation. For example, given three </span>
+<span class="sd">        arguments {a}, {b}, and {c}, specifying {b, c} as a contributor </span>
+<span class="sd">        results in two players: {a} and {b, c}.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        topic (string): The topic argument</span>
+<span class="sd">        contributors (string or set): The contributing argument(s)</span>
+<span class="sd">        qbaf (QBAFramework): The QBAF that contains topic and contributor</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: The contribution of the contributor to the topic</span>
+
+<span class="sd">    This is a wrapper around determine_partitioned_shapley_ctrb.</span>
+<span class="sd">    It partitions qbaf.arguments into singletons,</span>
+<span class="sd">    except for contributors which form one set, then calls determine_partitioned_shapley_ctrb.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">partition</span> <span class="o">=</span> <span class="p">{</span><span class="nb">frozenset</span><span class="p">([</span><span class="n">a</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">qbaf</span><span class="o">.</span><span class="n">arguments</span> <span class="k">if</span> <span class="n">a</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">contributors</span> <span class="ow">and</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">topic</span><span class="p">}</span> <span class="o">|</span> <span class="p">{</span><span class="nb">frozenset</span><span class="p">([</span><span class="n">topic</span><span class="p">]),</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">contributors</span><span class="p">)}</span>
+    <span class="k">return</span> <span class="n">determine_partitioned_shapley_ctrb</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">contributors</span><span class="p">,</span> <span class="n">partition</span><span class="p">,</span> <span class="n">qbaf</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="determine_partitioned_shapley_ctrb">
+<a class="viewcode-back" href="../../index.html#qbaf_ctrbs.shapley.determine_partitioned_shapley_ctrb">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">determine_partitioned_shapley_ctrb</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">contributors</span><span class="p">,</span> <span class="n">partition</span><span class="p">,</span> <span class="n">qbaf</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determines the shapley contribution of a contributor</span>
+<span class="sd">    or a set of contributors to a topic argument for a given argument partition.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        topic (string): The topic argument</span>
+<span class="sd">        contributors (string or set): The contributing argument(s)</span>
+<span class="sd">        partition (set): The argument partitioning</span>
+<span class="sd">        qbaf (QBAFramework): The QBAF that contains topic and contributor</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: The contribution of the contributor to the topic</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">contributors</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
+        <span class="n">contributors</span> <span class="o">=</span> <span class="p">{</span><span class="n">contributors</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">contributors</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span> <span class="p">(</span><span class="s1">&#39;An argument</span><span class="se">\&#39;</span><span class="s1">s shapley contribution to itself cannot be determined.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">item</span> <span class="ow">in</span> <span class="n">qbaf</span><span class="o">.</span><span class="n">arguments</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">[</span><span class="n">topic</span><span class="p">,</span> <span class="o">*</span><span class="n">contributors</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span> <span class="p">(</span><span class="s1">&#39;Topic and contributor must be in the QBAF.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">({</span><span class="n">topic</span><span class="p">}</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">partition</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">contributors</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">partition</span><span class="p">):</span>
+         <span class="k">raise</span> <span class="ne">Exception</span> <span class="p">(</span><span class="s1">&#39;Topic and contributor must be part of the given partition.&#39;</span><span class="p">)</span>
+
+    <span class="n">partitioned_args</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">partition</span><span class="p">)</span> <span class="c1"># Flatten list of sets into one set.</span>
+    <span class="k">if</span> <span class="n">partitioned_args</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">qbaf</span><span class="o">.</span><span class="n">arguments</span><span class="p">):</span>
+         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The partition is incomplete.&#39;</span><span class="p">)</span>
+    <span class="n">total_len</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">partition</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">total_len</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">partitioned_args</span><span class="p">):</span>
+         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Too many arguments in the partition (might not be disjoint).&#39;</span><span class="p">)</span>
+
+    <span class="n">sub_ctrbs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">reduced_partition</span> <span class="o">=</span> <span class="p">[</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">partition</span> <span class="k">if</span> <span class="n">part</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[{</span><span class="n">topic</span><span class="p">},</span> <span class="n">contributors</span><span class="p">]]</span>
+    <span class="n">subsets</span> <span class="o">=</span> <span class="n">determine_powerset</span><span class="p">(</span><span class="n">reduced_partition</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">subsets</span><span class="p">:</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="p">{</span><span class="n">topic</span><span class="p">}</span> <span class="o">|</span> <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">subset</span><span class="p">)</span>
+        <span class="n">qbaf_without</span> <span class="o">=</span> <span class="n">restrict</span><span class="p">(</span><span class="n">qbaf</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">targets</span><span class="p">))</span>
+
+        <span class="n">targets</span> <span class="o">|=</span> <span class="n">contributors</span>
+        <span class="n">qbaf_with</span> <span class="o">=</span> <span class="n">restrict</span><span class="p">(</span><span class="n">qbaf</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">targets</span><span class="p">))</span>
+
+        <span class="n">weight</span> <span class="o">=</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">))</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                  <span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">sub_ctrb</span> <span class="o">=</span> <span class="n">weight</span> <span class="o">*</span> <span class="p">(</span><span class="n">qbaf_with</span><span class="o">.</span><span class="n">final_strengths</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span> <span class="o">-</span> <span class="n">qbaf_without</span><span class="o">.</span><span class="n">final_strengths</span><span class="p">[</span><span class="n">topic</span><span class="p">])</span>
+        <span class="n">sub_ctrbs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub_ctrb</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">sub_ctrbs</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By José Ruiz Alarcón, Timotheus Kampik
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023, José Ruiz Alarcón, Timotheus Kampik.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
