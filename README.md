@@ -27,7 +27,7 @@ To illustrate how *QBAF-Py* works, the notebook [examples.ipynb](https://github.
 The notebook is also available on [Google Colab](https://colab.research.google.com/drive/1EDOpBgmHZmZtAJx3N5wOeXVuwMaTWf8M?usp=sharing).
 
 ## Documentation
-Generated documentation in html can be found [here](https://htmlpreview.github.io/?https://github.com/TimKam/Quantitative-Bipolar-Argumentation/blob/gh-pages/index.html).
+Generated documentation in html can be found [here](https://timkam.github.io/Quantitative-Bipolar-Argumentation/).
 
 You can also generate documentation in other formats making use of sphinx (you need to have sphinx installed).
 
