@@ -1,5 +1,7 @@
 # QBAF-Py
 ![CI status](https://github.com/TimKam/Quantitative-Bipolar-Argumentation/actions/workflows/actions.yml/badge.svg)
+![Python versions](https://img.shields.io/badge/python-3.8%E2%80%933.13-blue)
+
 
 This project provides _QBAF-Py_, a library for drawing inferences from Quantitative Bipolar Argumentation Frameworks (QBAFs) and explaining them.
 The library core is written in CPython (C with a Python API) to facilitate speed and efficiency.
