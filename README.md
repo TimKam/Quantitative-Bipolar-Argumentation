@@ -1,5 +1,7 @@
 # QBAF-Py
 ![CI status](https://github.com/TimKam/Quantitative-Bipolar-Argumentation/actions/workflows/actions.yml/badge.svg)
+![Python versions](https://img.shields.io/badge/python-3.8%E2%80%933.13-blue)
+
 
 This project provides _QBAF-Py_, a library for drawing inferences from Quantitative Bipolar Argumentation Frameworks (QBAFs) and explaining them.
 The library core is written in CPython (C with a Python API) to facilitate speed and efficiency.
@@ -27,7 +29,7 @@ To illustrate how *QBAF-Py* works, the notebook [examples.ipynb](https://github.
 The notebook is also available on [Google Colab](https://colab.research.google.com/drive/1EDOpBgmHZmZtAJx3N5wOeXVuwMaTWf8M?usp=sharing).
 
 ## Documentation
-Generated documentation in html can be found [here](https://htmlpreview.github.io/?https://github.com/TimKam/Quantitative-Bipolar-Argumentation/blob/gh-pages/index.html).
+Generated documentation in html can be found [here](https://timkam.github.io/Quantitative-Bipolar-Argumentation/).
 
 You can also generate documentation in other formats making use of sphinx (you need to have sphinx installed).
 

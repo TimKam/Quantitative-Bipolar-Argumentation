@@ -32,12 +32,15 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+      
+      - name: System deps for pygraphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz libgraphviz-dev pkg-config python3-dev
 
       - name: Install dependencies
         run: |
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install -U sphinx
-          pip install .
+          pip install -U sphinx sphinx-book-theme sphinx-design graphviz
+          pip install .[Visualizer]
 
       - run: |
           make -C doc html
