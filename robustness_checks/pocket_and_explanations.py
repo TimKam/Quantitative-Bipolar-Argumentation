@@ -71,7 +71,7 @@ def is_pocket(qbaf_initial: QBAFramework,
         if (qbaf.arguments == s and
             qbaf_initial.are_strength_consistent(qbaf,
                                                  topic_argument_1,
-                                                 topic_argument_2)):
+                                                 topic_argument_2) == False):
               return False
 
     return True
