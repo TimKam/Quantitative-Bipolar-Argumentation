@@ -51,7 +51,7 @@ def test_robust_consistency():
 
 
 
-def test_expansion_robust_consistent():
+def test_expansion_robust_consistency():
    value_1 = expansion_robust_consistent(qbaf_initial,
                                       qbaf_collection = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
                                       topic_argument_1 = 'a',
@@ -63,6 +63,7 @@ def test_expansion_robust_consistent():
                                       topic_argument_2 = 'b')
    assert value_1 == True
    assert value_2 == True
+
 
 
 
@@ -81,6 +82,8 @@ def test_robust_inconsistency():
   assert value_2 == False
 
 
+
+
 def test_expnasion_robust_inconsistency():
    value_1 = expansion_robust_inconsistent(qbaf_initial,
                                       qbaf_collection = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
@@ -94,7 +97,10 @@ def test_expnasion_robust_inconsistency():
    assert value_1 == True
    assert value_2 == True
 
-def test_bounded_updates_robust_consistent():
+
+
+
+def test_bounded_updates_robust_consistency():
    value_1 = bounded_updates_robust_consistent(qbaf_initial,
                                       qbaf_updates = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
                                       topic_argument_1 = 'a',
@@ -111,7 +117,10 @@ def test_bounded_updates_robust_consistent():
    assert value_1 == True
    assert value_2 == True
 
-def test_bounded_updates_robust_inconsistent():
+
+
+
+def test_bounded_updates_robust_inconsistency():
    value_1 = bounded_updates_robust_inconsistent(qbaf_initial,
                                       qbaf_updates = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
                                       topic_argument_1 = 'a',
@@ -129,8 +138,9 @@ def test_bounded_updates_robust_inconsistent():
    assert value_2 == False
 
 
-def test_pockets():
 
+
+def test_pockets():
   value_1 = pockets_of_consistency(qbaf_initial,
                                      qbaf_collection = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
                                      topic_argument_1 = 'a',
@@ -147,7 +157,8 @@ def test_pockets():
   for x in v_1: assert x in value_1
 
   assert value_2 == [set()]
-    
+
+
 
 
 def test_explanations():
