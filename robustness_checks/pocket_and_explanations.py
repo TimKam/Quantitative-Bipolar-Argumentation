@@ -130,11 +130,12 @@ def explanations_of_updates(qbaf_initial: QBAFramework,
     pockets = pockets_of_consistency(qbaf_initial, qbaf_collection,
                                      topic_argument_1, topic_argument_2)
     new_args = new_arguments(qbaf_initial, qbaf_collection)
-    explanations = dict()
+    explanations = []
 
     for pocket in pockets:
-      n = new_args.minus(pocket)
-      explanations.update({pocket: n})
+      n = new_args.difference(pocket)
+      for x in n:
+        explanations.append((pocket, x))
 
     return explanations
 

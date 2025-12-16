@@ -85,6 +85,22 @@ def test_pockets():
     
 
 
-
 def test_explanations():
-  pass
+  value_1 = explanations_of_updates(qbaf_initial,
+                                     qbaf_collection = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
+                                     topic_argument_1 = 'a',
+                                     topic_argument_2 = 'b') 
+    
+  value_2 = explanations_of_updates(qbaf_initial,
+                                     qbaf_collection = [qbaf_initial],
+                                     topic_argument_1 = 'a',
+                                     topic_argument_2 = 'b')
+  
+  v_1 = [(set(), 'd'), (set(), 'e'), ({'d'}, 'e'), ({'e'}, 'd')]
+  
+  for x in v_1: assert  x in value_1
+  for x in value_1: assert x in v_1
+
+  assert value_2 == []
+  
+  
