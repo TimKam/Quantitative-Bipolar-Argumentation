@@ -1,6 +1,7 @@
 from qbaf import QBAFramework
-from robustness_checks.robust_consistency_checks import is_bounded_update
-from robustness_checks.robust_consistency_checks import is_expansion
+from robustness_checks.robust_consistency_checks import is_expansion,is_bounded_update
+
+
 
 def general_robust_inconsistent(qbaf_initial: QBAFramework,
                               qbaf_collection: list[QBAFramework],
@@ -52,53 +53,43 @@ def expansion_robust_inconsistent( qbaf_initial: QBAFramework,
        qbaf_collection, False otherwise.
     """
     
-    updated_qbaf_collection = [qbaf for qbaf in qbaf_collection if (is_expansion(qbaf_initial, qbaf) == 1)]
+    updated_qbaf_collection = [qbaf for qbaf in qbaf_collection if (is_expansion (qbaf_initial, qbaf))]
 
     for qbaf in updated_qbaf_collection:
       if (not qbaf.are_strength_consistent(qbaf_initial,
                                        topic_argument_1,
                                        topic_argument_2)):
-        for qbaf_alt in qbaf_collection:
-          if (is_expansion(qbaf, qbaf_alt) and
-              qbaf_alt.are_strength_consistent(qbaf,
-                                               topic_argument_1,
-                                               topic_argument_2)):
             return False
 
     return True
 
 
-
-def is_expansion(qbaf_initial: QBAFramework,
-                 qbaf_update: QBAFramework) -> bool:
+def bounded_updates_robust_inconsistent(qbaf_initial: QBAFramework,
+                                     qbaf_updates: list[QBAFramework],
+                                     topic_argument_1: str,
+                                     topic_argument_2: str,
+                                     epsilon: float,
+                                     mutable_args: set) -> bool:
     """
-    Checks whether qbaf_update is a normal expansion of qbaf_initial.
+    Checks whether qbaf_initial is bounded-update robust inconsistent with respect to qbaf_collection, epsilon and the mutable_args.
 
     Args:
-       qbaf_initial (QBAFramework): The initial QBAF.
-       qbaf_update (QBAFramework): The updated QBAF.
+      qbaf_initial (QBAFramework): The initial QBAF.
+      qbaf_updates (list[QBAFramework]): The collection of QBAF updates.
+      topic_argument_1 (str): The first topic argument whose strength is  considered.
+      topic_argument_2 (str): The second topic argument whose strength is  considered.
+      epsilon (float): The permissible range of strength change.
+      mutable_args (set): The set of mutable arguments whose strength is suspected to change.
 
     Returns:
-       bool: True if qbaf_update is a normal expansion of qbaf_initial, False otherwise.
+      bool: True if qbaf_initial is bounded-update robust inconsistent with respect to qbaf_collection, False otherwise.
     """
-    k = 0
+    updated_qbaf_collection = [qbaf for qbaf in qbaf_updates if (is_bounded_update(qbaf_initial, qbaf, epsilon, mutable_args))]
 
-    if (qbaf_initial.arguments.issubset(qbaf_update.arguments) and
-        qbaf_initial.attack_relations.issubset(qbaf_update.attack_relations) and
-        qbaf_initial.support_relations.issubset(qbaf_update.support_relations)):
-          k = 1
+    for qbaf in updated_qbaf_collection:
+      if (qbaf.are_strength_consistent(qbaf_initial,
+                                           topic_argument_1,
+                                           topic_argument_2)):
+        return False
 
-    if (k == 1):
-          args = qbaf_initial.arguments
-
-          for arg in args:
-            if (qbaf_initial.initial_strength(arg)
-                != qbaf_update.initial_strength(arg)):
-                  return False
-
-          return True
-
-    if (k == 0):  return False
-
-
-
+    return True

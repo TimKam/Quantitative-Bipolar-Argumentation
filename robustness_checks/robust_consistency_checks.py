@@ -17,6 +17,7 @@ def is_bounded_update(qbaf_initial: QBAFramework,
       bool: True if qbaf_update is an epsilon and mutable_args bounded update,false otherwise.
     """
     k = 0
+    qbaf_initial_args = set(qbaf_initial.arguments)
 
     if (qbaf_initial.arguments == qbaf_update.arguments and
         qbaf_initial.attack_relations == qbaf_update.attack_relations and
@@ -27,13 +28,13 @@ def is_bounded_update(qbaf_initial: QBAFramework,
 
           for arg in mutable_args:
             if ((qbaf_update.initial_strength(arg)
-                >= (qbaf_initial.initial_strength(arg) + 0.5)) or
+                >= (qbaf_initial.initial_strength(arg) + epsilon)) or
                 (qbaf_update.initial_strength(arg)
-                <= (qbaf_initial.initial_strength(arg) - 0.5))
+                <= (qbaf_initial.initial_strength(arg) - epsilon))
                 ):
                   return False
 
-          for arg in qbaf_initial.arguments.difference(mutable_args):
+          for arg in qbaf_initial_args.difference(mutable_args):
             if (qbaf_update.initial_strength(arg)
                 != qbaf_initial.initial_strength(arg)):
                   return False
@@ -58,14 +59,15 @@ def is_expansion(qbaf_initial: QBAFramework,
        bool: True if qbaf_update is a normal expansion of qbaf_initial, False otherwise.
     """
     k = 0
-    
+
+ 
     args_initial = set(qbaf_initial.arguments)
     attack_rel = set(qbaf_initial.attack_relations)
     support_rel = set(qbaf_initial.support_relations)
 
-    if (args_initial.issubset(qbaf_update.arguments) and
-        attack_rel.issubset(qbaf_update.attack_relations) and
-        support_rel.issubset(qbaf_update.support_relations)):
+    if ((args_initial).issubset(qbaf_update.arguments) and
+        (attack_rel).issubset(qbaf_update.attack_relations) and
+        (support_rel).issubset(qbaf_update.support_relations)):
           k = 1
 
     if (k == 1):
@@ -144,7 +146,7 @@ def expansion_robust_consistent(qbaf_initial: QBAFramework,
 
 
 
-def bounded_update_robust_consistent(qbaf_initial: QBAFramework,
+def bounded_updates_robust_consistent(qbaf_initial: QBAFramework,
                                      qbaf_updates: list[QBAFramework],
                                      topic_argument_1: str,
                                      topic_argument_2: str,
