@@ -50,6 +50,7 @@ def expansion_robust_inconsistent( qbaf_initial: QBAFramework,
        bool: True if qbaf_initial is general robust consistent with respect to
        qbaf_collection, False otherwise.
     """
+    
     updated_qbaf_collection = [qbaf for qbaf in qbaf_collection if (is_expansion(qbaf_initial, qbaf))]
 
     for qbaf in updated_qbaf_collection:

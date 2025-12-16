@@ -63,8 +63,8 @@ def is_expansion(qbaf_initial: QBAFramework,
     support_rel = qbaf_initial.support_relations
 
     if (args_initial.issubset(qbaf_update.arguments) and
-        attack_rel.attack_relations.issubset(qbaf_update.attack_relations) and
-        support_rel.support_relations.issubset(qbaf_update.support_relations)):
+        attack_rel.issubset(qbaf_update.attack_relations) and
+        support_rel.issubset(qbaf_update.support_relations)):
           k = 1
 
     if (k == 1):
