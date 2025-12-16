@@ -58,9 +58,9 @@ def is_expansion(qbaf_initial: QBAFramework,
        bool: True if qbaf_update is a normal expansion of qbaf_initial, False otherwise.
     """
     k = 0
-    args_initial = qbaf_initial.arguments
-    attack_rel = qbaf_initial.attack_relations
-    support_rel = qbaf_initial.support_relations
+    args_initial = qbaf_initial.arguments[:]
+    attack_rel = qbaf_initial.attack_relations[:]
+    support_rel = qbaf_initial.support_relations[:]
 
     if (args_initial.issubset(qbaf_update.arguments) and
         attack_rel.issubset(qbaf_update.attack_relations) and
