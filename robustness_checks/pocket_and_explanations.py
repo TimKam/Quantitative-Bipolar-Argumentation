@@ -96,17 +96,17 @@ def pockets_of_consistency(qbaf_initial: QBAFramework,
        list[set[str]]: The list of pockets.
     """
     new_args = new_arguments(qbaf_initial, qbaf_collection)
-    p = []
+    pockets = []
 
-    subset_of_new_args = subsets_of_arguments(new_args)
+    for i in range(0, len(new_args)+1):
+       combinations_of_args = combinations(new_args, i)
+       for subset in combinations_of_args:
+          if(is_pocket(qbaf_initial,
+                       qbaf_collection, subset,
+                       topic_argument_1,topic_argument_2) == True): 
+              pockets.append(subset) 
 
-    for subset in subset_of_new_args:
-      if(is_pocket(qbaf_initial,
-                   qbaf_collection, subset,
-                   topic_argument_1,topic_argument_2) == True): 
-          p.append(subset)
-
-    return p
+    return pockets
 
 
 
