@@ -1,5 +1,6 @@
 from qbaf import QBAFramework
-from robustness_checks.robust_consistency_checks import is_bounded_update as is_bounded_update, is_expansion as is_expansion
+from robustness_checks.robust_consistency_checks import is_bounded_update
+from robustness_checks.robust_consistency_checks import is_expansion
 
 def general_robust_inconsistent(qbaf_initial: QBAFramework,
                               qbaf_collection: list[QBAFramework],
@@ -51,7 +52,7 @@ def expansion_robust_inconsistent( qbaf_initial: QBAFramework,
        qbaf_collection, False otherwise.
     """
     
-    updated_qbaf_collection = [qbaf for qbaf in qbaf_collection if (is_expansion(qbaf_initial, qbaf))]
+    updated_qbaf_collection = [qbaf for qbaf in qbaf_collection if (is_expansion(qbaf_initial, qbaf) == 1)]
 
     for qbaf in updated_qbaf_collection:
       if (not qbaf.are_strength_consistent(qbaf_initial,

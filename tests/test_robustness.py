@@ -49,6 +49,23 @@ def test_robust_consistency():
   assert value_2 == True
 
 
+
+
+def test_expansion_robust_consistent():
+   value_1 = expansion_robust_consistent(qbaf_initial,
+                                      qbaf_collection = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
+                                      topic_argument_1 = 'a',
+                                      topic_argument_2 = 'b')
+
+   value_2 = expansion_robust_consistent(qbaf_initial,
+                                      qbaf_collection = [qbaf_initial],
+                                      topic_argument_1 = 'a',
+                                      topic_argument_2 = 'b')
+   assert value_1 == True
+   assert value_2 == True
+
+
+
 def test_robust_inconsistency():
   value_1 = general_robust_inconsistent(qbaf_initial,
                                         qbaf_collection = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
@@ -62,6 +79,20 @@ def test_robust_inconsistency():
     
   assert value_1 == False
   assert value_2 == False
+
+
+def test_expnasion_robust_inconsistency():
+   value_1 = expansion_robust_inconsistent(qbaf_initial,
+                                      qbaf_collection = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
+                                      topic_argument_1 = 'a',
+                                      topic_argument_2 = 'b')
+
+   value_2 = expansion_robust_inconsistent(qbaf_initial,
+                                      qbaf_collection = [qbaf_initial],
+                                      topic_argument_1 = 'a',
+                                      topic_argument_2 = 'b')
+   assert value_1 == True
+   assert value_2 == True
 
 
 def test_pockets():
