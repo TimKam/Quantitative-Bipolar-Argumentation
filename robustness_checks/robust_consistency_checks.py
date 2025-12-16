@@ -58,10 +58,13 @@ def is_expansion(qbaf_initial: QBAFramework,
        bool: True if qbaf_update is a normal expansion of qbaf_initial, False otherwise.
     """
     k = 0
+    args_initial = qbaf_initial.arguments
+    attack_rel = qbaf_initial.attack_relations
+    support_rel = qbaf_initial.support_relations
 
-    if (qbaf_initial.arguments.issubset(qbaf_update.arguments) and
-        qbaf_initial.attack_relations.issubset(qbaf_update.attack_relations) and
-        qbaf_initial.support_relations.issubset(qbaf_update.support_relations)):
+    if (args_initial.issubset(qbaf_update.arguments) and
+        attack_rel.attack_relations.issubset(qbaf_update.attack_relations) and
+        support_rel.support_relations.issubset(qbaf_update.support_relations)):
           k = 1
 
     if (k == 1):
@@ -131,7 +134,8 @@ def expansion_robust_consistent(qbaf_initial: QBAFramework,
 
     for qbaf in updated_qbaf_collection:
       if (not qbaf.are_strength_consistent(qbaf_initial,
-                                           topic_argument_1,     topic_argument_2)):
+                                           topic_argument_1,     
+                                           topic_argument_2)):
         return False
 
     return True
