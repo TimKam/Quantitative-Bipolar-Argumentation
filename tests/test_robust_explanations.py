@@ -1,10 +1,7 @@
-import pytest 
-
-from qbaf import QBAFramework, QBAFARelations
-from robustness_measures. general_robust_explanations import *
-from robustness_measures. expansion_based_robust_explanations import *
-from robustness_measures. strength_update_based_robust_explanations import *
-from robustness_measures. ctrb_based_robust_explanations_removal import *
+from qbaf import QBAFramework
+from qbaf_robustness.explanations import *
+from qbaf_robustness.consistency_checks import *
+from qbaf_robustness.inconsistency_checks import *
 
 
 args = ['a', 'b', 'c', 'd', 'e', 'f']

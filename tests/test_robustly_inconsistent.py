@@ -1,9 +1,6 @@
-import pytest 
-
 from qbaf import QBAFramework
-from robustness_measures. general_robustly_inconsistent import *
-from robustness_measures. expansion_based_robustly_inconsistent import *
-from robustness_measures. strength_update_based_robustly_inconsistent import *
+from qbaf_robustness.consistency_checks import *
+from qbaf_robustness.inconsistency_checks import *
 
 
 args = ['a', 'b', 'c', 'd', 'e', 'f']

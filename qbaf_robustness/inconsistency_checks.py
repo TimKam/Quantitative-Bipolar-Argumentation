@@ -1,5 +1,5 @@
 from qbaf import QBAFramework
-from robustness_checks.robust_consistency_checks import is_expansion,is_bounded_update
+from qbaf_robustness.consistency_checks import is_expansion,is_bounded_update
 
 
 
