@@ -18,7 +18,7 @@ pip install .
 Note: To install on Windows, Microsoft Visual C++ 14.0 or greater might be required.
 
 _QBAF-Py_ features an optional basic visualization module for QBAFs and some explanation types.
-Install it with `pip install -e .[Visualizer]` and note that it is required for running the examples provided in the [Jupyter notebook](examples.ipynb).
+Install it with `pip install -e ".[Visualizer]"` and note that it is required for running the examples provided in the [Jupyter notebook](examples.ipynb).
 
 ## Dependencies
 *QBAF-Py* does not have any dependencies!
