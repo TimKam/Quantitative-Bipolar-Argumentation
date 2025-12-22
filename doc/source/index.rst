@@ -23,6 +23,21 @@ Contribution Functions
    .. autofunction:: qbaf_ctrbs.gradient.determine_gradient_ctrb
    .. autofunction:: qbaf_ctrbs.utils.restrict
 
+Robustness Functions
+####################
+   .. autofunction:: qbaf_robustness.consistency_checks.is_general_robust_consistent
+   .. autofunction:: qbaf_robustness.consistency_checks.is_expansion_robust_consistent
+   .. autofunction:: qbaf_robustness.consistency_checks.is_bounded_updates_robust_consistent
+   .. autofunction:: qbaf_robustness.consistency_checks.is_bounded_update
+   .. autofunction:: qbaf_robustness.consistency_checks.is_expansion
+   .. autofunction:: qbaf_robustness.inconsistency_checks.is_general_robust_inconsistent
+   .. autofunction:: qbaf_robustness.inconsistency_checks.is_expansion_robust_inconsistent
+   .. autofunction:: qbaf_robustness.inconsistency_checks.is_bounded_updates_robust_inconsistent
+   .. autofunction:: qbaf_robustness.explanations.new_arguments
+   .. autofunction:: qbaf_robustness.explanations.is_pocket
+   .. autofunction:: qbaf_robustness.explanations.pockets_of_consistency
+   .. autofunction:: qbaf_robustness.explanations.explanation_of_robustness_violation
+   
 Visualization Support
 #####################
 

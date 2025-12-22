@@ -1,3 +1,4 @@
+import copy
 from qbaf import QBAFramework
 from itertools import combinations
 
@@ -27,21 +28,6 @@ def new_arguments(initial_qbaf: QBAFramework,
 
 
 
-def subsets_of_arguments(args: set[str]) -> list[set[str]]:
-
-  n = len(args)
-  subset_of_args = []
-
-  for i in range (0, n + 1):
-    list_of_args = combinations(list(args), i)
-    for subset in list_of_args:
-      subset_of_args.append(set(subset))
-
-  return subset_of_args
-
-
-
-
 def is_pocket(qbaf_initial: QBAFramework,
               qbaf_collection: list[QBAFramework],
               pocket: list[str],
@@ -58,23 +44,41 @@ def is_pocket(qbaf_initial: QBAFramework,
        topic_argument_2 (str): The second topic argument whose strength is  considered.
 
     Returns:
-       bool: True if pocket is a pocket w.r.t. qbaf_initial and qbaf_collection, False otherwise.
+       list[set[str]]/bool: Returns the set of all sub-pockets, if pocket is a pocket of consistency; False otherwise.
     """
     assert topic_argument_1 in qbaf_initial.arguments
-    assert topic_argument_2 in qbaf_initial.arguments
+    assert topic_argument_1 in qbaf_initial.arguments
 
-    subsets = subsets_of_arguments(set(pocket))
 
-    for subset in subsets:
-      s = subset.union(qbaf_initial.arguments)
-      for qbaf in qbaf_collection:
-        if (qbaf.arguments == s and
-            qbaf_initial.are_strength_consistent(qbaf,
-                                                 topic_argument_1,
-                                                 topic_argument_2) == False):
+    if(not pocket): return [set()]
+
+    pocket_copy = list(copy.deepcopy(pocket))
+    subset_of_pockets = list()
+    y = pocket_copy[0]
+    pocket_wo_y = [x for x in pocket_copy if x!= y]
+
+    val = is_pocket(qbaf_initial,
+                    qbaf_collection,
+                    pocket_wo_y,
+                    topic_argument_1,
+                    topic_argument_2)     #Recursive call to is_pocket
+
+
+
+    if(val == False):
+        return False
+
+
+    for x in val:
+      A = x.union({y}) 
+      print(subset_of_pockets)
+      for h in qbaf_collection:
+        if(h.arguments == set(A) and
+           h.are_strength_consistent(qbaf_initial) == False):
               return False
+      subset_of_pockets.append(A)
 
-    return True
+    return(subset_of_pockets + val)
 
 
 
@@ -98,12 +102,12 @@ def pockets_of_consistency(qbaf_initial: QBAFramework,
     new_args = new_arguments(qbaf_initial, qbaf_collection)
     pockets = []
 
-    for i in range(0, len(new_args)+1):
+    for i in range(len(new_args)+1, 0, -1):
        combinations_of_args = combinations(new_args, i)
        for subset in combinations_of_args:
           if(is_pocket(qbaf_initial,
                        qbaf_collection, list[subset],
-                       topic_argument_1,topic_argument_2) == True): 
+                       topic_argument_1,topic_argument_2) != False): 
               pockets.append(set(subset)) 
 
     return pockets
@@ -111,7 +115,7 @@ def pockets_of_consistency(qbaf_initial: QBAFramework,
 
 
 
-def explanations_of_updates(qbaf_initial: QBAFramework,
+def explanation_of_robustness_violation(qbaf_initial: QBAFramework,
                             qbaf_collection: list[QBAFramework],
                             topic_argument_1: str,
                             topic_argument_2: str) -> list[dict[str]]:

@@ -34,12 +34,12 @@ qbaf_u_3 = QBAFramework(args_4, strength_4, att_4, supp_4, semantics = "Quadrati
 
 
 def test_robust_consistency():
-  value_1 = general_robust_consistent(qbaf_initial,
+  value_1 = is_general_robust_consistent(qbaf_initial,
                                       qbaf_collection = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
                                       topic_argument_1 = 'a',
                                       topic_argument_2 = 'b')
   
-  value_2 = general_robust_consistent(qbaf_initial,
+  value_2 = is_general_robust_consistent(qbaf_initial,
                                       qbaf_collection = [qbaf_initial],
                                       topic_argument_1 = 'a',
                                       topic_argument_2 = 'b')
@@ -50,12 +50,12 @@ def test_robust_consistency():
 
 
 def test_expansion_robust_consistency():
-   value_1 = expansion_robust_consistent(qbaf_initial,
+   value_1 = is_expansion_robust_consistent(qbaf_initial,
                                       qbaf_collection = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
                                       topic_argument_1 = 'a',
                                       topic_argument_2 = 'b')
 
-   value_2 = expansion_robust_consistent(qbaf_initial,
+   value_2 = is_expansion_robust_consistent(qbaf_initial,
                                       qbaf_collection = [qbaf_initial],
                                       topic_argument_1 = 'a',
                                       topic_argument_2 = 'b')
@@ -66,12 +66,12 @@ def test_expansion_robust_consistency():
 
 
 def test_robust_inconsistency():
-  value_1 = general_robust_inconsistent(qbaf_initial,
+  value_1 = is_general_robust_inconsistent(qbaf_initial,
                                         qbaf_collection = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
                                         topic_argument_1 = 'a',
                                         topic_argument_2 = 'b')
   
-  value_2 = general_robust_inconsistent(qbaf_initial,
+  value_2 = is_general_robust_inconsistent(qbaf_initial,
                                         qbaf_collection = [qbaf_initial],
                                         topic_argument_1 = 'a',
                                         topic_argument_2 = 'b')
@@ -83,12 +83,12 @@ def test_robust_inconsistency():
 
 
 def test_expnasion_robust_inconsistency():
-   value_1 = expansion_robust_inconsistent(qbaf_initial,
+   value_1 = is_expansion_robust_inconsistent(qbaf_initial,
                                       qbaf_collection = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
                                       topic_argument_1 = 'a',
                                       topic_argument_2 = 'b')
 
-   value_2 = expansion_robust_consistent(qbaf_initial,
+   value_2 = is_expansion_robust_consistent(qbaf_initial,
                                       qbaf_collection = [qbaf_initial],
                                       topic_argument_1 = 'a',
                                       topic_argument_2 = 'b')
@@ -99,14 +99,14 @@ def test_expnasion_robust_inconsistency():
 
 
 def test_bounded_updates_robust_consistency():
-   value_1 = bounded_updates_robust_consistent(qbaf_initial,
+   value_1 = is_bounded_updates_robust_consistent(qbaf_initial,
                                       qbaf_updates = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
                                       topic_argument_1 = 'a',
                                       topic_argument_2 = 'b',
                                       epsilon = 0.01, 
                                       mutable_args = {'d'})
 
-   value_2 = bounded_updates_robust_consistent(qbaf_initial,
+   value_2 = is_bounded_updates_robust_consistent(qbaf_initial,
                                       qbaf_updates = [qbaf_initial],
                                       topic_argument_1 = 'a',
                                       topic_argument_2 = 'b',
@@ -119,14 +119,14 @@ def test_bounded_updates_robust_consistency():
 
 
 def test_bounded_updates_robust_inconsistency():
-   value_1 = bounded_updates_robust_inconsistent(qbaf_initial,
+   value_1 = is_bounded_updates_robust_inconsistent(qbaf_initial,
                                       qbaf_updates = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
                                       topic_argument_1 = 'a',
                                       topic_argument_2 = 'b',
                                       epsilon = 0.01, 
                                       mutable_args = {'d'})
 
-   value_2 = bounded_updates_robust_inconsistent(qbaf_initial,
+   value_2 = is_bounded_updates_robust_inconsistent(qbaf_initial,
                                       qbaf_updates = [qbaf_initial],
                                       topic_argument_1 = 'a',
                                       topic_argument_2 = 'b',
@@ -149,28 +149,28 @@ def test_pockets():
                                      topic_argument_1 = 'a',
                                      topic_argument_2 = 'b')
     
-  v_1 = [set(), {'d'}, {'e'}, {'d', 'e'}]
+  v_1 = [{'d'}, {'e'}, {'d', 'e'}]
 
   for x in value_1: assert x in v_1
   for x in v_1: assert x in value_1
 
-  assert value_2 == [set()]
+  assert value_2 == []
 
 
 
 
 def test_explanations():
-  value_1 = explanations_of_updates(qbaf_initial,
+  value_1 = explanation_of_robustness_violation(qbaf_initial,
                                      qbaf_collection = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
                                      topic_argument_1 = 'a',
                                      topic_argument_2 = 'b') 
     
-  value_2 = explanations_of_updates(qbaf_initial,
+  value_2 = explanation_of_robustness_violation(qbaf_initial,
                                      qbaf_collection = [qbaf_initial],
                                      topic_argument_1 = 'a',
                                      topic_argument_2 = 'b')
   
-  v_1 = [(set(), 'd'), (set(), 'e'), ({'d'}, 'e'), ({'e'}, 'd')]
+  v_1 = [({'d'}, 'e'), ({'e'}, 'd')]
   
   for x in v_1: assert  x in value_1
   for x in value_1: assert x in v_1

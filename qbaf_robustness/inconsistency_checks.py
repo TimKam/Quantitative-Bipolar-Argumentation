@@ -3,7 +3,7 @@ from qbaf_robustness.consistency_checks import is_expansion,is_bounded_update
 
 
 
-def general_robust_inconsistent(qbaf_initial: QBAFramework,
+def is_general_robust_inconsistent(qbaf_initial: QBAFramework,
                               qbaf_collection: list[QBAFramework],
                               topic_argument_1: str,
                               topic_argument_2: str) -> bool:
@@ -34,7 +34,7 @@ def general_robust_inconsistent(qbaf_initial: QBAFramework,
 
 
 
-def expansion_robust_inconsistent( qbaf_initial: QBAFramework,
+def is_expansion_robust_inconsistent( qbaf_initial: QBAFramework,
                                  qbaf_collection: list[QBAFramework],
                                  topic_argument_1: str,
                                  topic_argument_2: str ) -> bool:
@@ -64,7 +64,8 @@ def expansion_robust_inconsistent( qbaf_initial: QBAFramework,
     return True
 
 
-def bounded_updates_robust_inconsistent(qbaf_initial: QBAFramework,
+
+def is_bounded_updates_robust_inconsistent(qbaf_initial: QBAFramework,
                                      qbaf_updates: list[QBAFramework],
                                      topic_argument_1: str,
                                      topic_argument_2: str,
