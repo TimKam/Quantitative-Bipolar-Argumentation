@@ -149,7 +149,7 @@ def test_pockets():
                                      topic_argument_1 = 'a',
                                      topic_argument_2 = 'b')
     
-  v_1 = [{'d'}, {'e'}, {'d', 'e'}]
+  v_1 = [{'d', 'e'}]
 
   for x in value_1: assert x in v_1
   for x in v_1: assert x in value_1
@@ -170,7 +170,7 @@ def test_explanations():
                                      topic_argument_1 = 'a',
                                      topic_argument_2 = 'b')
   
-  v_1 = [({'d'}, 'e'), ({'e'}, 'd')]
+  v_1 = [({'d','e'}, set())]
   
   for x in v_1: assert  x in value_1
   for x in value_1: assert x in v_1

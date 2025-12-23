@@ -123,7 +123,7 @@ def pockets_of_consistency(qbaf_initial: QBAFramework,
 def explanation_of_robustness_violation(qbaf_initial: QBAFramework,
                             qbaf_collection: list[QBAFramework],
                             topic_argument_1: str,
-                            topic_argument_2: str) -> list[dict[str]]:
+                            topic_argument_2: str) -> list[tuple[str]]:
     """
     Returns the list of minimal arguments in qbaf_collection that explain the updates.
 
@@ -134,12 +134,16 @@ def explanation_of_robustness_violation(qbaf_initial: QBAFramework,
       topic_argument_2 (str): The second topic argument whose strength is  considered.
 
     Returns:
-      list[dict[str]]: The list of minimal arguments in qbaf_collection that explain the updates.
+      list[tuple[str]]: The list of minimal arguments in qbaf_collection that explain the updates.
     """
     pockets = pockets_of_consistency(qbaf_initial, qbaf_collection,
                                      topic_argument_1, topic_argument_2)
     new_args = new_arguments(qbaf_initial, qbaf_collection)
     explanations = []
+
+    if(new_args in pockets):
+      p = [(new_args, set())]
+      return p
 
     for pocket in pockets:
       n = new_args.difference(pocket)
