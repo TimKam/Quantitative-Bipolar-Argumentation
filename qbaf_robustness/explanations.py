@@ -105,7 +105,12 @@ def pockets_of_consistency(qbaf_initial: QBAFramework,
     for i in range(len(new_args)+1, 0, -1):
        combinations_of_args = combinations(new_args, i)
        for subset in combinations_of_args:
-          if(is_pocket(qbaf_initial,
+          fl = 0
+          subset_transform = set(subset)
+          for x in pockets:
+             if(subset_transform.issubset(x)):  fl = 1
+          if(fl == 0 and
+             is_pocket(qbaf_initial,
                        qbaf_collection, list[subset],
                        topic_argument_1,topic_argument_2) != False): 
               pockets.append(set(subset)) 
