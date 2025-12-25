@@ -1,6 +1,6 @@
 # QBAF-Py
 ![CI status](https://github.com/TimKam/Quantitative-Bipolar-Argumentation/actions/workflows/actions.yml/badge.svg)
-![Python versions](https://img.shields.io/badge/python-3.8%E2%80%933.13-blue)
+![Python versions](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)
 
 
 This project provides _QBAF-Py_, a library for drawing inferences from Quantitative Bipolar Argumentation Frameworks (QBAFs) and explaining them.
@@ -18,7 +18,7 @@ pip install .
 Note: To install on Windows, Microsoft Visual C++ 14.0 or greater might be required.
 
 _QBAF-Py_ features an optional basic visualization module for QBAFs and some explanation types.
-Install it with `pip install -e .[Visualizer]` and note that it is required for running the examples provided in the [Jupyter notebook](examples.ipynb).
+Install it with `pip install -e ".[Visualizer]"` and note that it is required for running the examples provided in the [Jupyter notebook](examples.ipynb).
 
 ## Dependencies
 *QBAF-Py* does not have any dependencies!
@@ -33,7 +33,7 @@ Generated documentation in html can be found [here](https://timkam.github.io/Qua
 
 You can also generate documentation in other formats making use of sphinx (you need to have sphinx installed).
 
-The documentation is genereted from your installed libraries, so you need to install *QBAF-Py* first.
+The documentation is generated from your installed libraries, so you need to install *QBAF-Py* first.
 
 To generate the documentation, run in the [doc](https://github.com/TimKam/Quantitative-Bipolar-Argumentation/tree/main/doc) directory:
 
