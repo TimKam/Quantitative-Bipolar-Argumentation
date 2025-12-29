@@ -1,4 +1,5 @@
 from qbaf import QBAFramework
+import copy
 from qbaf_robustness.consistency_checks import *
 from qbaf_robustness.inconsistency_checks import *
 from qbaf_robustness.explanations import *
@@ -7,11 +8,14 @@ args_1 = ['a', 'b', 'c']
 args_2 = ['a', 'b', 'c', 'd']
 args_3 = ['a', 'b', 'c', 'd', 'e']
 args_4 = ['a', 'b', 'c', 'e']
+args_5 = copy.deepcopy(args_4)
+args_5.append('f')
 
 att_1 = [('c', 'a')]
 att_2 = [('c', 'a'), ('d', 'c')]
 att_3 = [('c', 'a'), ('d', 'c'),]
-att_4 = [('c', 'a'),]
+att_4 = [('c', 'a')]
+att_5 = [('c', 'a'), ('f', 'a')]
 
 supp_1 = [('c', 'b')]
 supp_2 = [('c', 'b')]
@@ -22,6 +26,8 @@ strength_1 =[1.0, 2.0, 1.0]
 strength_2 =[1.0, 2.0, 1.0, 1.0]
 strength_3 =[1.0, 2.0, 1.0, 0.5, 1.5]
 strength_4 =[1.0, 2.0, 1.0, 0.5]
+strength_5 =[10.0, 2.0, 1.0, 0.5]
+strength_6 =[10.0, 2.0, 1.0, 0.5, 5.0]
 
 qbaf_initial = QBAFramework(args_1, strength_1, att_1, supp_1, semantics = "QuadraticEnergy_model")
 
@@ -30,6 +36,19 @@ qbaf_u_1 = QBAFramework(args_2, strength_2, att_2, supp_2, semantics = "Quadrati
 qbaf_u_2 = QBAFramework(args_3, strength_3, att_3, supp_3, semantics = "QuadraticEnergy_model")
 
 qbaf_u_3 = QBAFramework(args_4, strength_4, att_4, supp_4, semantics = "QuadraticEnergy_model")
+
+qbaf_u_4 = QBAFramework(args_4, strength_5, att_4, supp_4, semantics = "QuadraticEnergy_model")
+
+qbaf_u_5 = QBAFramework(args_5, strength_6, att_5, supp_4, semantics = "QuadraticEnergy_model")
+
+value = pockets_of_consistency(qbaf_initial,
+                               qbaf_collection = [qbaf_u_4, qbaf_u_5],
+                               topic_argument_1 = 'a',
+                               topic_argument_2 = 'b')
+exps = explanation_of_robustness_violation(qbaf_initial,
+                               qbaf_collection = [qbaf_u_4, qbaf_u_5],
+                               topic_argument_1 = 'a',
+                               topic_argument_2 = 'b')
 
 
 
@@ -148,11 +167,19 @@ def test_pockets():
                                      qbaf_collection = [qbaf_initial],
                                      topic_argument_1 = 'a',
                                      topic_argument_2 = 'b')
+  value_3 = pockets_of_consistency(qbaf_initial,
+                               qbaf_collection = [qbaf_u_4, qbaf_u_5],
+                               topic_argument_1 = 'a',
+                               topic_argument_2 = 'b')
     
   v_1 = [{'d', 'e'}]
+  v_3 = [{'f'}]
 
   for x in value_1: assert x in v_1
   for x in v_1: assert x in value_1
+
+  for x in value_3: assert x in v_3
+  for x in v_3: assert x in value_3
 
   assert value_2 == []
 
@@ -169,11 +196,20 @@ def test_explanations():
                                      qbaf_collection = [qbaf_initial],
                                      topic_argument_1 = 'a',
                                      topic_argument_2 = 'b')
+
+  value_3 = explanation_of_robustness_violation(qbaf_initial,
+                               qbaf_collection = [qbaf_u_4, qbaf_u_5],
+                               topic_argument_1 = 'a',
+                               topic_argument_2 = 'b')
   
   v_1 = [({'d','e'}, set())]
+  v_3 = [({'f'},'e')]
   
   for x in v_1: assert  x in value_1
   for x in value_1: assert x in v_1
+
+  for x in value_3: assert x in v_3
+  for x in v_3: assert x in value_3
 
   assert value_2 == []
   
