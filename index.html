@@ -315,6 +315,21 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.utils.restrict"><code class="docutils literal notranslate"><span class="pre">restrict()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#robustness-functions">Robustness Functions</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_general_robust_consistent"><code class="docutils literal notranslate"><span class="pre">is_general_robust_consistent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_expansion_robust_consistent"><code class="docutils literal notranslate"><span class="pre">is_expansion_robust_consistent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_bounded_updates_robust_consistent"><code class="docutils literal notranslate"><span class="pre">is_bounded_updates_robust_consistent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_bounded_update"><code class="docutils literal notranslate"><span class="pre">is_bounded_update()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_expansion"><code class="docutils literal notranslate"><span class="pre">is_expansion()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.inconsistency_checks.is_general_robust_inconsistent"><code class="docutils literal notranslate"><span class="pre">is_general_robust_inconsistent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.inconsistency_checks.is_expansion_robust_inconsistent"><code class="docutils literal notranslate"><span class="pre">is_expansion_robust_inconsistent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.inconsistency_checks.is_bounded_updates_robust_inconsistent"><code class="docutils literal notranslate"><span class="pre">is_bounded_updates_robust_inconsistent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.explanations.new_arguments"><code class="docutils literal notranslate"><span class="pre">new_arguments()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.explanations.is_pocket"><code class="docutils literal notranslate"><span class="pre">is_pocket()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.explanations.pockets_of_consistency"><code class="docutils literal notranslate"><span class="pre">pockets_of_consistency()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.explanations.explanation_of_robustness_violation"><code class="docutils literal notranslate"><span class="pre">explanation_of_robustness_violation()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-support">Visualization Support</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_visualizer.Visualizer.visualize"><code class="docutils literal notranslate"><span class="pre">visualize()</span></code></a></li>
 </ul>
@@ -1276,6 +1291,282 @@ or a set of contributors to a topic argument.</p>
 
 </div></blockquote>
 </section>
+<section id="robustness-functions">
+<h2>Robustness Functions<a class="headerlink" href="#robustness-functions" title="Link to this heading">#</a></h2>
+<blockquote>
+<div><dl class="py function">
+<dt class="sig sig-object py" id="qbaf_robustness.consistency_checks.is_general_robust_consistent">
+<span class="sig-prename descclassname"><span class="pre">qbaf_robustness.consistency_checks.</span></span><span class="sig-name descname"><span class="pre">is_general_robust_consistent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf_initial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/qbaf_robustness/consistency_checks.html#is_general_robust_consistent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_robustness.consistency_checks.is_general_robust_consistent" title="Link to this definition">#</a></dt>
+<dd><p>Checks whether qbaf_initial is general robust consistent with respect to
+qbaf_collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf_initial</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The initial QBAF.</p></li>
+<li><p><strong>qbaf_collection</strong> (<em>list</em><em>[</em><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a><em>]</em>) – The collection of QBAF updates.</p></li>
+<li><p><strong>topic_argument_1</strong> (<em>str</em>) – The first topic argument whose strength is  considered.</p></li>
+<li><p><strong>topic_argument_2</strong> (<em>str</em>) – The second topic argument whose strength is  considered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if qbaf_initial is general robust consistent with respect to
+qbaf_collection, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_robustness.consistency_checks.is_expansion_robust_consistent">
+<span class="sig-prename descclassname"><span class="pre">qbaf_robustness.consistency_checks.</span></span><span class="sig-name descname"><span class="pre">is_expansion_robust_consistent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf_initial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/qbaf_robustness/consistency_checks.html#is_expansion_robust_consistent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_robustness.consistency_checks.is_expansion_robust_consistent" title="Link to this definition">#</a></dt>
+<dd><p>Checks whether qbaf_initial is expansion robust consistent with respect to
+qbaf_collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf_initial</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The initial QBAF.</p></li>
+<li><p><strong>qbaf_collection</strong> (<em>list</em><em>[</em><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a><em>]</em>) – The collection of QBAF updates.</p></li>
+<li><p><strong>topic_argument_1</strong> (<em>str</em>) – The first topic argument whose strength is  considered.</p></li>
+<li><p><strong>topic_argument_2</strong> (<em>str</em>) – The second topic argument whose strength is  considered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if qbaf_initial is general robust consistent with respect to
+qbaf_collection, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_robustness.consistency_checks.is_bounded_updates_robust_consistent">
+<span class="sig-prename descclassname"><span class="pre">qbaf_robustness.consistency_checks.</span></span><span class="sig-name descname"><span class="pre">is_bounded_updates_robust_consistent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf_initial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf_updates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutable_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/qbaf_robustness/consistency_checks.html#is_bounded_updates_robust_consistent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_robustness.consistency_checks.is_bounded_updates_robust_consistent" title="Link to this definition">#</a></dt>
+<dd><p>Checks whether qbaf_initial is bounded-update robust consistent with respect to qbaf_collection, epsilon and the mutable_args.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf_initial</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The initial QBAF.</p></li>
+<li><p><strong>qbaf_updates</strong> (<em>list</em><em>[</em><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a><em>]</em>) – The collection of QBAF updates.</p></li>
+<li><p><strong>topic_argument_1</strong> (<em>str</em>) – The first topic argument whose strength is  considered.</p></li>
+<li><p><strong>topic_argument_2</strong> (<em>str</em>) – The second topic argument whose strength is  considered.</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em>) – The permissible range of strength change.</p></li>
+<li><p><strong>mutable_args</strong> (<em>set</em>) – The set of mutable arguments whose strength is suspected to change.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if qbaf_initial is bounded-update robust consistent with respect to qbaf_collection.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_robustness.consistency_checks.is_bounded_update">
+<span class="sig-prename descclassname"><span class="pre">qbaf_robustness.consistency_checks.</span></span><span class="sig-name descname"><span class="pre">is_bounded_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf_initial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutable_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/qbaf_robustness/consistency_checks.html#is_bounded_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_robustness.consistency_checks.is_bounded_update" title="Link to this definition">#</a></dt>
+<dd><p>Checks whether qbaf_update is an epsilon and mutable_args bounded update.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf_initial</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The initial QBAF.</p></li>
+<li><p><strong>qbaf_update</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The updated QBAF.</p></li>
+<li><p><strong>mutable_args</strong> (<em>set</em>) – The set of mutable arguments whose strength is suspected to change.</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em>) – The permissible range of strength change.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Retruns:</dt><dd><p>bool: True if qbaf_update is an epsilon and mutable_args bounded update,false otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_robustness.consistency_checks.is_expansion">
+<span class="sig-prename descclassname"><span class="pre">qbaf_robustness.consistency_checks.</span></span><span class="sig-name descname"><span class="pre">is_expansion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf_initial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/qbaf_robustness/consistency_checks.html#is_expansion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_robustness.consistency_checks.is_expansion" title="Link to this definition">#</a></dt>
+<dd><p>Checks whether qbaf_update is a normal expansion of qbaf_initial.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf_initial</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The initial QBAF.</p></li>
+<li><p><strong>qbaf_update</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The updated QBAF.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if qbaf_update is a normal expansion of qbaf_initial, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_robustness.inconsistency_checks.is_general_robust_inconsistent">
+<span class="sig-prename descclassname"><span class="pre">qbaf_robustness.inconsistency_checks.</span></span><span class="sig-name descname"><span class="pre">is_general_robust_inconsistent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf_initial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/qbaf_robustness/inconsistency_checks.html#is_general_robust_inconsistent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_robustness.inconsistency_checks.is_general_robust_inconsistent" title="Link to this definition">#</a></dt>
+<dd><p>Checks whether qbaf_initial is general robust inconsistent with respect to
+qbaf_collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf_initial</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The initial QBAF.</p></li>
+<li><p><strong>qbaf_collection</strong> (<em>list</em><em>[</em><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a><em>]</em>) – The collection of QBAF updates.</p></li>
+<li><p><strong>topic_argument_1</strong> (<em>str</em>) – The first topic argument whose strength is  considered.</p></li>
+<li><p><strong>topic_argument_2</strong> (<em>str</em>) – The second topic argument whose strength is  considered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if qbaf_initial is general robust inconsistent with respect to
+qbaf_collection, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_robustness.inconsistency_checks.is_expansion_robust_inconsistent">
+<span class="sig-prename descclassname"><span class="pre">qbaf_robustness.inconsistency_checks.</span></span><span class="sig-name descname"><span class="pre">is_expansion_robust_inconsistent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf_initial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/qbaf_robustness/inconsistency_checks.html#is_expansion_robust_inconsistent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_robustness.inconsistency_checks.is_expansion_robust_inconsistent" title="Link to this definition">#</a></dt>
+<dd><p>Checks whether qbaf_initial is expansion robust consistent with respect to
+qbaf_collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf_initial</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The initial QBAF.</p></li>
+<li><p><strong>qbaf_collection</strong> (<em>list</em><em>[</em><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a><em>]</em>) – The collection of QBAF updates.</p></li>
+<li><p><strong>topic_argument_1</strong> (<em>str</em>) – The first topic argument whose strength is  considered.</p></li>
+<li><p><strong>topic_argument_2</strong> (<em>str</em>) – The second topic argument whose strength is  considered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if qbaf_initial is general robust consistent with respect to
+qbaf_collection, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_robustness.inconsistency_checks.is_bounded_updates_robust_inconsistent">
+<span class="sig-prename descclassname"><span class="pre">qbaf_robustness.inconsistency_checks.</span></span><span class="sig-name descname"><span class="pre">is_bounded_updates_robust_inconsistent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf_initial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf_updates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutable_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/qbaf_robustness/inconsistency_checks.html#is_bounded_updates_robust_inconsistent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_robustness.inconsistency_checks.is_bounded_updates_robust_inconsistent" title="Link to this definition">#</a></dt>
+<dd><p>Checks whether qbaf_initial is bounded-update robust inconsistent with respect to qbaf_collection, epsilon and the mutable_args.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf_initial</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The initial QBAF.</p></li>
+<li><p><strong>qbaf_updates</strong> (<em>list</em><em>[</em><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a><em>]</em>) – The collection of QBAF updates.</p></li>
+<li><p><strong>topic_argument_1</strong> (<em>str</em>) – The first topic argument whose strength is  considered.</p></li>
+<li><p><strong>topic_argument_2</strong> (<em>str</em>) – The second topic argument whose strength is  considered.</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em>) – The permissible range of strength change.</p></li>
+<li><p><strong>mutable_args</strong> (<em>set</em>) – The set of mutable arguments whose strength is suspected to change.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if qbaf_initial is bounded-update robust inconsistent with respect to qbaf_collection, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_robustness.explanations.new_arguments">
+<span class="sig-prename descclassname"><span class="pre">qbaf_robustness.explanations.</span></span><span class="sig-name descname"><span class="pre">new_arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_qbaf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/qbaf_robustness/explanations.html#new_arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_robustness.explanations.new_arguments" title="Link to this definition">#</a></dt>
+<dd><p>Returns the set of new arguments that gets added to qbaf_initial by qbaf_collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The initial QBAF.</p></li>
+<li><p><strong>qbaf_collection</strong> (<em>list</em><em>[</em><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a><em>]</em>) – The collection of QBAF updates.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The set of new arguments that gets added to qbaf_initial.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>set[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_robustness.explanations.is_pocket">
+<span class="sig-prename descclassname"><span class="pre">qbaf_robustness.explanations.</span></span><span class="sig-name descname"><span class="pre">is_pocket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf_initial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pocket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/qbaf_robustness/explanations.html#is_pocket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_robustness.explanations.is_pocket" title="Link to this definition">#</a></dt>
+<dd><p>Checks whether qbaf_initial is a pocket of qbaf_collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf_initial</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The initial QBAF.</p></li>
+<li><p><strong>qbaf_collection</strong> (<em>list</em><em>[</em><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a><em>]</em>) – The collection of QBAF updates.</p></li>
+<li><p><strong>pocket</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – The arguments we check whether is a pocket.</p></li>
+<li><p><strong>topic_argument_1</strong> (<em>str</em>) – The first topic argument whose strength is  considered.</p></li>
+<li><p><strong>topic_argument_2</strong> (<em>str</em>) – The second topic argument whose strength is  considered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns the set of all sub-pockets, if pocket is a pocket of consistency; False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[set[str]]/bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_robustness.explanations.pockets_of_consistency">
+<span class="sig-prename descclassname"><span class="pre">qbaf_robustness.explanations.</span></span><span class="sig-name descname"><span class="pre">pockets_of_consistency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf_initial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/qbaf_robustness/explanations.html#pockets_of_consistency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_robustness.explanations.pockets_of_consistency" title="Link to this definition">#</a></dt>
+<dd><p>Retruns the list of pockets of qbaf_initial and qbaf_collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf_initial</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The initial QBAF.</p></li>
+<li><p><strong>qbaf_collection</strong> (<em>list</em><em>[</em><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a><em>]</em>) – The collection of QBAF updates.</p></li>
+<li><p><strong>topic_argument_1</strong> (<em>str</em>) – The first topic argument whose strength is  considered.</p></li>
+<li><p><strong>topic_argument_2</strong> (<em>str</em>) – The second topic argument whose strength is  considered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of pockets.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[set[str]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_robustness.explanations.explanation_of_robustness_violation">
+<span class="sig-prename descclassname"><span class="pre">qbaf_robustness.explanations.</span></span><span class="sig-name descname"><span class="pre">explanation_of_robustness_violation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf_initial</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic_argument_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/qbaf_robustness/explanations.html#explanation_of_robustness_violation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_robustness.explanations.explanation_of_robustness_violation" title="Link to this definition">#</a></dt>
+<dd><p>Returns the list of minimal arguments in qbaf_collection that explain the updates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf_initial</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The initial QBAF.</p></li>
+<li><p><strong>qbaf_collection</strong> (<em>list</em><em>[</em><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a><em>]</em>) – The collection of QBAF updates.</p></li>
+<li><p><strong>topic_argument_1</strong> (<em>str</em>) – The first topic argument whose strength is  considered.</p></li>
+<li><p><strong>topic_argument_2</strong> (<em>str</em>) – The second topic argument whose strength is  considered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of minimal arguments in qbaf_collection that explain the updates.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[tuple[str]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</section>
 <section id="visualization-support">
 <h2>Visualization Support<a class="headerlink" href="#visualization-support" title="Link to this heading">#</a></h2>
 <blockquote>
@@ -1393,6 +1684,21 @@ Defaults to <cite>2</cite>.</p></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.shapley.determine_partitioned_shapley_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_partitioned_shapley_ctrb()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.gradient.determine_gradient_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_gradient_ctrb()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.utils.restrict"><code class="docutils literal notranslate"><span class="pre">restrict()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#robustness-functions">Robustness Functions</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_general_robust_consistent"><code class="docutils literal notranslate"><span class="pre">is_general_robust_consistent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_expansion_robust_consistent"><code class="docutils literal notranslate"><span class="pre">is_expansion_robust_consistent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_bounded_updates_robust_consistent"><code class="docutils literal notranslate"><span class="pre">is_bounded_updates_robust_consistent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_bounded_update"><code class="docutils literal notranslate"><span class="pre">is_bounded_update()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_expansion"><code class="docutils literal notranslate"><span class="pre">is_expansion()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.inconsistency_checks.is_general_robust_inconsistent"><code class="docutils literal notranslate"><span class="pre">is_general_robust_inconsistent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.inconsistency_checks.is_expansion_robust_inconsistent"><code class="docutils literal notranslate"><span class="pre">is_expansion_robust_inconsistent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.inconsistency_checks.is_bounded_updates_robust_inconsistent"><code class="docutils literal notranslate"><span class="pre">is_bounded_updates_robust_inconsistent()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.explanations.new_arguments"><code class="docutils literal notranslate"><span class="pre">new_arguments()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.explanations.is_pocket"><code class="docutils literal notranslate"><span class="pre">is_pocket()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.explanations.pockets_of_consistency"><code class="docutils literal notranslate"><span class="pre">pockets_of_consistency()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.explanations.explanation_of_robustness_violation"><code class="docutils literal notranslate"><span class="pre">explanation_of_robustness_violation()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-support">Visualization Support</a><ul class="nav section-nav flex-column">
