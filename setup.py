@@ -11,7 +11,7 @@ def main():
 
     setup(
         name='QBAF-Py',
-        python_requires='>=3.8',
+        python_requires='>=3.11',
         version='0.1.0',
         description='QBAF-Py is a library for drawing inferences from Quantitative Bipolar Argumentation Frameworks (QBAFs) and explaining them.',
         author='José Ruiz Alarcón, Filip Naudot, Arunavo Ganguly, Timotheus Kampik',
