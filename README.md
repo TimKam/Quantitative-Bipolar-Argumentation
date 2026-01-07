@@ -51,9 +51,3 @@ make html
 ## Testing
 To test the package locally, first install the test requirements (`pip install -e .[dev]`) and then run `pytest` in the project's root directory.
 
-## Acknowledgements
-**Authors**: José Ruiz Alarcón - [@Ruiz968](https://github.com/Ruiz968), Filip Naudot - [filipnaudot](https://github.com/filipnaudot), Arunavo Ganguly - [@Arunavo71](https://github.com/Arunavo71), Timotheus Kampik - [@TimKam](https://github.com/TimKam)
-
-This project is mainly based on the following papers:
-* [Change in quantitative bipolar argumentation: Sufficient, necessary, and counterfactual explanations](https://www.sciencedirect.com/science/article/pii/S0888613X23001974) (Kampik, Čyras & Ruiz Alarcón, 2024).
-* [Contribution functions for quantitative bipolar argumentation graphs: A principle-based analysis](https://www.sciencedirect.com/science/article/pii/S0888613X24001427) (Kampik, Potyka, Yin, Čyras & Toni, 2024).
