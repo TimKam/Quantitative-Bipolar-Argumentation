@@ -23,6 +23,8 @@ def determine_shapley_ctrb(topic, contributors, qbaf):
     It partitions qbaf.arguments into singletons,
     except for contributors which form one set, then calls determine_partitioned_shapley_ctrb.
     """
+    if not isinstance(contributors, set):
+        contributors = {contributors}
     partition = {frozenset([a]) for a in qbaf.arguments if a not in contributors and a != topic} | {frozenset([topic]), frozenset(contributors)}
     return determine_partitioned_shapley_ctrb(topic, contributors, partition, qbaf)
 

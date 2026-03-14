@@ -28,6 +28,10 @@ def test_shapley():
     assert determine_shapley_ctrb('a', 'b', qbaf_bigger) == determine_shapley_ctrb('a', 'b', qbaf)
     assert determine_shapley_ctrb('b', {'c', 'a'}, qbaf_bigger) == determine_shapley_ctrb('b', {'c', 'a'}, qbaf)
 
+def test_shapley_single_string_contributor_with_multi_char_name():
+    qbaf = QBAFramework(['topic', 'ab', 'x'], [1, 1, 0], [('ab', 'topic')], [], semantics='basic_model')
+    assert determine_shapley_ctrb('topic', {'ab'}, qbaf) == -1
+
 
 ##########################
 # Partitioned shapley
