@@ -57,3 +57,4 @@ To test the package locally, first install the test requirements (`pip install -
 This project is mainly based on the following papers:
 * [Change in quantitative bipolar argumentation: Sufficient, necessary, and counterfactual explanations](https://www.sciencedirect.com/science/article/pii/S0888613X23001974) (Kampik, Čyras & Ruiz Alarcón, 2024).
 * [Contribution functions for quantitative bipolar argumentation graphs: A principle-based analysis](https://www.sciencedirect.com/science/article/pii/S0888613X24001427) (Kampik, Potyka, Yin, Čyras & Toni, 2024).
+* [Set contribution functions for quantitative bipolar argumentation and their principles](https://www.sciencedirect.com/science/article/pii/S0888613X26000496) (Naudot, Brännström, Torra, Kampik, 2026)
