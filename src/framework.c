@@ -1533,57 +1533,47 @@ QBAFramework_copy(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
 }
 
 /**
- * @brief Return a list with the arguments that are being attacked/supported by Argument argument (itself included)
- * that are in a cycle, NULL if an error has occurred.
+ * @brief Return 1 if argument reaches a cycle through attack/support relations, 0 if not,
+ * -1 if an error has occurred.
  * 
  * @param self an instance of QBAFramework
  * @param argument an instance of QBAFArgument
  * @param not_visited a PySet of QBAFArgument that have not been visited yet (this set is modified in this function)
  * @param visiting a PySet of QBAFArgument that are being visited within this function
- * @return PyObject* a new PyList of QBAFArgument objects that contain at least one cycle 
+ * @return int 1 if a cycle is found, 0 if not, -1 if an error occurred
  */
-static PyObject *
-_QBAFramework_incycle_arguments(QBAFrameworkObject *self, PyObject *argument, PyObject *not_visited, PyObject *visiting)
+static int
+_QBAFramework_has_cycle_from(QBAFrameworkObject *self, PyObject *argument, PyObject *not_visited, PyObject *visiting)
 {
     int contains = PySet_Contains(visiting, argument);
     if (contains < 0) {
-        return NULL;
+        return -1;
     }
-    if (contains) { // If argument is being visited, do not visit it again but return it
-        PyObject *list = PyList_New(1);
-        if (list == NULL)
-            return NULL;
-        Py_INCREF(argument);
-        PyList_SET_ITEM(list, 0, argument);
-        return list;
+    if (contains) {// If argument is being visited, a cycle was found
+        return 1;
     }
 
-    if (PySet_Add(visiting, argument) < 0) {    // We add the argument to visiting
-        return NULL;
+    if (PySet_Add(visiting, argument) < 0) { // We add the argument to visiting
+        return -1;
     }
     PyObject *attack_patients, *support_patients;
-    PyObject *patients, *result, *previous_result, *incycle;
+    PyObject *patients;
 
     attack_patients = _QBAFARelations_patients((QBAFARelationsObject*)self->attack_relations, argument);
     if (attack_patients == NULL) {
-        return NULL;
+        return -1;
     }
     support_patients = _QBAFARelations_patients((QBAFARelationsObject*)self->support_relations, argument);
     if (support_patients == NULL) {
         Py_DECREF(attack_patients);
+        return -1;
     }
 
     patients = PyList_Concat(attack_patients, support_patients);
     Py_DECREF(attack_patients);
     Py_DECREF(support_patients);
     if (patients == NULL) {
-        return NULL;
-    }
-
-    result = PyList_New(0);
-    if (result == NULL) {
-        Py_DECREF(patients);
-        return NULL;
+        return -1;
     }
 
     PyObject *iterator = PyObject_GetIter(patients);
@@ -1591,34 +1581,28 @@ _QBAFramework_incycle_arguments(QBAFrameworkObject *self, PyObject *argument, Py
 
     if (iterator == NULL) {
         Py_DECREF(patients);
-        Py_DECREF(result);
-        return NULL;
+        return -1;
     }
 
     while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
         contains = PySet_Contains(not_visited, item);
         if (contains < 0) {
-            Py_DECREF(patients); Py_DECREF(result);
+            Py_DECREF(patients);
             Py_DECREF(iterator); Py_DECREF(item);
-            return NULL;
+            return -1;
         }
 
         if (contains) {
-            previous_result = result;
-            incycle = _QBAFramework_incycle_arguments(self, item, not_visited, visiting);
-            if (incycle == NULL) {
-                Py_DECREF(patients); Py_DECREF(previous_result);
-                Py_DECREF(iterator); Py_DECREF(item);
-                return NULL;
-            }
-
-            result = PyList_Concat(previous_result, incycle);
-            Py_DECREF(previous_result);
-            Py_DECREF(incycle);
-            if (result == NULL) {
+            int has_cycle = _QBAFramework_has_cycle_from(self, item, not_visited, visiting);
+            if (has_cycle < 0) {
                 Py_DECREF(patients);
                 Py_DECREF(iterator); Py_DECREF(item);
-                return NULL;
+                return -1;
+            }
+            if (has_cycle) {
+                Py_DECREF(patients);
+                Py_DECREF(iterator); Py_DECREF(item);
+                return 1;
             }
         }
 
@@ -1629,16 +1613,14 @@ _QBAFramework_incycle_arguments(QBAFrameworkObject *self, PyObject *argument, Py
     Py_DECREF(patients);
 
     if (PySet_Discard(not_visited, argument) < 0) { // We remove the argument from not visited
-        Py_DECREF(result);
-        return NULL;
+        return -1;
     }
 
     if (PySet_Discard(visiting, argument) < 0) { // We remove the argument from visiting
-        Py_DECREF(result);
-        return NULL;
+        return -1;
     }
 
-    return result;
+    return 0;
 }
 
 /**
@@ -1663,24 +1645,21 @@ _QBAFramework_isacyclic(QBAFrameworkObject *self)
         return -1;
     }
 
-    PyObject *argument, *incycle;
+    PyObject *argument;
 
     while (PySet_GET_SIZE(not_visited) > 0) {
         argument = PySet_Pop(not_visited);  // New reference. Unchecked errors
         PySet_Add(not_visited, argument);   // We return the argument to the set
+        int has_cycle = _QBAFramework_has_cycle_from(self, argument, not_visited, visiting);
         Py_DECREF(argument);
-
-        incycle = _QBAFramework_incycle_arguments(self, argument, not_visited, visiting);
-        if (incycle == NULL) {
+        if (has_cycle < 0) {
             Py_DECREF(visiting); Py_DECREF(not_visited);
             return -1;
         }
-        if (PyList_GET_SIZE(incycle) > 0) { // If detected cycle
+        if (has_cycle) { // If detected cycle
             Py_DECREF(visiting); Py_DECREF(not_visited);
-            Py_DECREF(incycle);
             return 0; // Return False
         }
-        Py_DECREF(incycle);
     }
 
     Py_DECREF(visiting);
@@ -1740,8 +1719,6 @@ _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argum
     }
 
     PyObject *iterator = PyObject_GetIter(attackers);
-    PyObject *item;
-
     if (iterator == NULL) {
         Py_DECREF(attackers);
         return -1.0;
@@ -1760,8 +1737,9 @@ _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argum
         return -1.0;
     }
     
+    PyObject *item;
     Py_ssize_t index = 0;
-    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+    while ((item = PyIter_Next(iterator))) { // PyIter_Next returns a new reference
         double strength = _QBAFramework_calculate_final_strength(self, item);
         Py_DECREF(item);
         if (strength == -1.0 && PyErr_Occurred()) {
@@ -1888,7 +1866,7 @@ _QBAFRamework_calculate_final_strengths(QBAFrameworkObject *self)
         return -1;
     }
 
-    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
+    while ((item = PyIter_Next(iterator))) { // PyIter_Next returns a new reference
         if (_QBAFramework_calculate_final_strength(self, item) == -1.0 && PyErr_Occurred()) {
             Py_DECREF(item); Py_DECREF(iterator);
             return -1;
