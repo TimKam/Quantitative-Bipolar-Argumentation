@@ -7,6 +7,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include "structmember.h"
+#include <stdarg.h>
 #include <float.h>
 #include <string.h>
 
@@ -1690,9 +1691,290 @@ QBAFramework_isacyclic(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
     Py_RETURN_FALSE;
 }
 
+
+/**
+ * @brief Decrease the reference count of each given PyObject and return -1.0.
+ *
+ * @param number_of_objects the number of PyObject* arguments that follow
+ * @return double always -1.0
+ */
+static double
+_QBAFramework_decref_on_error(Py_ssize_t number_of_objects, ...)
+{
+    va_list objects_to_decref;
+    va_start(objects_to_decref, number_of_objects);
+
+    for (Py_ssize_t object_index = 0; object_index < number_of_objects; object_index++) {
+        PyObject *current_object = va_arg(objects_to_decref, PyObject *);
+        Py_XDECREF(current_object);
+    }
+
+    va_end(objects_to_decref);
+    return -1.0;
+}
+
+
+/**
+ * @brief Append argument to argument_stack.
+ *
+ * @param argument_stack a PyList used as a stack
+ * @param argument the argument to push
+ * @return int 0 if successful, -1 otherwise
+ */
+static int
+_QBAFramework_argument_stack_push(PyObject *argument_stack, PyObject *argument)
+{
+    return PyList_Append(argument_stack, argument);
+}
+
+
+/**
+ * @brief Remove the top item from argument_stack.
+ *
+ * @param argument_stack a PyList used as a stack
+ * @return int 0 if successful, -1 otherwise
+ */
+static int
+_QBAFramework_argument_stack_pop(PyObject *argument_stack)
+{
+    Py_ssize_t last_argument_index = PyList_GET_SIZE(argument_stack) - 1;
+    return PySequence_DelItem(argument_stack, last_argument_index);
+}
+
+
+/**
+ * @brief Return the top item from argument_stack.
+ *
+ * @param argument_stack a PyList used as a stack
+ * @return PyObject* borrowed reference to the top argument
+ */
+static PyObject *
+_QBAFramework_argument_stack_top(PyObject *argument_stack)
+{
+    Py_ssize_t last_argument_index = PyList_GET_SIZE(argument_stack) - 1;
+    return PyList_GET_ITEM(argument_stack, last_argument_index);
+}
+
+
+/**
+ * @brief Add any dependency of current_argument without a calculated final strength to argument_stack.
+ *
+ * @param self an instance of QBAFramework
+ * @param current_argument the argument whose dependencies are inspected
+ * @param argument_stack a PyList used as a stack
+ * @param arguments_on_stack a PySet with arguments currently on the stack
+ * @return int 0 if successful, -1 otherwise
+ */
+static int
+_QBAFramework_push_unresolved_dependencies(QBAFrameworkObject *self, PyObject *current_argument,
+                                           PyObject *argument_stack, PyObject *arguments_on_stack)
+{
+    PyObject *attackers = _QBAFARelations_agents((QBAFARelationsObject*)self->attack_relations, current_argument);
+    if (attackers == NULL) {
+        return -1;
+    }
+
+    PyObject *supporters = _QBAFARelations_agents((QBAFARelationsObject*)self->support_relations, current_argument);
+    if (supporters == NULL) {
+        Py_DECREF(attackers);
+        return -1;
+    }
+
+    PyObject *dependencies = PyList_Concat(attackers, supporters);
+    Py_DECREF(attackers);
+    Py_DECREF(supporters);
+    if (dependencies == NULL) {
+        return -1;
+    }
+
+    PyObject *dependency_iterator = PyObject_GetIter(dependencies);
+    PyObject *dependency_argument;
+    if (dependency_iterator == NULL) {
+        Py_DECREF(dependencies);
+        return -1;
+    }
+
+    while ((dependency_argument = PyIter_Next(dependency_iterator))) {
+        int dependency_has_calculated_strength = PyDict_Contains(self->final_strengths, dependency_argument);
+        if (dependency_has_calculated_strength < 0) {
+            Py_DECREF(dependency_argument);
+            Py_DECREF(dependency_iterator);
+            Py_DECREF(dependencies);
+            return -1;
+        }
+
+        if (!dependency_has_calculated_strength) {
+            int dependency_is_on_stack = PySet_Contains(arguments_on_stack, dependency_argument);
+            if (dependency_is_on_stack < 0) {
+                Py_DECREF(dependency_argument);
+                Py_DECREF(dependency_iterator);
+                Py_DECREF(dependencies);
+                return -1;
+            }
+            if (dependency_is_on_stack) {
+                Py_DECREF(dependency_argument);
+                Py_DECREF(dependency_iterator);
+                Py_DECREF(dependencies);
+                PyErr_SetString(PyExc_RuntimeError,
+                                "encountered a dependency cycle while calculating final strengths");
+                return -1;
+            }
+
+            if (_QBAFramework_argument_stack_push(argument_stack, dependency_argument) < 0) {
+                Py_DECREF(dependency_argument);
+                Py_DECREF(dependency_iterator);
+                Py_DECREF(dependencies);
+                return -1;
+            }
+        }
+
+        Py_DECREF(dependency_argument);
+    }
+
+    Py_DECREF(dependency_iterator);
+    Py_DECREF(dependencies);
+    return 0;
+}
+
+
+/**
+ * @brief Return the calculated final strengths of all arguments in arguments.
+ * Return NULL if any argument does not have a calculated final strength yet or if an error occurred.
+ *
+ * @param self an instance of QBAFramework
+ * @param arguments a list of QBAFArgument
+ * @return PyObject* a new PyList of PyFloat
+ */
+static PyObject *
+_QBAFramework_retrieve_computed_strengths(QBAFrameworkObject *self, PyObject *arguments)
+{
+    Py_ssize_t number_of_arguments = PyObject_Size(arguments);
+    if (number_of_arguments == -1) {
+        return NULL;
+    }
+
+    PyObject *calculated_strengths = PyList_New(number_of_arguments);
+    if (calculated_strengths == NULL) {
+        return NULL;
+    }
+
+    PyObject *argument_iterator = PyObject_GetIter(arguments);
+    PyObject *current_argument;
+    if (argument_iterator == NULL) {
+        Py_DECREF(calculated_strengths);
+        return NULL;
+    }
+
+    Py_ssize_t argument_index = 0;
+    while ((current_argument = PyIter_Next(argument_iterator))) {
+        int has_calculated_strength = PyDict_Contains(self->final_strengths, current_argument);
+        if (has_calculated_strength < 0) {
+            Py_DECREF(current_argument);
+            Py_DECREF(argument_iterator);
+            Py_DECREF(calculated_strengths);
+            return NULL;
+        }
+        if (!has_calculated_strength) {
+            Py_DECREF(current_argument);
+            Py_DECREF(argument_iterator);
+            Py_DECREF(calculated_strengths);
+            PyErr_SetString(PyExc_RuntimeError, "missing calculated final strength for dependency");
+            return NULL;
+        }
+
+        double current_strength = PyFloat_AsDouble(PyDict_GetItem(self->final_strengths, current_argument));
+        Py_DECREF(current_argument);
+        if (current_strength == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(argument_iterator);
+            Py_DECREF(calculated_strengths);
+            return NULL;
+        }
+
+        PyObject *current_strength_object = PyFloat_FromDouble(current_strength);
+        if (current_strength_object == NULL) {
+            Py_DECREF(argument_iterator);
+            Py_DECREF(calculated_strengths);
+            return NULL;
+        }
+
+        PyList_SET_ITEM(calculated_strengths, argument_index, current_strength_object);
+        argument_index++;
+    }
+
+    Py_DECREF(argument_iterator);
+    return calculated_strengths;
+}
+
+
+/**
+ * @brief Calculate and store the final strength of current_argument from already-calculated dependencies.
+ *
+ * @param self an instance of QBAFramework
+ * @param current_argument the argument whose final strength is calculated
+ * @return int 0 if successful, -1 otherwise
+ */
+static int
+_QBAFramework_calculate_argument_with_resolved_dependencies(QBAFrameworkObject *self, PyObject *current_argument)
+{
+    PyObject *attackers = _QBAFARelations_agents((QBAFARelationsObject*)self->attack_relations, current_argument);
+    if (attackers == NULL) {
+        return -1;
+    }
+
+    PyObject *supporters = _QBAFARelations_agents((QBAFARelationsObject*)self->support_relations, current_argument);
+    if (supporters == NULL) {
+        Py_DECREF(attackers);
+        return -1;
+    }
+
+    PyObject *attacker_strengths = _QBAFramework_retrieve_computed_strengths(self, attackers);
+    if (attacker_strengths == NULL) {
+        Py_DECREF(attackers);
+        Py_DECREF(supporters);
+        return -1;
+    }
+
+    PyObject *supporter_strengths = _QBAFramework_retrieve_computed_strengths(self, supporters);
+    Py_DECREF(attackers);
+    Py_DECREF(supporters);
+    if (supporter_strengths == NULL) {
+        Py_DECREF(attacker_strengths);
+        return -1;
+    }
+
+    double aggregation = _QBAFramework_aggregation_function(self, attacker_strengths, supporter_strengths);
+    Py_DECREF(attacker_strengths);
+    Py_DECREF(supporter_strengths);
+    if (aggregation == -1.0 && PyErr_Occurred()) {
+        return -1;
+    }
+
+    double initial_strength = PyFloat_AsDouble(PyDict_GetItem(self->initial_strengths, current_argument));
+    if (initial_strength == -1.0 && PyErr_Occurred()) {
+        return -1;
+    }
+
+    double final_strength = _QBAFramework_influence_function(self, initial_strength, aggregation);
+    if (final_strength == -1.0 && PyErr_Occurred()) {
+        return -1;
+    }
+
+    PyObject *final_strength_object = PyFloat_FromDouble(final_strength);
+    if (final_strength_object == NULL) {
+        return -1;
+    }
+    if (PyDict_SetItem(self->final_strengths, current_argument, final_strength_object) < 0) {
+        Py_DECREF(final_strength_object);
+        return -1;
+    }
+    Py_DECREF(final_strength_object);
+    return 0;
+}
+
+
 /**
  * @brief Return the final strength of a specific argument, -1.0 if an error occurred.
- * This function calls itself recursively. So, it only works with acyclic arguments.
+ * This function evaluates dependencies iteratively. So, it only works with acyclic arguments.
  * It stores all the calculated final strengths in self.__final_strengths.
  * 
  * @param self an instance of QBAFramework
@@ -1702,7 +1984,6 @@ QBAFramework_isacyclic(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
 static double
 _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argument)
 {
-
     // Check if it has been calculated already
     int contains = PyDict_Contains(self->final_strengths, argument);
     if (contains < 0) {
@@ -1712,130 +1993,66 @@ _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argum
         return PyFloat_AsDouble(PyDict_GetItem(self->final_strengths, argument));
     }
 
-    // Obtain final strength of attackers
-    PyObject *attackers = _QBAFARelations_agents((QBAFARelationsObject*)self->attack_relations, argument);
-    if (attackers == NULL) {
-        return -1.0;
+    PyObject *argument_stack = PyList_New(0);
+    PyObject *arguments_on_stack = PySet_New(NULL);
+    if (argument_stack == NULL || arguments_on_stack == NULL) {
+        return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
     }
 
-    PyObject *iterator = PyObject_GetIter(attackers);
-    if (iterator == NULL) {
-        Py_DECREF(attackers);
-        return -1.0;
-    }
-    Py_ssize_t size = PyObject_Size(attackers);
-    if (size == -1) {
-        Py_DECREF(attackers);
-        Py_DECREF(iterator);
-        return -1.0;
+    if (_QBAFramework_argument_stack_push(argument_stack, argument) < 0) {
+        return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
     }
 
-    PyObject *attacker_strengths = PyList_New(size);
-    if (attacker_strengths == NULL) {
-        Py_DECREF(attackers);
-        Py_DECREF(iterator);
-        return -1.0;
-    }
-    
-    PyObject *item;
-    Py_ssize_t index = 0;
-    while ((item = PyIter_Next(iterator))) { // PyIter_Next returns a new reference
-        double strength = _QBAFramework_calculate_final_strength(self, item);
-        Py_DECREF(item);
-        if (strength == -1.0 && PyErr_Occurred()) {
-            Py_DECREF(iterator);
-            Py_DECREF(attackers);
-            Py_DECREF(attacker_strengths);
-            return -1.0;
+    while (PyList_GET_SIZE(argument_stack) > 0) {
+        PyObject *current_argument = _QBAFramework_argument_stack_top(argument_stack);
+
+        contains = PyDict_Contains(self->final_strengths, current_argument);
+        if (contains < 0) {
+            return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+        }
+        if (contains) {
+            if (_QBAFramework_argument_stack_pop(argument_stack) < 0) {
+                return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+            }
+            if (PySet_Discard(arguments_on_stack, current_argument) < 0) {
+                return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+            }
+            continue;
         }
 
-        PyList_SET_ITEM(attacker_strengths, index, PyFloat_FromDouble(strength));
-
-        index++;
-    }
-
-    Py_DECREF(iterator);
-    Py_DECREF(attackers);
-
-    // Obtain final strength of supporters
-    PyObject *supporters = _QBAFARelations_agents((QBAFARelationsObject*)self->support_relations, argument);
-    if (supporters == NULL) {
-        Py_DECREF(attacker_strengths);
-        return -1.0;
-    }
-    iterator = PyObject_GetIter(supporters);
-
-    if (iterator == NULL) {
-        Py_DECREF(attacker_strengths);
-        Py_DECREF(supporters);
-        return -1.0;
-    }
-    size = PyObject_Size(supporters);
-    if (size == -1) {
-        Py_DECREF(attacker_strengths);
-        Py_DECREF(iterator);
-        Py_DECREF(supporters);
-        return -1.0;
-    }
-
-    PyObject *supporter_strengths = PyList_New(size);
-    if (supporter_strengths == NULL) {
-        Py_DECREF(attacker_strengths);
-        Py_DECREF(iterator);
-        Py_DECREF(supporters);
-        return -1.0;
-    }
-    
-    index = 0;
-    while ((item = PyIter_Next(iterator))) {    // PyIter_Next returns a new reference
-        double strength = _QBAFramework_calculate_final_strength(self, item);
-        Py_DECREF(item);
-        if (strength == -1.0 && PyErr_Occurred()) {
-            Py_DECREF(attacker_strengths);
-            Py_DECREF(iterator);
-            Py_DECREF(supporters);
-            Py_DECREF(supporter_strengths);
-            return -1.0;
+        int argument_is_on_stack = PySet_Contains(arguments_on_stack, current_argument);
+        if (argument_is_on_stack < 0) {
+            return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
         }
 
-        PyList_SET_ITEM(supporter_strengths, index, PyFloat_FromDouble(strength));
+        // On first visit push dependencies. On second visit calculate final strength.
+        if (!argument_is_on_stack) {
+            if (PySet_Add(arguments_on_stack, current_argument) < 0) {
+                return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+            }
 
-        index++;
-    } 
+            if (_QBAFramework_push_unresolved_dependencies(self, current_argument, argument_stack, arguments_on_stack) < 0) {
+                return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+            }
+            continue;
+        }
 
-    Py_DECREF(iterator);
-    Py_DECREF(supporters);
-
-    // Obtain result from aggregation function
-    double aggregation = _QBAFramework_aggregation_function(self, attacker_strengths, supporter_strengths);
-    Py_DECREF(attacker_strengths);
-    Py_DECREF(supporter_strengths);
-    if (aggregation == -1.0 && PyErr_Occurred()) {
-        return -1.0;
+        if (_QBAFramework_calculate_argument_with_resolved_dependencies(self, current_argument) < 0) {
+            return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+        }
+        if (_QBAFramework_argument_stack_pop(argument_stack) < 0) {
+            return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+        }
+        if (PySet_Discard(arguments_on_stack, current_argument) < 0) {
+            return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+        }
     }
 
-    // Obtain initial strength
-    double initial_strength = PyFloat_AsDouble(PyDict_GetItem(self->initial_strengths, argument));
-    if (initial_strength == -1.0 && PyErr_Occurred()) {
-        return -1.0;
-    }
-
-    // calculate final strength;
-    double final_strength = _QBAFramework_influence_function(self, initial_strength, aggregation);
-    if (final_strength == -1.0 && PyErr_Occurred()) {
-        return -1.0;
-    }
-
-    // final_strengths[argument] = final_strength
-    PyObject *pyfinal_strength = PyFloat_FromDouble(final_strength);    // New reference
-    if (PyDict_SetItem(self->final_strengths, argument, pyfinal_strength) < 0) {
-        Py_XDECREF(pyfinal_strength);
-        return -1.0;
-    }
-    Py_XDECREF(pyfinal_strength);
-
-    return final_strength;
+    Py_DECREF(argument_stack);
+    Py_DECREF(arguments_on_stack);
+    return PyFloat_AsDouble(PyDict_GetItem(self->final_strengths, argument));
 }
+
 
 /**
  * @brief Calculate the final strengths of all the arguments of the Framework.
