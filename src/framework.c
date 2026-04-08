@@ -61,6 +61,9 @@ typedef struct {
     double  (*aggregation_function)(PyObject*, PyObject*); /* aggregation function that is going to be used to calcualte the final strengths */
     double    min_strength;           /* min value for the initial strengths */
     double    max_strength;           /* max value for the initial strengths */
+    int       allow_cycles;           /* 1 if cyclic frameworks should be evaluated iteratively, 0 otherwise */
+    Py_ssize_t max_iterations;        /* maximum number of synchronous iterations for cyclic frameworks */
+    double    convergence_threshold;  /* convergence threshold for cyclic frameworks */
     PyObject *influence_function_callable;   /* influence function given from python */
     PyObject *aggregation_function_callable; /* aggregation function given from python */
 } QBAFrameworkObject;
@@ -149,6 +152,9 @@ QBAFramework_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         self->aggregation_function = sum;
         self->min_strength = -DBL_MAX;
         self->max_strength = DBL_MAX;
+        self->allow_cycles = FALSE;
+        self->max_iterations = 1000;
+        self->convergence_threshold = 1e-9;
         self->influence_function_callable = NULL;
         self->aggregation_function = NULL;
     }
@@ -351,17 +357,20 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"arguments", "initial_strengths", "attack_relations", "support_relations",
                             "disjoint_relations", "semantics", "aggregation_function", "influence_function",
-                            "min_strength", "max_strength", NULL};
+                            "min_strength", "max_strength", "allow_cycles", "max_iterations", "convergence_threshold", NULL};
     PyObject *arguments, *initial_strengths, *attack_relations, *support_relations, *tmp;
     int disjoint_relations = TRUE;
     char *semantics = NULL; // (e.g. "basic_model") If None it will be NULL, otherwise it is a pointer to char that is only accesible in this function.
     PyObject *aggregation_function = NULL, *influence_function = NULL;
     double min_strength = -DBL_MAX, max_strength = DBL_MAX;
+    int allow_cycles = FALSE;
+    Py_ssize_t max_iterations = 1000;
+    double convergence_threshold = 1e-9;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOOO|pzOOdd", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OOOO|pzOOddpnd", kwlist,
                                      &arguments, &initial_strengths, &attack_relations, &support_relations,
                                      &disjoint_relations, &semantics, &aggregation_function, &influence_function,
-                                     &min_strength, &max_strength))
+                                     &min_strength, &max_strength, &allow_cycles, &max_iterations, &convergence_threshold))
         return -1;
 
     if (!PyList_Check(arguments)) {
@@ -448,6 +457,18 @@ QBAFramework_init(QBAFrameworkObject *self, PyObject *args, PyObject *kwds)
 
     
     self->disjoint_relations = disjoint_relations;
+    self->allow_cycles = allow_cycles;
+    self->max_iterations = max_iterations;
+    self->convergence_threshold = convergence_threshold;
+
+    if (self->max_iterations <= 0) {
+        PyErr_SetString(PyExc_ValueError, "max_iterations must be greater than 0");
+        return -1;
+    }
+    if (self->convergence_threshold <= 0.0) {
+        PyErr_SetString(PyExc_ValueError, "convergence_threshold must be greater than 0");
+        return -1;
+    }
 
     if (self->disjoint_relations) {
         // Check attack and support relations are disjoint
@@ -739,6 +760,24 @@ static PyObject *
 QBAFramework_getmax_strength(QBAFrameworkObject *self, void *closure)
 {
     return PyFloat_FromDouble(self->max_strength);
+}
+
+static PyObject *
+QBAFramework_getallow_cycles(QBAFrameworkObject *self, void *closure)
+{
+    Py_RETURN_BOOL(self->allow_cycles);
+}
+
+static PyObject *
+QBAFramework_getmax_iterations(QBAFrameworkObject *self, void *closure)
+{
+    return PyLong_FromSsize_t(self->max_iterations);
+}
+
+static PyObject *
+QBAFramework_getconvergence_threshold(QBAFrameworkObject *self, void *closure)
+{
+    return PyFloat_FromDouble(self->convergence_threshold);
 }
 
 /**
@@ -1524,6 +1563,9 @@ QBAFramework_copy(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
     copy->influence_function = self->influence_function;
     copy->min_strength = self->min_strength;
     copy->max_strength = self->max_strength;
+    copy->allow_cycles = self->allow_cycles;
+    copy->max_iterations = self->max_iterations;
+    copy->convergence_threshold = self->convergence_threshold;
 
     Py_XINCREF(self->aggregation_function_callable);
     copy->aggregation_function_callable = self->aggregation_function_callable;
@@ -1691,29 +1733,6 @@ QBAFramework_isacyclic(QBAFrameworkObject *self, PyObject *Py_UNUSED(ignored))
     Py_RETURN_FALSE;
 }
 
-
-/**
- * @brief Decrease the reference count of each given PyObject and return -1.0.
- *
- * @param number_of_objects the number of PyObject* arguments that follow
- * @return double always -1.0
- */
-static double
-_QBAFramework_decref_on_error(Py_ssize_t number_of_objects, ...)
-{
-    va_list objects_to_decref;
-    va_start(objects_to_decref, number_of_objects);
-
-    for (Py_ssize_t object_index = 0; object_index < number_of_objects; object_index++) {
-        PyObject *current_object = va_arg(objects_to_decref, PyObject *);
-        Py_XDECREF(current_object);
-    }
-
-    va_end(objects_to_decref);
-    return -1.0;
-}
-
-
 /**
  * @brief Append argument to argument_stack.
  *
@@ -1788,12 +1807,12 @@ _QBAFramework_push_unresolved_dependencies(QBAFrameworkObject *self, PyObject *c
     }
 
     PyObject *dependency_iterator = PyObject_GetIter(dependencies);
-    PyObject *dependency_argument;
     if (dependency_iterator == NULL) {
         Py_DECREF(dependencies);
         return -1;
     }
 
+    PyObject *dependency_argument;
     while ((dependency_argument = PyIter_Next(dependency_iterator))) {
         int dependency_has_calculated_strength = PyDict_Contains(self->final_strengths, dependency_argument);
         if (dependency_has_calculated_strength < 0) {
@@ -1846,7 +1865,7 @@ _QBAFramework_push_unresolved_dependencies(QBAFrameworkObject *self, PyObject *c
  * @return PyObject* a new PyList of PyFloat
  */
 static PyObject *
-_QBAFramework_retrieve_computed_strengths(QBAFrameworkObject *self, PyObject *arguments)
+_QBAFramework_retrieve_computed_strengths(PyObject *strengths_by_argument, PyObject *arguments)
 {
     Py_ssize_t number_of_arguments = PyObject_Size(arguments);
     if (number_of_arguments == -1) {
@@ -1867,7 +1886,7 @@ _QBAFramework_retrieve_computed_strengths(QBAFrameworkObject *self, PyObject *ar
 
     Py_ssize_t argument_index = 0;
     while ((current_argument = PyIter_Next(argument_iterator))) {
-        int has_calculated_strength = PyDict_Contains(self->final_strengths, current_argument);
+        int has_calculated_strength = PyDict_Contains(strengths_by_argument, current_argument);
         if (has_calculated_strength < 0) {
             Py_DECREF(current_argument);
             Py_DECREF(argument_iterator);
@@ -1882,7 +1901,7 @@ _QBAFramework_retrieve_computed_strengths(QBAFrameworkObject *self, PyObject *ar
             return NULL;
         }
 
-        double current_strength = PyFloat_AsDouble(PyDict_GetItem(self->final_strengths, current_argument));
+        double current_strength = PyFloat_AsDouble(PyDict_GetItem(strengths_by_argument, current_argument));
         Py_DECREF(current_argument);
         if (current_strength == -1.0 && PyErr_Occurred()) {
             Py_DECREF(argument_iterator);
@@ -1914,7 +1933,8 @@ _QBAFramework_retrieve_computed_strengths(QBAFrameworkObject *self, PyObject *ar
  * @return int 0 if successful, -1 otherwise
  */
 static int
-_QBAFramework_calculate_argument_with_resolved_dependencies(QBAFrameworkObject *self, PyObject *current_argument)
+_QBAFramework_apply_semantics(QBAFrameworkObject *self, PyObject *current_argument,
+                              PyObject *dependency_strengths_by_argument, PyObject *strengths_to_update)
 {
     PyObject *attackers = _QBAFARelations_agents((QBAFARelationsObject*)self->attack_relations, current_argument);
     if (attackers == NULL) {
@@ -1927,14 +1947,14 @@ _QBAFramework_calculate_argument_with_resolved_dependencies(QBAFrameworkObject *
         return -1;
     }
 
-    PyObject *attacker_strengths = _QBAFramework_retrieve_computed_strengths(self, attackers);
+    PyObject *attacker_strengths = _QBAFramework_retrieve_computed_strengths(dependency_strengths_by_argument, attackers);
     if (attacker_strengths == NULL) {
         Py_DECREF(attackers);
         Py_DECREF(supporters);
         return -1;
     }
 
-    PyObject *supporter_strengths = _QBAFramework_retrieve_computed_strengths(self, supporters);
+    PyObject *supporter_strengths = _QBAFramework_retrieve_computed_strengths(dependency_strengths_by_argument, supporters);
     Py_DECREF(attackers);
     Py_DECREF(supporters);
     if (supporter_strengths == NULL) {
@@ -1963,7 +1983,7 @@ _QBAFramework_calculate_argument_with_resolved_dependencies(QBAFrameworkObject *
     if (final_strength_object == NULL) {
         return -1;
     }
-    if (PyDict_SetItem(self->final_strengths, current_argument, final_strength_object) < 0) {
+    if (PyDict_SetItem(strengths_to_update, current_argument, final_strength_object) < 0) {
         Py_DECREF(final_strength_object);
         return -1;
     }
@@ -1984,8 +2004,7 @@ _QBAFramework_calculate_argument_with_resolved_dependencies(QBAFrameworkObject *
 static double
 _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argument)
 {
-    // Check if it has been calculated already
-    int contains = PyDict_Contains(self->final_strengths, argument);
+    int contains = PyDict_Contains(self->final_strengths, argument); // Check if it has been calculated already
     if (contains < 0) {
         return -1.0;
     }
@@ -1996,11 +2015,13 @@ _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argum
     PyObject *argument_stack = PyList_New(0);
     PyObject *arguments_on_stack = PySet_New(NULL);
     if (argument_stack == NULL || arguments_on_stack == NULL) {
-        return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+        Py_XDECREF(argument_stack); Py_XDECREF(arguments_on_stack);
+        return -1.0;
     }
 
     if (_QBAFramework_argument_stack_push(argument_stack, argument) < 0) {
-        return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+        Py_DECREF(argument_stack); Py_DECREF(arguments_on_stack);
+        return -1.0;
     }
 
     while (PyList_GET_SIZE(argument_stack) > 0) {
@@ -2008,49 +2029,179 @@ _QBAFramework_calculate_final_strength(QBAFrameworkObject *self, PyObject *argum
 
         contains = PyDict_Contains(self->final_strengths, current_argument);
         if (contains < 0) {
-            return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+            Py_DECREF(argument_stack); Py_DECREF(arguments_on_stack);
+            return -1.0;
         }
         if (contains) {
             if (_QBAFramework_argument_stack_pop(argument_stack) < 0) {
-                return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+                Py_DECREF(argument_stack); Py_DECREF(arguments_on_stack);
+                return -1.0;
             }
             if (PySet_Discard(arguments_on_stack, current_argument) < 0) {
-                return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+                Py_DECREF(argument_stack); Py_DECREF(arguments_on_stack);
+                return -1.0;
             }
             continue;
         }
 
         int argument_is_on_stack = PySet_Contains(arguments_on_stack, current_argument);
         if (argument_is_on_stack < 0) {
-            return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+            Py_DECREF(argument_stack); Py_DECREF(arguments_on_stack);
+            return -1.0;
         }
 
         // On first visit push dependencies. On second visit calculate final strength.
         if (!argument_is_on_stack) {
             if (PySet_Add(arguments_on_stack, current_argument) < 0) {
-                return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+                Py_DECREF(argument_stack); Py_DECREF(arguments_on_stack);
+                return -1.0;
             }
 
             if (_QBAFramework_push_unresolved_dependencies(self, current_argument, argument_stack, arguments_on_stack) < 0) {
-                return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+                Py_DECREF(argument_stack); Py_DECREF(arguments_on_stack);
+                return -1.0;
             }
             continue;
         }
 
-        if (_QBAFramework_calculate_argument_with_resolved_dependencies(self, current_argument) < 0) {
-            return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+        if (_QBAFramework_apply_semantics(self, current_argument, self->final_strengths, self->final_strengths) < 0) {
+            Py_DECREF(argument_stack); Py_DECREF(arguments_on_stack);
+            return -1.0;
         }
         if (_QBAFramework_argument_stack_pop(argument_stack) < 0) {
-            return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+            Py_DECREF(argument_stack); Py_DECREF(arguments_on_stack);
+            return -1.0;
         }
         if (PySet_Discard(arguments_on_stack, current_argument) < 0) {
-            return _QBAFramework_decref_on_error(2, argument_stack, arguments_on_stack);
+            Py_DECREF(argument_stack); Py_DECREF(arguments_on_stack);
+            return -1.0;
         }
     }
-
     Py_DECREF(argument_stack);
     Py_DECREF(arguments_on_stack);
     return PyFloat_AsDouble(PyDict_GetItem(self->final_strengths, argument));
+}
+
+
+/**
+ * @brief Calculate one synchronous update of all argument strengths from dependency_strengths_by_argument.
+ *
+ * @param self an instance of QBAFramework
+ * @param dependency_strengths_by_argument strengths used as the read-only source for this iteration
+ * @return PyObject* a new PyDict with updated strengths, NULL if an error occurred
+ */
+static PyObject *
+_QBAFramework_calculate_next_strengths(QBAFrameworkObject *self, PyObject *dependency_strengths_by_argument)
+{
+    PyObject *updated_strengths = PyDict_New();
+    if (updated_strengths == NULL) {
+        return NULL;
+    }
+
+    PyObject *argument_iterator = PyObject_GetIter(self->arguments);
+    if (argument_iterator == NULL) {
+        Py_DECREF(updated_strengths);
+        return NULL;
+    }
+
+    PyObject *current_argument;
+    while ((current_argument = PyIter_Next(argument_iterator))) {
+        if (_QBAFramework_apply_semantics(self, current_argument, dependency_strengths_by_argument, updated_strengths) < 0) {
+            Py_DECREF(current_argument); Py_DECREF(argument_iterator); Py_DECREF(updated_strengths);
+            return NULL;
+        }
+        Py_DECREF(current_argument);
+    }
+
+    Py_DECREF(argument_iterator);
+    return updated_strengths;
+}
+
+
+/**
+ * @brief Return 1 if previous_strengths and updated_strengths differ by at most convergence_threshold for every argument.
+ *
+ * @param self an instance of QBAFramework
+ * @param previous_strengths strengths from the previous iteration
+ * @param updated_strengths strengths from the current iteration
+ * @return int 1 if converged, 0 if not converged, -1 if an error occurred
+ */
+static int
+_QBAFramework_strengths_have_converged(QBAFrameworkObject *self, PyObject *previous_strengths, PyObject *updated_strengths)
+{
+    PyObject *argument_iterator = PyObject_GetIter(self->arguments);
+    if (argument_iterator == NULL) {
+        return -1;
+    }
+
+    PyObject *current_argument;
+    while ((current_argument = PyIter_Next(argument_iterator))) {
+        double previous_strength = PyFloat_AsDouble(PyDict_GetItem(previous_strengths, current_argument));
+        if (previous_strength == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(current_argument); Py_DECREF(argument_iterator);
+            return -1;
+        }
+
+        double updated_strength = PyFloat_AsDouble(PyDict_GetItem(updated_strengths, current_argument));
+        if (updated_strength == -1.0 && PyErr_Occurred()) {
+            Py_DECREF(current_argument); Py_DECREF(argument_iterator);
+            return -1;
+        }
+
+        double strength_difference = updated_strength - previous_strength;
+        if (strength_difference < 0.0) {
+            strength_difference = -strength_difference;
+        }
+        Py_DECREF(current_argument);
+
+        if (strength_difference > self->convergence_threshold) {
+            Py_DECREF(argument_iterator);
+            return FALSE;
+        }
+    }
+
+    Py_DECREF(argument_iterator);
+    return TRUE;
+}
+
+
+/**
+ * @brief Calculate final strengths for cyclic frameworks by synchronous fixed-point iteration.
+ *
+ * @param self the QBAFramework
+ * @return int 0 if successful, -1 if an error occurred
+ */
+static int
+_QBAFramework_calculate_cyclic_final_strengths(QBAFrameworkObject *self)
+{
+    PyObject *previous_strengths = PyDict_Copy(self->initial_strengths);
+    if (previous_strengths == NULL) {
+        return -1;
+    }
+
+    for (Py_ssize_t iteration = 0; iteration < self->max_iterations; iteration++) {
+        PyObject *updated_strengths = _QBAFramework_calculate_next_strengths(self, previous_strengths);
+        if (updated_strengths == NULL) {
+            Py_DECREF(previous_strengths);
+            return -1;
+        }
+
+        int strengths_have_converged = _QBAFramework_strengths_have_converged(self, previous_strengths, updated_strengths);
+        Py_DECREF(previous_strengths);
+        if (strengths_have_converged < 0) {
+            Py_DECREF(updated_strengths);
+            return -1;
+        }
+        if (strengths_have_converged) {
+            Py_CLEAR(self->final_strengths);
+            self->final_strengths = updated_strengths;
+            return 0;
+        }
+        previous_strengths = updated_strengths;
+    }
+    Py_DECREF(previous_strengths);
+    PyErr_Format(PyExc_RuntimeError, "cyclic framework did not converge within %zd iterations", self->max_iterations);
+    return -1;
 }
 
 
@@ -2069,32 +2220,34 @@ _QBAFRamework_calculate_final_strengths(QBAFrameworkObject *self)
         return -1;
     }
     if (!isacyclic) {
-        PyErr_SetString(PyExc_NotImplementedError,
-                        "calculate final strengths of non-acyclic framework not implemented");
-        return -1;
+        if (!self->allow_cycles) {
+            PyErr_SetString(PyExc_NotImplementedError, "calculate final strengths of cyclic framework requires allow_cycles=True");
+            return -1;
+        }
+        return _QBAFramework_calculate_cyclic_final_strengths(self);
     }
 
     Py_CLEAR(self->final_strengths);
     self->final_strengths = PyDict_New();
 
     PyObject *iterator = PyObject_GetIter(self->arguments);
-    PyObject *item;
     if (iterator == NULL) {
         return -1;
     }
 
+    PyObject *item;
     while ((item = PyIter_Next(iterator))) { // PyIter_Next returns a new reference
         if (_QBAFramework_calculate_final_strength(self, item) == -1.0 && PyErr_Occurred()) {
-            Py_DECREF(item); Py_DECREF(iterator);
+            Py_DECREF(item);
+            Py_DECREF(iterator);
             return -1;
         }
         Py_DECREF(item);
     }
-
     Py_DECREF(iterator);
-
     return 0;
 }
+
 
 /**
  * @brief Return the final strengths of arguments of the Framework, NULL if an error occurred.
@@ -2330,6 +2483,9 @@ _QBAFramework_copy_settings(QBAFrameworkObject *self)
     copy->influence_function = self->influence_function;
     copy->min_strength = self->min_strength;
     copy->max_strength = self->max_strength;
+    copy->allow_cycles = self->allow_cycles;
+    copy->max_iterations = self->max_iterations;
+    copy->convergence_threshold = self->convergence_threshold;
 
     Py_XINCREF(self->aggregation_function_callable);
     copy->aggregation_function_callable = self->aggregation_function_callable;
@@ -2338,6 +2494,7 @@ _QBAFramework_copy_settings(QBAFrameworkObject *self)
     
     return (PyObject*)copy;
 }
+
 
 /**
  * @brief Return the reversal framework of self to other w.r.t. set, NULL if an error is encountered.
@@ -4402,6 +4559,30 @@ PyDoc_STRVAR(max_strength_doc,
 "Type: float\n"
 );
 
+PyDoc_STRVAR(allow_cycles_doc,
+"True if cyclic frameworks should be evaluated by synchronous iteration.\n"
+"\n"
+"Getter: Return whether cyclic frameworks are allowed.\n"
+"\n"
+"Type: bool\n"
+);
+
+PyDoc_STRVAR(max_iterations_doc,
+"The maximum number of synchronous iterations used for cyclic frameworks.\n"
+"\n"
+"Getter: Return the QBAFramework's maximum number of iterations.\n"
+"\n"
+"Type: int\n"
+);
+
+PyDoc_STRVAR(convergence_threshold_doc,
+"The convergence threshold used for cyclic frameworks.\n"
+"\n"
+"Getter: Return the QBAFramework's convergence threshold.\n"
+"\n"
+"Type: float\n"
+);
+
 /**
  * @brief A list with the setters and getters of the class QBAFramework
  * 
@@ -4425,6 +4606,12 @@ static PyGetSetDef QBAFramework_getsetters[] = {
      min_strength_doc, NULL},
     {"max_strength", (getter) QBAFramework_getmax_strength, NULL,
      max_strength_doc, NULL},
+    {"allow_cycles", (getter) QBAFramework_getallow_cycles, NULL,
+     allow_cycles_doc, NULL},
+    {"max_iterations", (getter) QBAFramework_getmax_iterations, NULL,
+     max_iterations_doc, NULL},
+    {"convergence_threshold", (getter) QBAFramework_getconvergence_threshold, NULL,
+     convergence_threshold_doc, NULL},
     {NULL}  /* Sentinel */
 };
 
@@ -4931,7 +5118,8 @@ PyDoc_STRVAR(QBAFramework_doc,
 "QBAFramework(arguments, initial_strengths, attack_relations, support_relations,\n"
 "    disjoint_relations=True, semantics=None,\n"
 "    aggregation_function=None, influence_function=None,\n"
-"    min_strength=-1.7976931348623157e+308, max_strength=1.7976931348623157e+308)\n"     
+"    min_strength=-1.7976931348623157e+308, max_strength=1.7976931348623157e+308,\n"
+"    allow_cycles=False, max_iterations=1000, convergence_threshold=1e-09)\n"
 "\n"
 "Args:\n"
 "    arguments (list): a list of QBAFArgument\n"
@@ -4950,6 +5138,9 @@ PyDoc_STRVAR(QBAFramework_doc,
 "        It can only be modified when the semantics are custom\n"
 "    max_strength (float, optional): The maximum value an initial strength can have. Defaults to 1.7976931348623157e+308.\n"
 "        It can only be modified when the semantics are custom\n"
+"    allow_cycles (bool, optional): True if cyclic frameworks should be evaluated by synchronous iteration. Defaults to False.\n"
+"    max_iterations (int, optional): Maximum number of synchronous iterations for cyclic frameworks. Defaults to 1000.\n"
+"    convergence_threshold (float, optional): Convergence threshold for cyclic frameworks. Defaults to 1e-09.\n"
 );
 
 /**

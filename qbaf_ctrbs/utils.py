@@ -1,6 +1,8 @@
 from itertools import chain, combinations
 from qbaf import QBAFramework
 
+
+
 def restrict(qbaf, arguments):
     """Restricts the given QBAF to the provided set of arguments.
 
@@ -19,7 +21,16 @@ def restrict(qbaf, arguments):
             restriction_is.append(strength)
     restriction_atts = [(source, target) for source, target in qbaf.attack_relations.relations if source in arguments and target in arguments]
     restriction_supps = [(source, target) for source, target in qbaf.support_relations.relations if source in arguments and target in arguments]
-    return QBAFramework(new_args, restriction_is, restriction_atts, restriction_supps, semantics=qbaf.semantics)
+    return QBAFramework(new_args,
+                        restriction_is,
+                        restriction_atts,
+                        restriction_supps,
+                        semantics=qbaf.semantics,
+                        allow_cycles=qbaf.allow_cycles,
+                        max_iterations=qbaf.max_iterations,
+                        convergence_threshold=qbaf.convergence_threshold)
+
+
 
 def determine_powerset(elements):
     """Determines the powerset of a list of elements

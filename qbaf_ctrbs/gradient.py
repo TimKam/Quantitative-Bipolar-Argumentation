@@ -30,7 +30,10 @@ def determine_gradient_ctrb(topic, contributors, qbaf, epsilon=1.490116119384765
         qbaf_changed = QBAFramework(argument_list, initial_strengths,
                                     qbaf.attack_relations.relations,
                                     qbaf.support_relations.relations,
-                                    semantics=qbaf.semantics)
+                                    semantics=qbaf.semantics,
+                                    allow_cycles=qbaf.allow_cycles,
+                                    max_iterations=qbaf.max_iterations,
+                                    convergence_threshold=qbaf.convergence_threshold)
         return qbaf_changed.final_strength(topic)
     
     all_contributors_strength = [(contributor, qbaf.initial_strength(contributor)) for contributor in contributors]
