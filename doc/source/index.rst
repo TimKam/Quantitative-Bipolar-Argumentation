@@ -19,14 +19,14 @@ For example, a small framework can be created like this:
    from qbaf import QBAFramework
 
    qbaf = QBAFramework(
-       ["A", "B", "C"],
+       ['a', 'b', 'c'],
        [0.8, 0.4, 0.7],
-       [("B", "A")],
-       [("C", "A")],
+       [('b', 'a')],
+       [('c', 'a')],
        semantics="DFQuAD_model",
    )
 
-Here, ``B`` attacks ``A``, ``C`` supports ``A``, and ``semantics`` specifies how those interactions are turned into final strengths.
+Here, ``b`` attacks ``a``, ``c`` supports ``a``, and ``semantics`` specifies how those interactions are turned into final strengths.
 
 The supported semantics are:
 
@@ -42,7 +42,7 @@ Once the framework has been created, you can inspect whether it is acyclic and w
 .. code-block:: python
 
    qbaf.final_strengths
-   qbaf.final_strength("A")
+   qbaf.final_strength('a')
 
 
 
@@ -56,13 +56,13 @@ The available contribution functions are:
 - Partitioned Shapley contribution: ``determine_partitioned_shapley_ctrb``
 - Gradient contribution: ``determine_gradient_ctrb``
 
-For example, to compute the removal contribution of ``C`` to ``A``:
+For example, to compute the removal contribution of ``c`` to ``a``:
 
 .. code-block:: python
 
    from qbaf_ctrbs.removal import determine_removal_ctrb
 
-   contribution = determine_removal_ctrb("A", "C", qbaf)
+   contribution = determine_removal_ctrb('a', 'c', qbaf)
    print(contribution)
 
 Cyclic Frameworks
@@ -84,9 +84,9 @@ For example:
 .. code-block:: python
 
    cyclic_qbaf = QBAFramework(
-       ["A", "B"],
+       ['a', 'b'],
        [1.0, 0.5],
-       [("A", "B"), ("B", "A")],
+       [('a', 'b'), ('b', 'a')],
        [],
        semantics="DFQuAD_model",
        allow_cycles=True,
