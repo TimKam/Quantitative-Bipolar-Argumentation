@@ -239,6 +239,8 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">combinations</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qbaf</span><span class="w"> </span><span class="kn">import</span> <span class="n">QBAFramework</span>
 
+
+
 <div class="viewcode-block" id="restrict">
 <a class="viewcode-back" href="../../index.html#qbaf_ctrbs.utils.restrict">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">restrict</span><span class="p">(</span><span class="n">qbaf</span><span class="p">,</span> <span class="n">arguments</span><span class="p">):</span>
@@ -259,7 +261,16 @@
             <span class="n">restriction_is</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">strength</span><span class="p">)</span>
     <span class="n">restriction_atts</span> <span class="o">=</span> <span class="p">[(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span> <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">qbaf</span><span class="o">.</span><span class="n">attack_relations</span><span class="o">.</span><span class="n">relations</span> <span class="k">if</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">arguments</span> <span class="ow">and</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">arguments</span><span class="p">]</span>
     <span class="n">restriction_supps</span> <span class="o">=</span> <span class="p">[(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span> <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">qbaf</span><span class="o">.</span><span class="n">support_relations</span><span class="o">.</span><span class="n">relations</span> <span class="k">if</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">arguments</span> <span class="ow">and</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">arguments</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">QBAFramework</span><span class="p">(</span><span class="n">new_args</span><span class="p">,</span> <span class="n">restriction_is</span><span class="p">,</span> <span class="n">restriction_atts</span><span class="p">,</span> <span class="n">restriction_supps</span><span class="p">,</span> <span class="n">semantics</span><span class="o">=</span><span class="n">qbaf</span><span class="o">.</span><span class="n">semantics</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">QBAFramework</span><span class="p">(</span><span class="n">new_args</span><span class="p">,</span>
+                        <span class="n">restriction_is</span><span class="p">,</span>
+                        <span class="n">restriction_atts</span><span class="p">,</span>
+                        <span class="n">restriction_supps</span><span class="p">,</span>
+                        <span class="n">semantics</span><span class="o">=</span><span class="n">qbaf</span><span class="o">.</span><span class="n">semantics</span><span class="p">,</span>
+                        <span class="n">allow_cycles</span><span class="o">=</span><span class="n">qbaf</span><span class="o">.</span><span class="n">allow_cycles</span><span class="p">,</span>
+                        <span class="n">max_iterations</span><span class="o">=</span><span class="n">qbaf</span><span class="o">.</span><span class="n">max_iterations</span><span class="p">,</span>
+                        <span class="n">convergence_threshold</span><span class="o">=</span><span class="n">qbaf</span><span class="o">.</span><span class="n">convergence_threshold</span><span class="p">)</span></div>
+
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">determine_powerset</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>

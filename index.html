@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Welcome to QBAF-Py’s documentation! &#8212; qbaf-py 0.0.1 documentation</title>
+    <title>QBAF-Py Documentation &#8212; qbaf-py 0.0.1 documentation</title>
   
   
   
@@ -224,7 +224,7 @@
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Welcome to QBAF-Py’s documentation!</h1>
+    <h1>QBAF-Py Documentation</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -234,6 +234,20 @@
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cyclic-frameworks">Cyclic Frameworks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contribution-functions">Contribution Functions</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.removal.determine_removal_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_removal_ctrb()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.intrinsic_removal.determine_iremoval_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_iremoval_ctrb()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.shapley.determine_shapley_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_shapley_ctrb()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.shapley.determine_partitioned_shapley_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_partitioned_shapley_ctrb()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.gradient.determine_gradient_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_gradient_ctrb()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.utils.restrict"><code class="docutils literal notranslate"><span class="pre">restrict()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-support">Visualization Support</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_visualizer.Visualizer.visualize"><code class="docutils literal notranslate"><span class="pre">visualize()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-qbaf">Core API</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFARelations"><code class="docutils literal notranslate"><span class="pre">QBAFARelations</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFARelations.add"><code class="docutils literal notranslate"><span class="pre">QBAFARelations.add()</span></code></a></li>
@@ -255,6 +269,7 @@
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.add_argument"><code class="docutils literal notranslate"><span class="pre">QBAFramework.add_argument()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.add_attack_relation"><code class="docutils literal notranslate"><span class="pre">QBAFramework.add_attack_relation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.add_support_relation"><code class="docutils literal notranslate"><span class="pre">QBAFramework.add_support_relation()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.allow_cycles"><code class="docutils literal notranslate"><span class="pre">QBAFramework.allow_cycles</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.are_strength_consistent"><code class="docutils literal notranslate"><span class="pre">QBAFramework.are_strength_consistent()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.arguments"><code class="docutils literal notranslate"><span class="pre">QBAFramework.arguments</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.attack_relations"><code class="docutils literal notranslate"><span class="pre">QBAFramework.attack_relations</span></code></a></li>
@@ -264,6 +279,7 @@
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.contains_argument"><code class="docutils literal notranslate"><span class="pre">QBAFramework.contains_argument()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.contains_attack_relation"><code class="docutils literal notranslate"><span class="pre">QBAFramework.contains_attack_relation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.contains_support_relation"><code class="docutils literal notranslate"><span class="pre">QBAFramework.contains_support_relation()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.convergence_threshold"><code class="docutils literal notranslate"><span class="pre">QBAFramework.convergence_threshold</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.copy"><code class="docutils literal notranslate"><span class="pre">QBAFramework.copy()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.disjoint_relations"><code class="docutils literal notranslate"><span class="pre">QBAFramework.disjoint_relations</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.final_strength"><code class="docutils literal notranslate"><span class="pre">QBAFramework.final_strength()</span></code></a></li>
@@ -274,6 +290,7 @@
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.isNSIExplanation"><code class="docutils literal notranslate"><span class="pre">QBAFramework.isNSIExplanation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.isSSIExplanation"><code class="docutils literal notranslate"><span class="pre">QBAFramework.isSSIExplanation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.isacyclic"><code class="docutils literal notranslate"><span class="pre">QBAFramework.isacyclic()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.max_iterations"><code class="docutils literal notranslate"><span class="pre">QBAFramework.max_iterations</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.max_strength"><code class="docutils literal notranslate"><span class="pre">QBAFramework.max_strength</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.min_strength"><code class="docutils literal notranslate"><span class="pre">QBAFramework.min_strength</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.minimalCSIExplanations"><code class="docutils literal notranslate"><span class="pre">QBAFramework.minimalCSIExplanations()</span></code></a></li>
@@ -292,15 +309,6 @@
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contribution-functions">Contribution Functions</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.removal.determine_removal_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_removal_ctrb()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.intrinsic_removal.determine_iremoval_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_iremoval_ctrb()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.shapley.determine_shapley_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_shapley_ctrb()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.shapley.determine_partitioned_shapley_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_partitioned_shapley_ctrb()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.gradient.determine_gradient_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_gradient_ctrb()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.utils.restrict"><code class="docutils literal notranslate"><span class="pre">restrict()</span></code></a></li>
-</ul>
-</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#robustness-functions">Robustness Functions</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_general_robust_consistent"><code class="docutils literal notranslate"><span class="pre">is_general_robust_consistent()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_expansion_robust_consistent"><code class="docutils literal notranslate"><span class="pre">is_expansion_robust_consistent()</span></code></a></li>
@@ -316,10 +324,6 @@
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.explanations.explanation_of_robustness_violation"><code class="docutils literal notranslate"><span class="pre">explanation_of_robustness_violation()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-support">Visualization Support</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_visualizer.Visualizer.visualize"><code class="docutils literal notranslate"><span class="pre">visualize()</span></code></a></li>
-</ul>
-</li>
 </ul>
             </nav>
         </div>
@@ -331,9 +335,276 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="welcome-to-qbaf-py-s-documentation">
-<h1>Welcome to QBAF-Py’s documentation!<a class="headerlink" href="#welcome-to-qbaf-py-s-documentation" title="Link to this heading">#</a></h1>
-<p>QBAF-Py is a library for drawing inferences from Quantitative Bipolar Argumentation Frameworks (QBAFs) and explaining them. The library is written in CPython (C with a Python API) to facilitate speed and efficiency.</p>
+  <section id="qbaf-py-documentation">
+<h1>QBAF-Py Documentation<a class="headerlink" href="#qbaf-py-documentation" title="Link to this heading">#</a></h1>
+<p>QBAF-Py is a library for drawing inferences from Quantitative Bipolar Argumentation Frameworks (QBAFs) and explaining them.
+The library is written in CPython (C with a Python API) to facilitate speed and efficiency.</p>
+<p>To use QBAF-Py, the main object to create is a <code class="docutils literal notranslate"><span class="pre">QBAFramework</span></code>. At a high level, a framework is built from four pieces:</p>
+<ul class="simple">
+<li><p>the arguments in the graph,</p></li>
+<li><p>the initial strength of each argument,</p></li>
+<li><p>the attack relations,</p></li>
+<li><p>the support relations.</p></li>
+</ul>
+<p>So the user describes which arguments exist, how strong they are initially, and how they influence one another.</p>
+<p>For example, a small framework can be created like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qbaf</span><span class="w"> </span><span class="kn">import</span> <span class="n">QBAFramework</span>
+
+<span class="n">qbaf</span> <span class="o">=</span> <span class="n">QBAFramework</span><span class="p">(</span>
+    <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">],</span>
+    <span class="p">[(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)],</span>
+    <span class="p">[(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)],</span>
+    <span class="n">semantics</span><span class="o">=</span><span class="s2">&quot;DFQuAD_model&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">b</span></code> attacks <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">c</span></code> supports <code class="docutils literal notranslate"><span class="pre">a</span></code>, and <code class="docutils literal notranslate"><span class="pre">semantics</span></code> specifies how those interactions are turned into final strengths.</p>
+<p>The supported semantics are:</p>
+<ul class="simple">
+<li><p>Basic model: <code class="docutils literal notranslate"><span class="pre">&quot;basic_model&quot;</span></code></p></li>
+<li><p>Quadratic Energy: <code class="docutils literal notranslate"><span class="pre">&quot;QuadraticEnergy_model&quot;</span></code></p></li>
+<li><p>Squared DF-QuAD: <code class="docutils literal notranslate"><span class="pre">&quot;SquaredDFQuAD_model&quot;</span></code></p></li>
+<li><p>Euler-Based Top: <code class="docutils literal notranslate"><span class="pre">&quot;EulerBasedTop_model&quot;</span></code></p></li>
+<li><p>Euler-Based: <code class="docutils literal notranslate"><span class="pre">&quot;EulerBased_model&quot;</span></code></p></li>
+<li><p>DF-QuAD: <code class="docutils literal notranslate"><span class="pre">&quot;DFQuAD_model&quot;</span></code></p></li>
+</ul>
+<p>Once the framework has been created, you can inspect whether it is acyclic and what final strengths it assigns:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qbaf</span><span class="o">.</span><span class="n">final_strengths</span>
+<span class="n">qbaf</span><span class="o">.</span><span class="n">final_strength</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To understand how different arguments affect a topic argument, QBAF-Py provides several contribution functions, supporting both individual contributors and sets of contributors.</p>
+<p>The available contribution functions are:</p>
+<ul class="simple">
+<li><p>Removal contribution: <code class="docutils literal notranslate"><span class="pre">determine_removal_ctrb</span></code></p></li>
+<li><p>Intrinsic removal contribution: <code class="docutils literal notranslate"><span class="pre">determine_iremoval_ctrb</span></code></p></li>
+<li><p>Shapley contribution: <code class="docutils literal notranslate"><span class="pre">determine_shapley_ctrb</span></code></p></li>
+<li><p>Partitioned Shapley contribution: <code class="docutils literal notranslate"><span class="pre">determine_partitioned_shapley_ctrb</span></code></p></li>
+<li><p>Gradient contribution: <code class="docutils literal notranslate"><span class="pre">determine_gradient_ctrb</span></code></p></li>
+</ul>
+<p>For example, to compute the removal contribution of <code class="docutils literal notranslate"><span class="pre">c</span></code> to <code class="docutils literal notranslate"><span class="pre">a</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qbaf_ctrbs.removal</span><span class="w"> </span><span class="kn">import</span> <span class="n">determine_removal_ctrb</span>
+
+<span class="n">contribution</span> <span class="o">=</span> <span class="n">determine_removal_ctrb</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">qbaf</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">contribution</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="cyclic-frameworks">
+<h2>Cyclic Frameworks<a class="headerlink" href="#cyclic-frameworks" title="Link to this heading">#</a></h2>
+<p>QBAF-Py also supports cyclic frameworks.
+A framework can contain cycles through its attack and support relations, and you can check this with <code class="docutils literal notranslate"><span class="pre">qbaf.isacyclic()</span></code>.</p>
+<p>By default, cycle handling is disabled.
+This means that if the framework is cyclic, accessing <code class="docutils literal notranslate"><span class="pre">final_strengths</span></code> raises an error unless cycle support is enabled explicitly.
+To evaluate a cyclic framework, you can enable cycle support by passing <code class="docutils literal notranslate"><span class="pre">allow_cycles=True</span></code>.
+To control the convergence criteria, you can also pass the following arguments when constructing it:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">max_iterations</span></code> (default <code class="docutils literal notranslate"><span class="pre">1000</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">convergence_threshold</span></code> (default <code class="docutils literal notranslate"><span class="pre">1e-9</span></code>)</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cyclic_qbaf</span> <span class="o">=</span> <span class="n">QBAFramework</span><span class="p">(</span>
+    <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+    <span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)],</span>
+    <span class="p">[],</span>
+    <span class="n">semantics</span><span class="o">=</span><span class="s2">&quot;DFQuAD_model&quot;</span><span class="p">,</span>
+    <span class="n">allow_cycles</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">max_iterations</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">convergence_threshold</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">cyclic_qbaf</span><span class="o">.</span><span class="n">isacyclic</span><span class="p">()</span>
+<span class="n">cyclic_qbaf</span><span class="o">.</span><span class="n">final_strengths</span>
+</pre></div>
+</div>
+<p>When cycle support is enabled, QBAF-Py computes final strengths by synchronous fixed-point iteration.
+It starts from the initial strengths, updates all arguments from the previous iteration, and stops once the change is below the convergence threshold.
+If convergence is not reached within <code class="docutils literal notranslate"><span class="pre">max_iterations</span></code>, a <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code> is raised.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Whether a cyclic framework converges or not can depend on the chosen semantics.</p>
+</div>
+<p>The cycle-related settings are exposed on the framework instance through:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">allow_cycles</span></code> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_iterations</span></code> (<code class="docutils literal notranslate"><span class="pre">int</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">convergence_threshold</span></code> (<code class="docutils literal notranslate"><span class="pre">float</span></code>)</p></li>
+</ul>
+</section>
+<section id="contribution-functions">
+<h2>Contribution Functions<a class="headerlink" href="#contribution-functions" title="Link to this heading">#</a></h2>
+<blockquote>
+<div><dl class="py function">
+<dt class="sig sig-object py" id="qbaf_ctrbs.removal.determine_removal_ctrb">
+<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.removal.</span></span><span class="sig-name descname"><span class="pre">determine_removal_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_ctrbs/removal.html#determine_removal_ctrb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_ctrbs.removal.determine_removal_ctrb" title="Link to this definition">#</a></dt>
+<dd><p>Determines the removal contribution of a contributor
+or a set of contributors to a topic argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
+<li><p><strong>contributors</strong> (<em>string</em><em> or </em><em>set</em>) – The contributing argument(s)</p></li>
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The contribution of the contributor to the topic</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_ctrbs.intrinsic_removal.determine_iremoval_ctrb">
+<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.intrinsic_removal.</span></span><span class="sig-name descname"><span class="pre">determine_iremoval_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_ctrbs/intrinsic_removal.html#determine_iremoval_ctrb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_ctrbs.intrinsic_removal.determine_iremoval_ctrb" title="Link to this definition">#</a></dt>
+<dd><dl class="simple">
+<dt>Determines the intrinsic removal contribution of a contributor</dt><dd><p>or a set of contributors to a topic argument.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
+<li><p><strong>contributors</strong> (<em>string</em><em> or </em><em>set</em>) – The contributing argument(s)</p></li>
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The contribution of the contributor to the topic</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_ctrbs.shapley.determine_shapley_ctrb">
+<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.shapley.</span></span><span class="sig-name descname"><span class="pre">determine_shapley_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_ctrbs/shapley.html#determine_shapley_ctrb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_ctrbs.shapley.determine_shapley_ctrb" title="Link to this definition">#</a></dt>
+<dd><p>Determines the shapley contribution of a contributor
+or a set of contributors to a topic argument.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If a set of contributors is provided, its elements are treated
+as a single player in the calculation. For example, given three
+arguments {a}, {b}, and {c}, specifying {b, c} as a contributor
+results in two players: {a} and {b, c}.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
+<li><p><strong>contributors</strong> (<em>string</em><em> or </em><em>set</em>) – The contributing argument(s)</p></li>
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The contribution of the contributor to the topic</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<p>This is a wrapper around determine_partitioned_shapley_ctrb.
+It partitions qbaf.arguments into singletons,
+except for contributors which form one set, then calls determine_partitioned_shapley_ctrb.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_ctrbs.shapley.determine_partitioned_shapley_ctrb">
+<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.shapley.</span></span><span class="sig-name descname"><span class="pre">determine_partitioned_shapley_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_ctrbs/shapley.html#determine_partitioned_shapley_ctrb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_ctrbs.shapley.determine_partitioned_shapley_ctrb" title="Link to this definition">#</a></dt>
+<dd><p>Determines the shapley contribution of a contributor
+or a set of contributors to a topic argument for a given argument partition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
+<li><p><strong>contributors</strong> (<em>string</em><em> or </em><em>set</em>) – The contributing argument(s)</p></li>
+<li><p><strong>partition</strong> (<em>set</em>) – The argument partitioning</p></li>
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The contribution of the contributor to the topic</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_ctrbs.gradient.determine_gradient_ctrb">
+<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.gradient.</span></span><span class="sig-name descname"><span class="pre">determine_gradient_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.4901161193847656e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">max&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_ctrbs/gradient.html#determine_gradient_ctrb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_ctrbs.gradient.determine_gradient_ctrb" title="Link to this definition">#</a></dt>
+<dd><p>Determines the gradient contribution of a contributor
+or a set of contributors to a topic argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
+<li><p><strong>contributors</strong> (<em>string</em><em> or </em><em>set</em>) – The contributing argument(s)</p></li>
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em>) – Epsilon used by the approximator. Defaults to 1.4901161193847656e-08.</p></li>
+<li><p><strong>aggregation_fn</strong> (<em>function</em>) – Function to aggregate gradient contributions. Defaults to max.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The contribution of the contributor to the topic</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qbaf_ctrbs.utils.restrict">
+<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.utils.</span></span><span class="sig-name descname"><span class="pre">restrict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_ctrbs/utils.html#restrict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_ctrbs.utils.restrict" title="Link to this definition">#</a></dt>
+<dd><p>Restricts the given QBAF to the provided set of arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – QBAF that is to be restricted</p></li>
+<li><p><strong>arguments</strong> (<em>list</em>) – Arguments the QBAF is to be restricted to (all other arguments will be removed)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>restricted QBAF</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework">QBAFramework</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</section>
+<section id="visualization-support">
+<h2>Visualization Support<a class="headerlink" href="#visualization-support" title="Link to this heading">#</a></h2>
+<blockquote>
+<div><dl class="py function">
+<dt class="sig sig-object py" id="qbaf_visualizer.Visualizer.visualize">
+<span class="sig-prename descclassname"><span class="pre">qbaf_visualizer.Visualizer.</span></span><span class="sig-name descname"><span class="pre">visualize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">explanations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_fs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_visualizer/Visualizer.html#visualize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_visualizer.Visualizer.visualize" title="Link to this definition">#</a></dt>
+<dd><p>Takes a QBAF and renders it as a graph</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that is supposed to be rendered</p></li>
+<li><p><strong>explanations</strong> (<em>List</em>) – List of sets of explanation arguments that are supposed to be highlighted</p></li>
+<li><p><strong>with_fs</strong> (<em>Bool</em>) – Set to <cite>True</cite> if final strenghts should be rendered as well.
+Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>round_to</strong> (<em>int</em>) – Number of decimals the strengths should be rounded to before rendering.
+Defaults to <cite>2</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div></blockquote>
+</section>
 <section id="module-qbaf">
 <span id="core-api"></span><h2>Core API<a class="headerlink" href="#module-qbaf" title="Link to this heading">#</a></h2>
 <p>Module that creates a QBAFArgument type.</p>
@@ -521,7 +792,8 @@ can be created by implementing your own aggregation function and influence funct
 </dd>
 <dt>QBAFramework(arguments, initial_strengths, attack_relations, support_relations,</dt><dd><p>disjoint_relations=True, semantics=None,
 aggregation_function=None, influence_function=None,
-min_strength=-1.7976931348623157e+308, max_strength=1.7976931348623157e+308)</p>
+min_strength=-1.7976931348623157e+308, max_strength=1.7976931348623157e+308,
+allow_cycles=False, max_iterations=1000, convergence_threshold=1e-09)</p>
 </dd>
 </dl>
 <dl class="field-list simple">
@@ -543,6 +815,9 @@ and the aggregation result. Defaults to None.</p></li>
 It can only be modified when the semantics are custom</p></li>
 <li><p><strong>max_strength</strong> (<em>float</em><em>, </em><em>optional</em>) – The maximum value an initial strength can have. Defaults to 1.7976931348623157e+308.
 It can only be modified when the semantics are custom</p></li>
+<li><p><strong>allow_cycles</strong> (<em>bool</em><em>, </em><em>optional</em>) – True if cyclic frameworks should be evaluated by synchronous iteration. Defaults to False.</p></li>
+<li><p><strong>max_iterations</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of synchronous iterations for cyclic frameworks. Defaults to 1000.</p></li>
+<li><p><strong>convergence_threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Convergence threshold for cyclic frameworks. Defaults to 1e-09.</p></li>
 </ul>
 </dd>
 </dl>
@@ -590,6 +865,14 @@ If the Support relation already exists, this method does nothing.</p>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.allow_cycles">
+<span class="sig-name descname"><span class="pre">allow_cycles</span></span><a class="headerlink" href="#qbaf.QBAFramework.allow_cycles" title="Link to this definition">#</a></dt>
+<dd><p>True if cyclic frameworks should be evaluated by synchronous iteration.</p>
+<p>Getter: Return whether cyclic frameworks are allowed.</p>
+<p>Type: bool</p>
 </dd></dl>
 
 <dl class="py method">
@@ -748,6 +1031,14 @@ in the Framework. False if it is not.</p>
 <dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.convergence_threshold">
+<span class="sig-name descname"><span class="pre">convergence_threshold</span></span><a class="headerlink" href="#qbaf.QBAFramework.convergence_threshold" title="Link to this definition">#</a></dt>
+<dd><p>The convergence threshold used for cyclic frameworks.</p>
+<p>Getter: Return the QBAFramework’s convergence threshold.</p>
+<p>Type: float</p>
 </dd></dl>
 
 <dl class="py method">
@@ -909,6 +1200,14 @@ False otherwise.</p>
 <dd class="field-even"><p>bool</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qbaf.QBAFramework.max_iterations">
+<span class="sig-name descname"><span class="pre">max_iterations</span></span><a class="headerlink" href="#qbaf.QBAFramework.max_iterations" title="Link to this definition">#</a></dt>
+<dd><p>The maximum number of synchronous iterations used for cyclic frameworks.</p>
+<p>Getter: Return the QBAFramework’s maximum number of iterations.</p>
+<p>Type: int</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1126,156 +1425,6 @@ If the semantics are custom (not predefined) then its value is None.</p>
 
 </dd></dl>
 
-</section>
-<section id="contribution-functions">
-<h2>Contribution Functions<a class="headerlink" href="#contribution-functions" title="Link to this heading">#</a></h2>
-<blockquote>
-<div><dl class="py function">
-<dt class="sig sig-object py" id="qbaf_ctrbs.removal.determine_removal_ctrb">
-<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.removal.</span></span><span class="sig-name descname"><span class="pre">determine_removal_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_ctrbs/removal.html#determine_removal_ctrb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_ctrbs.removal.determine_removal_ctrb" title="Link to this definition">#</a></dt>
-<dd><p>Determines the removal contribution of a contributor
-or a set of contributors to a topic argument.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
-<li><p><strong>contributors</strong> (<em>string</em><em> or </em><em>set</em>) – The contributing argument(s)</p></li>
-<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The contribution of the contributor to the topic</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qbaf_ctrbs.intrinsic_removal.determine_iremoval_ctrb">
-<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.intrinsic_removal.</span></span><span class="sig-name descname"><span class="pre">determine_iremoval_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_ctrbs/intrinsic_removal.html#determine_iremoval_ctrb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_ctrbs.intrinsic_removal.determine_iremoval_ctrb" title="Link to this definition">#</a></dt>
-<dd><dl class="simple">
-<dt>Determines the intrinsic removal contribution of a contributor</dt><dd><p>or a set of contributors to a topic argument.</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
-<li><p><strong>contributors</strong> (<em>string</em><em> or </em><em>set</em>) – The contributing argument(s)</p></li>
-<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The contribution of the contributor to the topic</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qbaf_ctrbs.shapley.determine_shapley_ctrb">
-<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.shapley.</span></span><span class="sig-name descname"><span class="pre">determine_shapley_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_ctrbs/shapley.html#determine_shapley_ctrb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_ctrbs.shapley.determine_shapley_ctrb" title="Link to this definition">#</a></dt>
-<dd><p>Determines the shapley contribution of a contributor
-or a set of contributors to a topic argument.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If a set of contributors is provided, its elements are treated
-as a single player in the calculation. For example, given three
-arguments {a}, {b}, and {c}, specifying {b, c} as a contributor
-results in two players: {a} and {b, c}.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
-<li><p><strong>contributors</strong> (<em>string</em><em> or </em><em>set</em>) – The contributing argument(s)</p></li>
-<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The contribution of the contributor to the topic</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-<p>This is a wrapper around determine_partitioned_shapley_ctrb.
-It partitions qbaf.arguments into singletons,
-except for contributors which form one set, then calls determine_partitioned_shapley_ctrb.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qbaf_ctrbs.shapley.determine_partitioned_shapley_ctrb">
-<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.shapley.</span></span><span class="sig-name descname"><span class="pre">determine_partitioned_shapley_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_ctrbs/shapley.html#determine_partitioned_shapley_ctrb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_ctrbs.shapley.determine_partitioned_shapley_ctrb" title="Link to this definition">#</a></dt>
-<dd><p>Determines the shapley contribution of a contributor
-or a set of contributors to a topic argument for a given argument partition.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
-<li><p><strong>contributors</strong> (<em>string</em><em> or </em><em>set</em>) – The contributing argument(s)</p></li>
-<li><p><strong>partition</strong> (<em>set</em>) – The argument partitioning</p></li>
-<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The contribution of the contributor to the topic</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qbaf_ctrbs.gradient.determine_gradient_ctrb">
-<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.gradient.</span></span><span class="sig-name descname"><span class="pre">determine_gradient_ctrb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contributors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.4901161193847656e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;built-in</span> <span class="pre">function</span> <span class="pre">max&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_ctrbs/gradient.html#determine_gradient_ctrb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_ctrbs.gradient.determine_gradient_ctrb" title="Link to this definition">#</a></dt>
-<dd><p>Determines the gradient contribution of a contributor
-or a set of contributors to a topic argument.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>topic</strong> (<em>string</em>) – The topic argument</p></li>
-<li><p><strong>contributors</strong> (<em>string</em><em> or </em><em>set</em>) – The contributing argument(s)</p></li>
-<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that contains topic and contributor</p></li>
-<li><p><strong>epsilon</strong> (<em>float</em>) – Epsilon used by the approximator. Defaults to 1.4901161193847656e-08.</p></li>
-<li><p><strong>aggregation_fn</strong> (<em>function</em>) – Function to aggregate gradient contributions. Defaults to max.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The contribution of the contributor to the topic</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qbaf_ctrbs.utils.restrict">
-<span class="sig-prename descclassname"><span class="pre">qbaf_ctrbs.utils.</span></span><span class="sig-name descname"><span class="pre">restrict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_ctrbs/utils.html#restrict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_ctrbs.utils.restrict" title="Link to this definition">#</a></dt>
-<dd><p>Restricts the given QBAF to the provided set of arguments.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – QBAF that is to be restricted</p></li>
-<li><p><strong>arguments</strong> (<em>list</em>) – Arguments the QBAF is to be restricted to (all other arguments will be removed)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>restricted QBAF</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework">QBAFramework</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-</div></blockquote>
 </section>
 <section id="robustness-functions">
 <h2>Robustness Functions<a class="headerlink" href="#robustness-functions" title="Link to this heading">#</a></h2>
@@ -1553,29 +1702,6 @@ qbaf_collection, False otherwise.</p>
 
 </div></blockquote>
 </section>
-<section id="visualization-support">
-<h2>Visualization Support<a class="headerlink" href="#visualization-support" title="Link to this heading">#</a></h2>
-<blockquote>
-<div><dl class="py function">
-<dt class="sig sig-object py" id="qbaf_visualizer.Visualizer.visualize">
-<span class="sig-prename descclassname"><span class="pre">qbaf_visualizer.Visualizer.</span></span><span class="sig-name descname"><span class="pre">visualize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qbaf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><span class="pre">QBAFramework</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">explanations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_fs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qbaf_visualizer/Visualizer.html#visualize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qbaf_visualizer.Visualizer.visualize" title="Link to this definition">#</a></dt>
-<dd><p>Takes a QBAF and renders it as a graph</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>qbaf</strong> (<a class="reference internal" href="#qbaf.QBAFramework" title="qbaf.QBAFramework"><em>QBAFramework</em></a>) – The QBAF that is supposed to be rendered</p></li>
-<li><p><strong>explanations</strong> (<em>List</em>) – List of sets of explanation arguments that are supposed to be highlighted</p></li>
-<li><p><strong>with_fs</strong> (<em>Bool</em>) – Set to <cite>True</cite> if final strenghts should be rendered as well.
-Defaults to <cite>False</cite>.</p></li>
-<li><p><strong>round_to</strong> (<em>int</em>) – Number of decimals the strengths should be rounded to before rendering.
-Defaults to <cite>2</cite>.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</div></blockquote>
-</section>
 </section>
 
 
@@ -1607,6 +1733,20 @@ Defaults to <cite>2</cite>.</p></li>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cyclic-frameworks">Cyclic Frameworks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contribution-functions">Contribution Functions</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.removal.determine_removal_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_removal_ctrb()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.intrinsic_removal.determine_iremoval_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_iremoval_ctrb()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.shapley.determine_shapley_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_shapley_ctrb()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.shapley.determine_partitioned_shapley_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_partitioned_shapley_ctrb()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.gradient.determine_gradient_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_gradient_ctrb()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.utils.restrict"><code class="docutils literal notranslate"><span class="pre">restrict()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-support">Visualization Support</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_visualizer.Visualizer.visualize"><code class="docutils literal notranslate"><span class="pre">visualize()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-qbaf">Core API</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFARelations"><code class="docutils literal notranslate"><span class="pre">QBAFARelations</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFARelations.add"><code class="docutils literal notranslate"><span class="pre">QBAFARelations.add()</span></code></a></li>
@@ -1628,6 +1768,7 @@ Defaults to <cite>2</cite>.</p></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.add_argument"><code class="docutils literal notranslate"><span class="pre">QBAFramework.add_argument()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.add_attack_relation"><code class="docutils literal notranslate"><span class="pre">QBAFramework.add_attack_relation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.add_support_relation"><code class="docutils literal notranslate"><span class="pre">QBAFramework.add_support_relation()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.allow_cycles"><code class="docutils literal notranslate"><span class="pre">QBAFramework.allow_cycles</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.are_strength_consistent"><code class="docutils literal notranslate"><span class="pre">QBAFramework.are_strength_consistent()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.arguments"><code class="docutils literal notranslate"><span class="pre">QBAFramework.arguments</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.attack_relations"><code class="docutils literal notranslate"><span class="pre">QBAFramework.attack_relations</span></code></a></li>
@@ -1637,6 +1778,7 @@ Defaults to <cite>2</cite>.</p></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.contains_argument"><code class="docutils literal notranslate"><span class="pre">QBAFramework.contains_argument()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.contains_attack_relation"><code class="docutils literal notranslate"><span class="pre">QBAFramework.contains_attack_relation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.contains_support_relation"><code class="docutils literal notranslate"><span class="pre">QBAFramework.contains_support_relation()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.convergence_threshold"><code class="docutils literal notranslate"><span class="pre">QBAFramework.convergence_threshold</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.copy"><code class="docutils literal notranslate"><span class="pre">QBAFramework.copy()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.disjoint_relations"><code class="docutils literal notranslate"><span class="pre">QBAFramework.disjoint_relations</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.final_strength"><code class="docutils literal notranslate"><span class="pre">QBAFramework.final_strength()</span></code></a></li>
@@ -1647,6 +1789,7 @@ Defaults to <cite>2</cite>.</p></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.isNSIExplanation"><code class="docutils literal notranslate"><span class="pre">QBAFramework.isNSIExplanation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.isSSIExplanation"><code class="docutils literal notranslate"><span class="pre">QBAFramework.isSSIExplanation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.isacyclic"><code class="docutils literal notranslate"><span class="pre">QBAFramework.isacyclic()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.max_iterations"><code class="docutils literal notranslate"><span class="pre">QBAFramework.max_iterations</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.max_strength"><code class="docutils literal notranslate"><span class="pre">QBAFramework.max_strength</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.min_strength"><code class="docutils literal notranslate"><span class="pre">QBAFramework.min_strength</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf.QBAFramework.minimalCSIExplanations"><code class="docutils literal notranslate"><span class="pre">QBAFramework.minimalCSIExplanations()</span></code></a></li>
@@ -1665,15 +1808,6 @@ Defaults to <cite>2</cite>.</p></li>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contribution-functions">Contribution Functions</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.removal.determine_removal_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_removal_ctrb()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.intrinsic_removal.determine_iremoval_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_iremoval_ctrb()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.shapley.determine_shapley_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_shapley_ctrb()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.shapley.determine_partitioned_shapley_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_partitioned_shapley_ctrb()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.gradient.determine_gradient_ctrb"><code class="docutils literal notranslate"><span class="pre">determine_gradient_ctrb()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_ctrbs.utils.restrict"><code class="docutils literal notranslate"><span class="pre">restrict()</span></code></a></li>
-</ul>
-</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#robustness-functions">Robustness Functions</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_general_robust_consistent"><code class="docutils literal notranslate"><span class="pre">is_general_robust_consistent()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.consistency_checks.is_expansion_robust_consistent"><code class="docutils literal notranslate"><span class="pre">is_expansion_robust_consistent()</span></code></a></li>
@@ -1687,10 +1821,6 @@ Defaults to <cite>2</cite>.</p></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.explanations.is_pocket"><code class="docutils literal notranslate"><span class="pre">is_pocket()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.explanations.pockets_of_consistency"><code class="docutils literal notranslate"><span class="pre">pockets_of_consistency()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_robustness.explanations.explanation_of_robustness_violation"><code class="docutils literal notranslate"><span class="pre">explanation_of_robustness_violation()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#visualization-support">Visualization Support</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#qbaf_visualizer.Visualizer.visualize"><code class="docutils literal notranslate"><span class="pre">visualize()</span></code></a></li>
 </ul>
 </li>
 </ul>
