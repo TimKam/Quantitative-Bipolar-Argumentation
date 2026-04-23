@@ -140,3 +140,28 @@ def test_reversal_preserves_cycle_settings():
     assert reversal.convergence_threshold == pytest.approx(1e-5)
     assert reversal.final_strengths['a'] == pytest.approx(framework.final_strengths['a'])
     assert reversal.final_strengths['b'] == pytest.approx(framework.final_strengths['b'])
+
+
+def test_four_node_attack_cycle():
+    arguments = ['a', 'b', 'c', 'd']
+    initial_strengths = [0.1, 0.1, 0.1, 0.1]
+    attack_relations = [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'a')]
+    support_relations = []
+
+    framework = QBAFramework(arguments,
+                             initial_strengths,
+                             attack_relations,
+                             support_relations,
+                             semantics="DFQuAD_model",
+                             allow_cycles=True)
+
+    final_strengths = framework.final_strengths
+    assert framework.isacyclic() is False
+    assert set(final_strengths.keys()) == set(arguments)
+    for argument in arguments:
+        assert framework.final_strength(argument) == pytest.approx(final_strengths[argument])
+        assert 0.0 <= final_strengths[argument] < 0.1
+    values = [final_strengths[arg] for arg in arguments]
+    assert values[0] == pytest.approx(values[1])
+    assert values[1] == pytest.approx(values[2])
+    assert values[2] == pytest.approx(values[3])
