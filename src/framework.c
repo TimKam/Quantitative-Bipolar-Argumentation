@@ -1400,7 +1400,7 @@ QBAFramework_attackedBy(QBAFrameworkObject *self, PyObject *args, PyObject *kwds
         return NULL;
     }
 
-    return _QBAFARelations_patients(self->attack_relations, attacker);
+    return _QBAFARelations_patients((QBAFARelationsObject *)self->attack_relations, attacker);
 }
 
 /**
@@ -1432,7 +1432,7 @@ QBAFramework_attackersOf(QBAFrameworkObject *self, PyObject *args, PyObject *kwd
         return NULL;
     }
 
-    return _QBAFARelations_agents(self->attack_relations, attacked);
+    return _QBAFARelations_agents((QBAFARelationsObject *)self->attack_relations, attacked);
 }
 
 /**
@@ -1464,7 +1464,7 @@ QBAFramework_supportedBy(QBAFrameworkObject *self, PyObject *args, PyObject *kwd
         return NULL;
     }
 
-    return _QBAFARelations_patients(self->support_relations, supporter);
+    return _QBAFARelations_patients((QBAFARelationsObject *)self->support_relations, supporter);
 }
 
 /**
@@ -1496,7 +1496,7 @@ QBAFramework_supportersOf(QBAFrameworkObject *self, PyObject *args, PyObject *kw
         return NULL;
     }
 
-    return _QBAFARelations_agents(self->support_relations, supported);
+    return _QBAFARelations_agents((QBAFARelationsObject *)self->support_relations, supported);
 }
 
 /**
@@ -2860,7 +2860,7 @@ _QBAFramework_isSSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
         return -1;
     }
 
-    if (!_QBAFramework_isacyclic(reversal)) {
+    if (!_QBAFramework_isacyclic((QBAFrameworkObject *)reversal)) {
         PyErr_WarnEx(PyExc_Warning, "Acyclic reversal of a QBAF was found when checking if it was a SSI Explanation. "
                                     "False was returned instead.", 1);
         Py_DECREF(reversal);
@@ -2895,7 +2895,7 @@ _QBAFramework_isCSIExplanation(QBAFrameworkObject *self, QBAFrameworkObject *oth
         return -1;
     }
 
-    if (!_QBAFramework_isacyclic(reversal)) {
+    if (!_QBAFramework_isacyclic((QBAFrameworkObject *)reversal)) {
         PyErr_WarnEx(PyExc_Warning, "Acyclic reversal of a QBAF was found when checking if it was a CSI Explanation. "
                                     "False was returned instead.", 1);
         Py_DECREF(reversal);
@@ -4431,7 +4431,7 @@ QBAFramework_change_info(QBAFrameworkObject *self, PyObject *args, PyObject *kwd
     Py_DECREF(iterator);
     Py_DECREF(self_arguments_union_other_arguments);
 
-    return _QBAFramework_change_info(self, other, set);
+    return _QBAFramework_change_info(self, (QBAFrameworkObject *)other, set);
 }
 
 /**

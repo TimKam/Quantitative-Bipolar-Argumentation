@@ -635,7 +635,7 @@ QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
     if (args == NULL)
         return NULL;
 
-    QBAFARelationsObject *copy = QBAFARelations_new(Py_TYPE(self), args, kwds);
+    QBAFARelationsObject *copy = (QBAFARelationsObject *)QBAFARelations_new(Py_TYPE(self), args, kwds);
     if (copy == NULL) {
         Py_DECREF(args);
         return NULL;
@@ -646,7 +646,7 @@ QBAFARelations_copy(QBAFARelationsObject *self, PyObject *Py_UNUSED(ignored))
         return NULL;
     }
     Py_DECREF(args);
-    return copy;
+    return (PyObject *)copy;
 }
 
 /**
@@ -948,7 +948,7 @@ QBAFARelations_Create(PyObject *relations)
     if (args == NULL)
         return NULL;
 
-    QBAFARelationsObject *new = QBAFARelations_new(&QBAFARelationsType, args, kwds);
+    QBAFARelationsObject *new = (QBAFARelationsObject *)QBAFARelations_new(&QBAFARelationsType, args, kwds);
     if (new == NULL) {
         Py_DECREF(args);
         return NULL;
