@@ -103,11 +103,13 @@ def is_pocket_max(qbaf_initial: QBAFramework,
    """
 
    qbaf_collection_mdf = []
-   
+
    for x in qbaf_collection:
-      args = x.arguments
-      if args.issubset(pocket): 
+      args = set(x.arguments)
+      if args.issubset(set(pocket)): 
          qbaf_collection_mdf.append(x)
+   
+   
    
    for qbaf in qbaf_collection_mdf:
       args = set(qbaf.arguments)
