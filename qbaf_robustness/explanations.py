@@ -132,6 +132,7 @@ def max_pockets(qbaf_initial: QBAFramework,
    Args: 
       qbaf_initial (QBAFramework): The initial QBAF. 
       qbaf_collection (list[QBAFramework]): The collection of QBAFs to be considered.
+      pocket (set[str]): The pocket to be considered, initialised to the set of all new arguments to start with.
       topic_argument_1 (str): The first topic argument to be considered.
       topic_argument_2 (str): The second topic argument to be considered.
 

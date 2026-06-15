@@ -212,5 +212,37 @@ def test_explanations():
   for x in v_3: assert x in value_3
 
   assert value_2 == []
+
+
+def test_max_pockets():
+   value_1 = max_pockets(qbaf_initial,
+                                     qbaf_collection = [qbaf_u_1, qbaf_u_2, qbaf_u_3],
+                                     pocket= new_arguments(qbaf_initial, [qbaf_u_1, qbaf_u_2, qbaf_u_3]),
+                                     topic_argument_1 = 'a',
+                                     topic_argument_2 = 'b') 
+    
+   value_2 = max_pockets(qbaf_initial,
+                                     qbaf_collection = [qbaf_initial],
+                                     pocket=new_arguments(qbaf_initial, [qbaf_initial]),
+                                     topic_argument_1 = 'a',
+                                     topic_argument_2 = 'b')
+   value_3 = max_pockets(qbaf_initial,
+                               qbaf_collection = [qbaf_u_4, qbaf_u_5],
+                               pocket = new_arguments(qbaf_initial, [qbaf_u_4, qbaf_u_5]),
+                               topic_argument_1 = 'a',
+                               topic_argument_2 = 'b')
+    
+   v_1 = [['d'], ['e']]
+   v_3 = [['f'], []]
+   print(value_1)
+   
+   for x in value_1: assert x in v_1
+   for x in v_1: assert x in value_1
+
+   for x in value_3: assert x in v_3
+   for x in v_3: assert x in value_3
+
+   assert value_2 == [[]]
+
   
   
