@@ -83,6 +83,80 @@ def is_pocket(qbaf_initial: QBAFramework,
 
 
 
+def is_pocket_max(qbaf_initial: QBAFramework,
+                  qbaf_collection: list[QBAFramework],
+                  pocket: set[str],
+                  topic_argument_1: str,
+                  topic_argument_2:str)-> bool:
+   
+   """
+   Checks whether pocket is a pocket of consistency with respect to qbaf_initial and qbaf_collection as per the subset relation.
+
+   Args: 
+      qbaf_initial (QBAFramework): The initial QBAF. 
+      qbaf_collection (list[QBAFramework]): The collection of QBAFs to be considered.
+      topic_argument_1 (str): The first topic argument to be considered.
+      topic_argument_2 (str): The second topic argument to be considered.
+
+   Returns:
+      bool: Returns True if pocket is a pocket of consistency; False otherwise.  
+   """
+
+   qbaf_collection_mdf = []
+   
+   for x in qbaf_collection:
+      args = x.arguments
+      if args.issubset(pocket): 
+         qbaf_collection_mdf.append(x)
+   
+   for qbaf in qbaf_collection_mdf:
+      args = set(qbaf.arguments)
+      if(args.issubset(pocket) and (qbaf_initial.are_strength_consistent(qbaf, 
+                                                                         topic_argument_1, 
+                                                                         topic_argument_2) == False)):
+         return False
+      
+   return True
+
+
+
+def max_pockets(qbaf_initial: QBAFramework,
+                  qbaf_collection: list[QBAFramework],
+                  pocket: set[str],
+                  topic_argument_1: str,
+                  topic_argument_2:str)-> set[list[str]]:
+   """
+   Returns the set of all maximal pockets with respect to qbaf_initial and qbaf_collection.
+   
+   Args: 
+      qbaf_initial (QBAFramework): The initial QBAF. 
+      qbaf_collection (list[QBAFramework]): The collection of QBAFs to be considered.
+      topic_argument_1 (str): The first topic argument to be considered.
+      topic_argument_2 (str): The second topic argument to be considered.
+
+   Returns:
+      set[list[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.   
+   """
+
+   new_args = copy.deepcopy(new_arguments(qbaf_initial, qbaf_collection))
+
+   if (is_pocket_max(qbaf_initial, qbaf_collection, topic_argument_1, topic_argument_2)): 
+      return [new_args]
+   
+   nxt_itr = combinations(new_args, len(new_args)-1)
+   max_pkts = []
+
+   for subsets in nxt_itr:
+      max_pkts= max_pkts + max_pockets(qbaf_initial, 
+                                       qbaf_collection, 
+                                       subsets,
+                                       topic_argument_1, topic_argument_2)
+      
+   return max_pkts
+
+
+
+
 
 def pockets_of_consistency(qbaf_initial: QBAFramework,
                            qbaf_collection: list[QBAFramework],
