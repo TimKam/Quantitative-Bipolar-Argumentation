@@ -105,17 +105,16 @@ def is_pocket_max(qbaf_initial: QBAFramework,
    qbaf_collection_mdf = []
 
    for x in qbaf_collection:
-      args = set(x.arguments)
+      args = new_arguments(qbaf_initial, [x])
       if args.issubset(set(pocket)): 
          qbaf_collection_mdf.append(x)
    
-   for x in qbaf_collection_mdf: print(x.arguments)
    
    for qbaf in qbaf_collection_mdf:
       args = set(qbaf.arguments)
-      if(args.issubset(pocket) and (qbaf_initial.are_strength_consistent(qbaf, 
-                                                                         topic_argument_1, 
-                                                                         topic_argument_2) == False)):
+      if((qbaf_initial.are_strength_consistent(qbaf, 
+                                                topic_argument_1, 
+                                                topic_argument_2) == False)):
          return False
       
    return True
@@ -140,19 +139,20 @@ def max_pockets(qbaf_initial: QBAFramework,
       set[list[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.   
    """
 
-   new_args = copy.deepcopy(new_arguments(qbaf_initial, qbaf_collection))
+   pckt = copy.deepcopy(pocket)  
 
-   if (is_pocket_max(qbaf_initial, qbaf_collection, topic_argument_1, topic_argument_2)): 
-      return [new_args]
+   if (is_pocket_max(qbaf_initial, qbaf_collection, pckt, topic_argument_1, topic_argument_2)): 
+      return [pocket]
    
-   nxt_itr = combinations(new_args, len(new_args)-1)
-   max_pkts = []
+   nxt_itr = combinations(pckt, len(pckt)-1)
+   max_pkts = list()
 
    for subsets in nxt_itr:
       max_pkts= max_pkts + max_pockets(qbaf_initial, 
                                        qbaf_collection, 
-                                       subsets,
+                                       list(subsets),
                                        topic_argument_1, topic_argument_2)
+   
       
    return max_pkts
 
