@@ -232,8 +232,10 @@ def test_max_pockets():
                                topic_argument_1 = 'a',
                                topic_argument_2 = 'b')
     
-   v_1 = [['d', 'e']]
-   v_3 = [['f'], []]
+   value_1 = [set(x) for x in value_1]
+   value_3 = [set(x) for x in value_3] 
+   v_1 = [{'d', 'e'}]
+   v_3 = [{'f'}, set()]
 
    for x in value_1: assert x in v_1
    for x in v_1: assert x in value_1
