@@ -15,6 +15,7 @@ def new_arguments(initial_qbaf: QBAFramework,
     Returns:
        set[str]: The set of new arguments that gets added to qbaf_initial.
     """
+    
     new_args = set()
     args = initial_qbaf.arguments
 
@@ -102,15 +103,15 @@ def is_pocket_max(qbaf_initial: QBAFramework,
       bool: Returns True if pocket is a pocket of consistency; False otherwise.  
    """
 
-   qbaf_collection_mdf = []
+   qbaf_collection_modified = []
 
    for x in qbaf_collection:
       args = new_arguments(qbaf_initial, [x])
       if args.issubset(set(pocket)): 
-         qbaf_collection_mdf.append(x)
+         qbaf_collection_modified.append(x)
    
    
-   for qbaf in qbaf_collection_mdf:
+   for qbaf in qbaf_collection_modified:
       args = set(qbaf.arguments)
       if((qbaf_initial.are_strength_consistent(qbaf, 
                                                 topic_argument_1, 
@@ -140,24 +141,39 @@ def max_pockets(qbaf_initial: QBAFramework,
       set[list[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.   
    """
 
-   pckt = copy.deepcopy(pocket)  
+   p = copy.deepcopy(pocket)  
 
-   if (is_pocket_max(qbaf_initial, qbaf_collection, pckt, topic_argument_1, topic_argument_2)): 
+   if (is_pocket_max(qbaf_initial, qbaf_collection, p, topic_argument_1, topic_argument_2)): 
       return [pocket]
    
-   nxt_itr = combinations(pckt, len(pckt)-1)
-   max_pkts = list()
+   if (len(p) == 1): 
+      return []
+   
+   nxt_itr = combinations(p, len(p)-1)
+   max_p = list()
 
    for subsets in nxt_itr:
-      max_pkts= max_pkts + max_pockets(qbaf_initial, 
+      max_p= max_p + max_pockets(qbaf_initial, 
                                        qbaf_collection, 
                                        list(subsets),
                                        topic_argument_1, topic_argument_2)
    
-      
-   return max_pkts
+   return max_p
 
 
+def determine_max_pockets(qbaf_initial: QBAFramework,
+                           qbaf_collection: list[QBAFramework],
+                           topic_argument_1: str,
+                           topic_argument_2:str)-> set[list[str]]:
+   
+   m = max_pockets(qbaf_initial, 
+                   qbaf_collection, 
+                   list(new_arguments(qbaf_initial, qbaf_collection)),
+                   topic_argument_1,
+                   topic_argument_2)
+   
+   return m
+   
 
 
 
