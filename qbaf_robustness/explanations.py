@@ -15,7 +15,7 @@ def new_arguments(initial_qbaf: QBAFramework,
     Returns:
        set[str]: The set of new arguments that gets added to qbaf_initial.
     """
-    
+
     new_args = set()
     args = initial_qbaf.arguments
 
@@ -122,11 +122,12 @@ def is_pocket_max(qbaf_initial: QBAFramework,
 
 
 
-def max_pockets(qbaf_initial: QBAFramework,
+def determine_max_pockets(qbaf_initial: QBAFramework,
                   qbaf_collection: list[QBAFramework],
-                  pocket: set[str],
                   topic_argument_1: str,
-                  topic_argument_2:str)-> set[list[str]]:
+                  topic_argument_2: str,
+                  pocket: set[str] = 0,
+                  depth = 0)-> set[list[str]]:
    """
    Returns the set of all maximal pockets with respect to qbaf_initial and qbaf_collection.
    
@@ -141,10 +142,15 @@ def max_pockets(qbaf_initial: QBAFramework,
       set[list[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.   
    """
 
-   p = copy.deepcopy(pocket)  
+   n = copy.deepcopy(depth)
+
+   if (depth == 0):
+      p = copy.deepcopy(list(new_arguments(qbaf_initial, qbaf_collection)))  
+   else: 
+      p = copy.deepcopy(pocket) 
 
    if (is_pocket_max(qbaf_initial, qbaf_collection, p, topic_argument_1, topic_argument_2)): 
-      return [pocket]
+      return [p]
    
    if (len(p) == 1): 
       return []
@@ -153,27 +159,14 @@ def max_pockets(qbaf_initial: QBAFramework,
    max_p = list()
 
    for subsets in nxt_itr:
-      max_p= max_p + max_pockets(qbaf_initial, 
-                                       qbaf_collection, 
-                                       list(subsets),
-                                       topic_argument_1, topic_argument_2)
+      max_p= max_p + determine_max_pockets(qbaf_initial, 
+                                       qbaf_collection,
+                                       topic_argument_1,
+                                       topic_argument_2,
+                                       list(subsets), n + 1)
    
+
    return max_p
-
-
-def determine_max_pockets(qbaf_initial: QBAFramework,
-                           qbaf_collection: list[QBAFramework],
-                           topic_argument_1: str,
-                           topic_argument_2:str)-> set[list[str]]:
-   
-   m = max_pockets(qbaf_initial, 
-                   qbaf_collection, 
-                   list(new_arguments(qbaf_initial, qbaf_collection)),
-                   topic_argument_1,
-                   topic_argument_2)
-   
-   return m
-   
 
 
 
