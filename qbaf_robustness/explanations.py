@@ -102,21 +102,12 @@ def is_pocket_max(qbaf_initial: QBAFramework,
    Returns:
       bool: Returns True if pocket is a pocket of consistency; False otherwise.  
    """
-
-   qbaf_collection_modified = []
-
-   for x in qbaf_collection:
-      args = new_arguments(qbaf_initial, [x])
+   
+   for qbaf in qbaf_collection:
+      args = new_arguments(qbaf_initial, [qbaf])
       if args.issubset(set(pocket)): 
-         qbaf_collection_modified.append(x)
-   
-   
-   for qbaf in qbaf_collection_modified:
-      args = set(qbaf.arguments)
-      if((qbaf_initial.are_strength_consistent(qbaf, 
-                                                topic_argument_1, 
-                                                topic_argument_2) == False)):
-         return False
+         if not qbaf_initial.are_strength_consistent(qbaf, topic_argument_1, topic_argument_2):
+            return False
       
    return True
 
