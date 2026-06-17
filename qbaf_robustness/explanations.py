@@ -15,6 +15,7 @@ def new_arguments(initial_qbaf: QBAFramework,
     Returns:
        set[str]: The set of new arguments that gets added to qbaf_initial.
     """
+
     new_args = set()
     args = initial_qbaf.arguments
 
@@ -81,6 +82,87 @@ def is_pocket(qbaf_initial: QBAFramework,
 
     return(subset_of_pockets + val)
 
+
+
+def is_pocket_max(qbaf_initial: QBAFramework,
+                  qbaf_collection: list[QBAFramework],
+                  pocket: set[str],
+                  topic_argument_1: str,
+                  topic_argument_2:str)-> bool:
+   
+   """
+   Checks whether pocket is a pocket of consistency with respect to qbaf_initial and qbaf_collection as per the subset relation.
+
+   Args: 
+      qbaf_initial (QBAFramework): The initial QBAF. 
+      qbaf_collection (list[QBAFramework]): The collection of QBAFs to be considered.
+      topic_argument_1 (str): The first topic argument to be considered.
+      topic_argument_2 (str): The second topic argument to be considered.
+
+   Returns:
+      bool: Returns True if pocket is a pocket of consistency; False otherwise.  
+   """
+
+   qbaf_collection_modified = []
+
+   for x in qbaf_collection:
+      args = new_arguments(qbaf_initial, [x])
+      if args.issubset(set(pocket)): 
+         qbaf_collection_modified.append(x)
+   
+   
+   for qbaf in qbaf_collection_modified:
+      args = set(qbaf.arguments)
+      if((qbaf_initial.are_strength_consistent(qbaf, 
+                                                topic_argument_1, 
+                                                topic_argument_2) == False)):
+         return False
+      
+   return True
+
+
+
+def determine_max_pockets(qbaf_initial: QBAFramework,
+                  qbaf_collection: list[QBAFramework],
+                  topic_argument_1: str,
+                  topic_argument_2: str,
+                  pocket: set[str] = 0,
+                  depth = 0)-> set[list[str]]:
+   """
+   Returns the set of all maximal pockets with respect to qbaf_initial and qbaf_collection.
+   
+   Args: 
+      qbaf_initial (QBAFramework): The initial QBAF. 
+      qbaf_collection (list[QBAFramework]): The collection of QBAFs to be considered.
+      pocket (set[str]): The pocket to be considered, initialised to the set of all new arguments to start with.
+      topic_argument_1 (str): The first topic argument to be considered.
+      topic_argument_2 (str): The second topic argument to be considered.
+
+   Returns:
+      set[list[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.   
+   """
+
+   if (depth == 0):
+      pocket = list(new_arguments(qbaf_initial, qbaf_collection))
+
+   if (is_pocket_max(qbaf_initial, qbaf_collection, pocket, topic_argument_1, topic_argument_2)): 
+      return [pocket]
+   
+   if (len(pocket) == 1 or len(pocket) == 0): 
+      return []
+   
+   nxt_itr = combinations(pocket, len(pocket)-1)
+   max_p = list()
+
+   for subsets in nxt_itr:
+      max_p = max_p + determine_max_pockets(qbaf_initial, 
+                                       qbaf_collection,
+                                       topic_argument_1,
+                                       topic_argument_2,
+                                       list(subsets), depth + 1)
+   
+
+   return max_p
 
 
 
