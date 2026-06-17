@@ -142,28 +142,24 @@ def determine_max_pockets(qbaf_initial: QBAFramework,
       set[list[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.   
    """
 
-   n = copy.deepcopy(depth)
-
    if (depth == 0):
-      p = copy.deepcopy(list(new_arguments(qbaf_initial, qbaf_collection)))  
-   else: 
-      p = copy.deepcopy(pocket) 
+      pocket = list(new_arguments(qbaf_initial, qbaf_collection))
 
-   if (is_pocket_max(qbaf_initial, qbaf_collection, p, topic_argument_1, topic_argument_2)): 
-      return [p]
+   if (is_pocket_max(qbaf_initial, qbaf_collection, pocket, topic_argument_1, topic_argument_2)): 
+      return [pocket]
    
-   if (len(p) == 1 or len(p) == 0): 
+   if (len(pocket) == 1 or len(pocket) == 0): 
       return []
    
-   nxt_itr = combinations(p, len(p)-1)
+   nxt_itr = combinations(pocket, len(pocket)-1)
    max_p = list()
 
    for subsets in nxt_itr:
-      max_p= max_p + determine_max_pockets(qbaf_initial, 
+      max_p = max_p + determine_max_pockets(qbaf_initial, 
                                        qbaf_collection,
                                        topic_argument_1,
                                        topic_argument_2,
-                                       list(subsets), n + 1)
+                                       list(subsets), depth + 1)
    
 
    return max_p
