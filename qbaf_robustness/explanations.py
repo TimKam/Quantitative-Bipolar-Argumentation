@@ -152,7 +152,7 @@ def determine_max_pockets(qbaf_initial: QBAFramework,
    if (is_pocket_max(qbaf_initial, qbaf_collection, p, topic_argument_1, topic_argument_2)): 
       return [p]
    
-   if (len(p) == 1): 
+   if (len(p) == 1 or len(p) == 0): 
       return []
    
    nxt_itr = combinations(p, len(p)-1)
