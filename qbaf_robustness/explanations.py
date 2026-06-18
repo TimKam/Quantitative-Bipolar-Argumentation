@@ -117,28 +117,25 @@ def determine_max_pockets(qbaf_initial: QBAFramework,
                             qbaf_collection: list[QBAFramework],
                             topic_argument_1: str,
                             topic_argument_2: str,
-                            current_subset: list[str]= [],
-                            pocket_list: list[str]= [],
-                            depth = 0)-> list[list[str]]:
+                            current_subset: set[str]= set(),
+                            pocket_list: list[set[str]]= [],
+                            depth = 0)-> list[set[str]]:
 
    """
-   Returns the maximal pockets with respect to qbaf_initial and qbaf_collection.
+   Checks whether pocket is a pocket of consistency with respect to qbaf_initial and qbaf_collection as per the subset relation.
 
    Args:
       qbaf_initial (QBAFramework): The initial QBAF.
       qbaf_collection (list[QBAFramework]): The collection of QBAFs to be considered.
       topic_argument_1 (str): The first topic argument to be considered.
       topic_argument_2 (str): The second topic argument to be considered.
-      current_subset (list[str]): The subset under consideration.
-      pocket_list (list(list[str])): The list of maximal pockets. 
-      depth (int): The depth of the recursion tree. 
 
    Returns:
-      list[list[str]]: Returns the list of all maximal pockets.
+      bool: Returns True if pocket is a pocket of consistency; False otherwise.
    """
 
    if (depth == 0):
-      considered_subset = list(new_arguments(qbaf_initial, qbaf_collection))
+      considered_subset = set(new_arguments(qbaf_initial, qbaf_collection))
    else: 
       considered_subset = current_subset
 
@@ -149,21 +146,35 @@ def determine_max_pockets(qbaf_initial: QBAFramework,
                     topic_argument_2)):
       return [considered_subset]
 
-   next_itr = [set(x) for x in combinations(considered_subset, len(considered_subset)-1)]
-   next_itr_modified = [x for x in next_itr if not any(x.issubset(set(y)) for y in pocket_list)]
+   
+
+   next_itr = [set(x) for x in combinations(considered_subset, 
+                                                     len(considered_subset)-1)]
+   
+   next_itr_modified = [x for x in next_itr if not any(x.issubset(y) 
+                                                for y in pocket_list)]
+
+
 
    for subset in next_itr_modified:
       pocket_list = pocket_list + determine_max_pockets(qbaf_initial,
                                                           qbaf_collection,
                                                           topic_argument_1,
                                                           topic_argument_2,
-                                                          list(subset),
+                                                          subset,
                                                           pocket_list,
                                                           depth + 1)
-   
-   
-   if depth == 0: return pocket_list
-   else:          return []
+      
+   if depth != 0: 
+      return pocket_list
+   else:
+      max_p = [x for x in pocket_list if (not any( (x != y and x.issubset(y)) for y in pocket_list))]
+      unique_pockets = []
+      
+      for x in max_p:
+        if x not in unique_pockets:
+          unique_pockets.append(x)
+      return unique_pockets
 
 
 
