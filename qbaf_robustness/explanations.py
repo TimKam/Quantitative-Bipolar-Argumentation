@@ -122,7 +122,7 @@ def determine_max_pockets(qbaf_initial: QBAFramework,
                             depth = 0)-> list[list[str]]:
 
    """
-   Checks whether pocket is a pocket of consistency with respect to qbaf_initial and qbaf_collection as per the subset relation.
+   Returns the maximal pockets with respect to qbaf_initial and qbaf_collection.
 
    Args:
       qbaf_initial (QBAFramework): The initial QBAF.
