@@ -227,3 +227,39 @@ def explanation_of_robustness_violation(qbaf_initial: QBAFramework,
         explanations.append((pocket, x))
 
     return explanations
+
+
+def determine_linear_max_pockets(qbaf_initial: QBAFramework,
+                                 qbaf_collection: list[QBAFramework],
+                                 topic_argument_1: str,
+                                 topic_argument_2: str) -> list[list[str]]:
+
+  """ 
+  Determines the pockets when the qbaf_collection is a linear chain. 
+
+  Args:
+    qbaf_initial (QBAFramework): The initial QBAF. 
+    qbaf_collection (list[QBAFramework]): The collection of QBAFs to be considered. 
+    topic_argument_1 (str): The first topic argument to be considered.
+    topic_argument_2 (str): The second topic argument to be considered. 
+  
+  Returns:
+    set[list[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.
+  """
+
+  collection_index = 0
+  new_args = list(new_arguments(qbaf_initial, qbaf_collection))
+
+  while (collection_index < len(qbaf_collection)):
+    if (qbaf_initial.are_strength_consistent(qbaf_collection[collection_index],
+                                            topic_argument_1,
+                                            topic_argument_2) == False): 
+      break
+    else: 
+      collection_index = collection_index+1
+
+
+  args = set(new_arguments(qbaf_initial,[qbaf_collection[collection_index]])) 
+  p_set = [set(x) for x in combinations(new_args, len(new_args)-1)]
+  pocket_list = [list(x) for x in p_set if (args.issubset(x) == False)] 
+  return pocket_list
