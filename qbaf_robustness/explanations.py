@@ -159,7 +159,6 @@ def determine_max_pockets(qbaf_initial: QBAFramework,
                                                           topic_argument_2,
                                                           list(subset),
                                                           pocket_list,
-   
                                                           depth + 1)
    
    
