@@ -114,68 +114,46 @@ def is_pocket_max(qbaf_initial: QBAFramework,
 
 
 def determine_max_pockets(qbaf_initial: QBAFramework,
-                            qbaf_collection: list[QBAFramework],
-                            topic_argument_1: str,
-                            topic_argument_2: str,
-                            current_subset: set[str]= set(),
-                            pocket_list: list[set[str]]= [],
-                            depth = 0)-> list[set[str]]:
-
+                  qbaf_collection: list[QBAFramework],
+                  topic_argument_1: str,
+                  topic_argument_2: str,
+                  pocket: set[str] = 0,
+                  depth = 0)-> set[list[str]]:
    """
-   Checks whether pocket is a pocket of consistency with respect to qbaf_initial and qbaf_collection as per the subset relation.
-
-   Args:
-      qbaf_initial (QBAFramework): The initial QBAF.
+   Returns the set of all maximal pockets with respect to qbaf_initial and qbaf_collection.
+   
+   Args: 
+      qbaf_initial (QBAFramework): The initial QBAF. 
       qbaf_collection (list[QBAFramework]): The collection of QBAFs to be considered.
+      pocket (set[str]): The pocket to be considered, initialised to the set of all new arguments to start with.
       topic_argument_1 (str): The first topic argument to be considered.
       topic_argument_2 (str): The second topic argument to be considered.
 
    Returns:
-      bool: Returns True if pocket is a pocket of consistency; False otherwise.
+      set[list[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.   
    """
 
    if (depth == 0):
-      considered_subset = set(new_arguments(qbaf_initial, qbaf_collection))
-   else: 
-      considered_subset = current_subset
+      pocket = list(new_arguments(qbaf_initial, qbaf_collection))
 
-   if(is_pocket_max(qbaf_initial,
-                    qbaf_collection,
-                    considered_subset,
-                    topic_argument_1,
-                    topic_argument_2)):
-      return [considered_subset]
+   if (is_pocket_max(qbaf_initial, qbaf_collection, pocket, topic_argument_1, topic_argument_2)): 
+      return [pocket]
+   
+   if (len(pocket) == 1 or len(pocket) == 0): 
+      return []
+   
+   nxt_itr = combinations(pocket, len(pocket)-1)
+   max_p = list()
 
+   for subsets in nxt_itr:
+      max_p = max_p + determine_max_pockets(qbaf_initial, 
+                                       qbaf_collection,
+                                       topic_argument_1,
+                                       topic_argument_2,
+                                       list(subsets), depth + 1)
    
 
-   next_itr = [set(x) for x in combinations(considered_subset, 
-                                                     len(considered_subset)-1)]
-   
-   next_itr_subset = [x for x in next_itr if not any(x.issubset(y) 
-                                                for y in pocket_list)]
-
-
-
-   for subset in next_itr_subset:
-      pocket_list = pocket_list + determine_max_pockets(qbaf_initial,
-                                                          qbaf_collection,
-                                                          topic_argument_1,
-                                                          topic_argument_2,
-                                                          subset,
-                                                          pocket_list,
-                                                          depth + 1)
-      
-   if depth != 0: 
-      return pocket_list
-   else:
-      max_p = [x for x in pocket_list if (not any( (x != y and x.issubset(y)) for y in pocket_list))]
-      unique_pockets = []
-      
-      for x in max_p:
-        if x not in unique_pockets:
-          unique_pockets.append(x)
-      return unique_pockets
-
+   return max_p
 
 
 def pockets_of_consistency(qbaf_initial: QBAFramework,
