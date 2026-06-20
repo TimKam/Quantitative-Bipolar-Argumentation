@@ -151,12 +151,12 @@ def determine_max_pockets(qbaf_initial: QBAFramework,
    next_itr = [set(x) for x in combinations(considered_subset, 
                                                      len(considered_subset)-1)]
    
-   next_itr_modified = [x for x in next_itr if not any(x.issubset(y) 
+   next_itr_subset = [x for x in next_itr if not any(x.issubset(y) 
                                                 for y in pocket_list)]
 
 
 
-   for subset in next_itr_modified:
+   for subset in next_itr_subset:
       pocket_list = pocket_list + determine_max_pockets(qbaf_initial,
                                                           qbaf_collection,
                                                           topic_argument_1,
@@ -271,16 +271,17 @@ def determine_linear_max_pockets(qbaf_initial: QBAFramework,
   collection_index = 0
   new_args = list(new_arguments(qbaf_initial, qbaf_collection))
 
-  while (collection_index < len(qbaf_collection)):
-    if (qbaf_initial.are_strength_consistent(qbaf_collection[collection_index],
+  for i in range (0,len(qbaf_collection)-1):
+      if (qbaf_initial.are_strength_consistent(qbaf_collection[i],
                                             topic_argument_1,
                                             topic_argument_2) == False): 
+         collection_index = i
       break
-    else: 
-      collection_index = collection_index+1
-
-
-  args = set(new_arguments(qbaf_initial,[qbaf_collection[collection_index]])) 
-  p_set = [set(x) for x in combinations(new_args, len(new_args)-1)]
-  pocket_list = [list(x) for x in p_set if (args.issubset(x) == False)] 
-  return pocket_list
+   
+  if (collection_index == -1):
+      return new_args
+  else:
+      args = set(new_arguments(qbaf_initial,[qbaf_collection[collection_index]])) 
+      p_set = [set(x) for x in combinations(new_args, len(new_args)-1)]
+      pocket_list = [x for x in p_set if ( not args.issubset(x))] 
+      return pocket_list
