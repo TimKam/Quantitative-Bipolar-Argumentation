@@ -257,7 +257,7 @@ def test_max_pockets():
    for x in generated_value_4: assert x in expected_value_4
    for x in expected_value_4: assert x in generated_value_4
 
-   assert generated_value_2 == [set()]
+   assert generated_value_2 == [[]]
 
   
 def test_max_linear_pockets():
