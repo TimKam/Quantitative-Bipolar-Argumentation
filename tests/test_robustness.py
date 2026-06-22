@@ -262,12 +262,12 @@ def test_max_pockets():
   
 def test_max_linear_pockets():
 
-   g_value_1 = determine_linear_max_pockets(qbaf_initial= Q_1, 
+   g_value_1 = determine_linear_pragmatic_pockets(qbaf_initial= Q_1, 
                                      qbaf_collection = [Q_2],
                                      topic_argument_1 = 'a',
                                      topic_argument_2 = 'b')
    
-   g_value_2 = determine_linear_max_pockets(qbaf_initial= Q_1, 
+   g_value_2 = determine_linear_pragmatic_pockets(qbaf_initial= Q_1, 
                                      qbaf_collection = [Q_2, Q_3],
                                      topic_argument_1 = 'a',
                                      topic_argument_2 = 'b')
