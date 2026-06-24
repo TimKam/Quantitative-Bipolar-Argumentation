@@ -283,3 +283,27 @@ def test_max_linear_pockets():
 
    for x in generated_value_2: assert x in expected_value_2
    for x in expected_value_2: assert x in generated_value_2
+
+
+def test_max_bottoms_up_pocket():
+   g_value_1 = determine_bottom_up_linear_pockets(qbaf_initial = Q_1, 
+                                     qbaf_collection = [Q_2],
+                                     topic_argument_1 = 'a',
+                                     topic_argument_2 = 'b')
+   
+   g_value_2 = determine_bottom_up_linear_pockets(qbaf_initial = Q_1, 
+                                     qbaf_collection = [Q_3],
+                                     topic_argument_1 = 'a',
+                                     topic_argument_2 = 'b')
+   
+   generated_value_1 = [set(x) for x in g_value_1]
+   generated_value_2 = [set(x) for x in g_value_2]
+
+   expected_value_1 = [{'c'}, {'d'}]
+   expected_value_2 = [{'c', 'd'}, {'c', 'e'}, {'d', 'e'}]
+
+   for x in generated_value_1: assert x in expected_value_1
+   for x in expected_value_1: assert x in generated_value_1
+
+   for x in generated_value_2: assert x in expected_value_2
+   for x in expected_value_2: assert x in generated_value_2
