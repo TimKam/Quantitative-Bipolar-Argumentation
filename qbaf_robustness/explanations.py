@@ -130,7 +130,7 @@ def determine_max_pockets(qbaf_initial: QBAFramework,
       topic_argument_2 (str): The second topic argument to be considered.
 
    Returns:
-      list[set[str]]: returns the list of all maximal pockets with respect to qbaf_intial and qbaf-collection.   
+      set[frozenset[str]]: returns the list of all maximal pockets with respect to qbaf_intial and qbaf-collection.   
    """
 
    if (depth == 0):
@@ -152,15 +152,8 @@ def determine_max_pockets(qbaf_initial: QBAFramework,
                                        topic_argument_2,
                                        list(subsets), depth + 1)
    
-   if (depth != 0):
-      return max_p
-   else:  #removes pockets that get counted twice. 
-      max_p_wo_duplicates = []
-      for i in max_p:
-         if i not in max_p_wo_duplicates:
-            max_p_wo_duplicates.append(i)
-      return max_p_wo_duplicates
-
+   
+   return max_p
 
 def pockets_of_consistency(qbaf_initial: QBAFramework,
                            qbaf_collection: list[QBAFramework],
@@ -261,7 +254,7 @@ def determine_linear_pragmatic_pockets(qbaf_initial: QBAFramework,
   return [list(new_arguments(qbaf_initial, qbaf_collection))]
 
 
-def determine_bottom_up_linear_pockets(qbaf_initial: QBAFramework,
+def determine_bottom_up_max_pockets(qbaf_initial: QBAFramework,
                                  qbaf_collection: list[QBAFramework],
                                  topic_argument_1: str,
                                  topic_argument_2: str) -> list[set[str]]:

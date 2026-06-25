@@ -286,12 +286,12 @@ def test_max_linear_pockets():
 
 
 def test_max_bottoms_up_pocket():
-   g_value_1 = determine_bottom_up_linear_pockets(qbaf_initial = Q_1, 
+   g_value_1 = determine_bottom_up_max_pockets(qbaf_initial = Q_1, 
                                      qbaf_collection = [Q_2],
                                      topic_argument_1 = 'a',
                                      topic_argument_2 = 'b')
    
-   g_value_2 = determine_bottom_up_linear_pockets(qbaf_initial = Q_1, 
+   g_value_2 = determine_bottom_up_max_pockets(qbaf_initial = Q_1, 
                                      qbaf_collection = [Q_3],
                                      topic_argument_1 = 'a',
                                      topic_argument_2 = 'b')
