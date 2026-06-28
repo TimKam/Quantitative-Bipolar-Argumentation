@@ -230,7 +230,8 @@ def explanation_of_robustness_violation(qbaf_initial: QBAFramework,
 def determine_linear_pragmatic_pockets(qbaf_initial: QBAFramework,
                                  qbaf_collection: list[QBAFramework],
                                  topic_argument_1: str,
-                                 topic_argument_2: str) -> list[list[str]]:
+                                 topic_argument_2: str,
+                                 bottom_up: bool = True) -> list[list[str]]:
   """ 
   Determines the pragmatic, large pockets when the qbaf_collection is a linear chain.
   However, the function only determines the max. pockets the "breaking" point
@@ -241,6 +242,7 @@ def determine_linear_pragmatic_pockets(qbaf_initial: QBAFramework,
     qbaf_collection (list[QBAFramework]): The collection of QBAFs to be considered. 
     topic_argument_1 (str): The first topic argument to be considered.
     topic_argument_2 (str): The second topic argument to be considered. 
+    bottom_up (bool): Whether bottom-up or top-down search should be executed. Defaults to `True`.
   
   Returns:
     set[list[str]]: returns a list of "linear" maximal pockets with respect to qbaf_initial and qbaf_collection.
@@ -249,8 +251,11 @@ def determine_linear_pragmatic_pockets(qbaf_initial: QBAFramework,
     if not qbaf_initial.are_strength_consistent(qbaf, topic_argument_1, topic_argument_2):
       previous_qbaf = qbaf_collection[index-1] if index > 0 else qbaf_initial
       new_args_to_prev = list(new_arguments(qbaf_initial, [previous_qbaf]))
-      intermediate_max_pockets = determine_max_pockets(previous_qbaf, [qbaf], topic_argument_1, topic_argument_2)
-      return [pocket + new_args_to_prev for pocket in intermediate_max_pockets]
+      if bottom_up:
+         intermediate_max_pockets = determine_bottom_up_max_pockets(previous_qbaf, [qbaf], topic_argument_1, topic_argument_2)
+      else:
+         intermediate_max_pockets = determine_max_pockets(previous_qbaf, [qbaf], topic_argument_1, topic_argument_2)
+      return [list(pocket) + new_args_to_prev for pocket in intermediate_max_pockets]
   return [list(new_arguments(qbaf_initial, qbaf_collection))]
 
 
