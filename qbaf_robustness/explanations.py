@@ -118,7 +118,7 @@ def determine_max_pockets(qbaf_initial: QBAFramework,
                   topic_argument_1: str,
                   topic_argument_2: str,
                   pocket: set[str] = 0,
-                  depth = 0)-> set[list[str]]:
+                  depth = 0)-> list[list[str]]:
    """
    Returns the set of all maximal pockets with respect to qbaf_initial and qbaf_collection.
    
@@ -130,7 +130,7 @@ def determine_max_pockets(qbaf_initial: QBAFramework,
       topic_argument_2 (str): The second topic argument to be considered.
 
    Returns:
-      set[list[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.   
+      set[frozenset[str]]: returns the list of all maximal pockets with respect to qbaf_intial and qbaf-collection.   
    """
 
    if (depth == 0):
@@ -152,17 +152,15 @@ def determine_max_pockets(qbaf_initial: QBAFramework,
                                        topic_argument_2,
                                        list(subsets), depth + 1)
    
-
+   
    return max_p
-
-
 
 def pockets_of_consistency(qbaf_initial: QBAFramework,
                            qbaf_collection: list[QBAFramework],
                            topic_argument_1: str,
                            topic_argument_2: str) -> list[set[str]]:
     """
-    Retruns the list of pockets of qbaf_initial and qbaf_collection.
+    Returns the list of pockets of qbaf_initial and qbaf_collection.
 
     Args:
        qbaf_initial (QBAFramework): The initial QBAF.
@@ -227,3 +225,93 @@ def explanation_of_robustness_violation(qbaf_initial: QBAFramework,
         explanations.append((pocket, x))
 
     return explanations
+
+
+def determine_linear_pragmatic_pockets(qbaf_initial: QBAFramework,
+                                 qbaf_collection: list[QBAFramework],
+                                 topic_argument_1: str,
+                                 topic_argument_2: str,
+                                 bottom_up: bool = True) -> list[list[str]]:
+  """ 
+  Determines the pragmatic, large pockets when the qbaf_collection is a linear chain.
+  However, the function only determines the max. pockets the "breaking" point
+  between the last robust QBAF and the first non-robust QBAF gives rise to.
+
+  Args:
+    qbaf_initial (QBAFramework): The initial QBAF. 
+    qbaf_collection (list[QBAFramework]): The collection of QBAFs to be considered. 
+    topic_argument_1 (str): The first topic argument to be considered.
+    topic_argument_2 (str): The second topic argument to be considered. 
+    bottom_up (bool): Whether bottom-up or top-down search should be executed. Defaults to `True`.
+  
+  Returns:
+    set[list[str]]: returns a list of "linear" maximal pockets with respect to qbaf_initial and qbaf_collection.
+  """
+  for index, qbaf in enumerate(qbaf_collection):
+    if not qbaf_initial.are_strength_consistent(qbaf, topic_argument_1, topic_argument_2):
+      previous_qbaf = qbaf_collection[index-1] if index > 0 else qbaf_initial
+      new_args_to_prev = list(new_arguments(qbaf_initial, [previous_qbaf]))
+      if bottom_up:
+         intermediate_max_pockets = determine_bottom_up_max_pockets(previous_qbaf, [qbaf], topic_argument_1, topic_argument_2)
+      else:
+         intermediate_max_pockets = determine_max_pockets(previous_qbaf, [qbaf], topic_argument_1, topic_argument_2)
+      return [list(pocket) + new_args_to_prev for pocket in intermediate_max_pockets]
+  return [list(new_arguments(qbaf_initial, qbaf_collection))]
+
+
+def determine_bottom_up_max_pockets(qbaf_initial: QBAFramework,
+                                 qbaf_collection: list[QBAFramework],
+                                 topic_argument_1: str,
+                                 topic_argument_2: str) -> list[set[str]]:
+   """
+   Returns all the maximal pockets w.r.t. qbaf_initial and qbaf_collection usinga bottom-up approach.
+
+   Args:
+      qbaf_initial (QBAFramework): The initial QBAF. 
+      qbaf_collection (list[QBAFramework]): The collection of QBAFs to be considered. 
+      topic_argument_1 (str): The first topic argument to be considered.
+      topic_argument_2 (str): The second topic argument to be considered. 
+  
+   Returns:
+      list[set[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.
+   """
+
+   new_args = list(new_arguments(qbaf_initial, qbaf_collection))
+
+   def backtrack_pockets(current_set: list[str],
+                         remaining_args: list[str], 
+                         max_pockets = list[set[str]]) -> list[set[str]]:
+      """Implements a bottoms-up search for maximal pockets.
+      
+      Args:
+         current_set (list[str]): The current list of arguments considered.
+         remaining_args (list[str]): The set of arguments left to be checked for extending current_set.
+         max_pockets (list[str]): The list of maximal pockets.
+
+      Returns:
+         list[set[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.
+      """
+      
+      is_maximal = True
+
+      for i, arg in enumerate(remaining_args): #Checks whether a pocket can be extended
+         if(is_pocket_max(qbaf_initial,
+                          qbaf_collection,
+                          (set(current_set)|set(arg)),
+                          topic_argument_1,
+                          topic_argument_2)):
+           is_maximal = False
+           backtrack_pockets(current_set + [arg],
+                             remaining_args[i+1:],
+                             max_pockets)
+
+      
+      if(is_maximal == True): #checks whether the extended pocket is maximal.
+          if any([set(current_set).issubset(x) for x in max_pockets]):
+              return
+          
+          max_pockets.append(set(current_set))
+      
+      return max_pockets
+   
+   return backtrack_pockets([], list(new_args), [])

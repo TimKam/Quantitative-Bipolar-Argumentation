@@ -45,6 +45,8 @@ Q_2 = QBAFramework(['a', 'b', 'c', 'd'], [0.5, 0.5, 0.5, 0.5], [('c', 'a')], [('
 
 Q_1 = QBAFramework(['a', 'b'], [0.5, 0.5], [], [], semantics="QuadraticEnergy_model")
 
+Q_3 = QBAFramework(['a', 'b', 'c', 'd', 'e'], [0.5, 0.5, 0.5, 0.5, 0.0], [('c', 'a')], [('d', 'b')], semantics = "QuadraticEnergy_model")
+
 value = pockets_of_consistency(qbaf_initial,
                                qbaf_collection = [qbaf_u_4, qbaf_u_5],
                                topic_argument_1 = 'a',
@@ -258,4 +260,50 @@ def test_max_pockets():
    assert generated_value_2 == [[]]
 
   
-  
+def test_max_linear_pockets():
+
+   g_value_1 = determine_linear_pragmatic_pockets(qbaf_initial= Q_1, 
+                                     qbaf_collection = [Q_2],
+                                     topic_argument_1 = 'a',
+                                     topic_argument_2 = 'b')
+   
+   g_value_2 = determine_linear_pragmatic_pockets(qbaf_initial= Q_1, 
+                                     qbaf_collection = [Q_3],
+                                     topic_argument_1 = 'a',
+                                     topic_argument_2 = 'b')
+   
+   generated_value_1 = [set(x) for x in g_value_1]
+   generated_value_2 = [set(x) for x in g_value_2]
+
+   expected_value_1 = [{'c'}, {'d'}]
+   expected_value_2 = [{'c', 'd'}, {'c', 'e'}, {'d', 'e'}]
+
+   for x in generated_value_1: assert x in expected_value_1
+   for x in expected_value_1: assert x in generated_value_1
+
+   for x in generated_value_2: assert x in expected_value_2
+   for x in expected_value_2: assert x in generated_value_2
+
+
+def test_max_bottoms_up_pocket():
+   g_value_1 = determine_bottom_up_max_pockets(qbaf_initial = Q_1, 
+                                     qbaf_collection = [Q_2],
+                                     topic_argument_1 = 'a',
+                                     topic_argument_2 = 'b')
+   
+   g_value_2 = determine_bottom_up_max_pockets(qbaf_initial = Q_1, 
+                                     qbaf_collection = [Q_3],
+                                     topic_argument_1 = 'a',
+                                     topic_argument_2 = 'b')
+   
+   generated_value_1 = [set(x) for x in g_value_1]
+   generated_value_2 = [set(x) for x in g_value_2]
+
+   expected_value_1 = [{'c'}, {'d'}]
+   expected_value_2 = [{'c', 'd'}, {'c', 'e'}, {'d', 'e'}]
+
+   for x in generated_value_1: assert x in expected_value_1
+   for x in expected_value_1: assert x in generated_value_1
+
+   for x in generated_value_2: assert x in expected_value_2
+   for x in expected_value_2: assert x in generated_value_2
