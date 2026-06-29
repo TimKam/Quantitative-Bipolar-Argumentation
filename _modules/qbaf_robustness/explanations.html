@@ -362,7 +362,7 @@
                   <span class="n">topic_argument_1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                   <span class="n">topic_argument_2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                   <span class="n">pocket</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                  <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+                  <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
 <span class="w">   </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">   Returns the set of all maximal pockets with respect to qbaf_initial and qbaf_collection.</span>
 <span class="sd">   </span>
@@ -374,7 +374,7 @@
 <span class="sd">      topic_argument_2 (str): The second topic argument to be considered.</span>
 
 <span class="sd">   Returns:</span>
-<span class="sd">      set[list[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.   </span>
+<span class="sd">      set[frozenset[str]]: returns the list of all maximal pockets with respect to qbaf_intial and qbaf-collection.   </span>
 <span class="sd">   &quot;&quot;&quot;</span>
 
    <span class="k">if</span> <span class="p">(</span><span class="n">depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
@@ -396,10 +396,8 @@
                                        <span class="n">topic_argument_2</span><span class="p">,</span>
                                        <span class="nb">list</span><span class="p">(</span><span class="n">subsets</span><span class="p">),</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
    
-
+   
    <span class="k">return</span> <span class="n">max_p</span>
-
-
 
 <div class="viewcode-block" id="pockets_of_consistency">
 <a class="viewcode-back" href="../../index.html#qbaf_robustness.explanations.pockets_of_consistency">[docs]</a>
@@ -408,7 +406,7 @@
                            <span class="n">topic_argument_1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                            <span class="n">topic_argument_2</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Retruns the list of pockets of qbaf_initial and qbaf_collection.</span>
+<span class="sd">    Returns the list of pockets of qbaf_initial and qbaf_collection.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">       qbaf_initial (QBAFramework): The initial QBAF.</span>
@@ -477,6 +475,96 @@
 
     <span class="k">return</span> <span class="n">explanations</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">determine_linear_pragmatic_pockets</span><span class="p">(</span><span class="n">qbaf_initial</span><span class="p">:</span> <span class="n">QBAFramework</span><span class="p">,</span>
+                                 <span class="n">qbaf_collection</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QBAFramework</span><span class="p">],</span>
+                                 <span class="n">topic_argument_1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                 <span class="n">topic_argument_2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                 <span class="n">bottom_up</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">  Determines the pragmatic, large pockets when the qbaf_collection is a linear chain.</span>
+<span class="sd">  However, the function only determines the max. pockets the &quot;breaking&quot; point</span>
+<span class="sd">  between the last robust QBAF and the first non-robust QBAF gives rise to.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    qbaf_initial (QBAFramework): The initial QBAF. </span>
+<span class="sd">    qbaf_collection (list[QBAFramework]): The collection of QBAFs to be considered. </span>
+<span class="sd">    topic_argument_1 (str): The first topic argument to be considered.</span>
+<span class="sd">    topic_argument_2 (str): The second topic argument to be considered. </span>
+<span class="sd">    bottom_up (bool): Whether bottom-up or top-down search should be executed. Defaults to `True`.</span>
+<span class="sd">  </span>
+<span class="sd">  Returns:</span>
+<span class="sd">    set[list[str]]: returns a list of &quot;linear&quot; maximal pockets with respect to qbaf_initial and qbaf_collection.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">qbaf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">qbaf_collection</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">qbaf_initial</span><span class="o">.</span><span class="n">are_strength_consistent</span><span class="p">(</span><span class="n">qbaf</span><span class="p">,</span> <span class="n">topic_argument_1</span><span class="p">,</span> <span class="n">topic_argument_2</span><span class="p">):</span>
+      <span class="n">previous_qbaf</span> <span class="o">=</span> <span class="n">qbaf_collection</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">qbaf_initial</span>
+      <span class="n">new_args_to_prev</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_arguments</span><span class="p">(</span><span class="n">qbaf_initial</span><span class="p">,</span> <span class="p">[</span><span class="n">previous_qbaf</span><span class="p">]))</span>
+      <span class="k">if</span> <span class="n">bottom_up</span><span class="p">:</span>
+         <span class="n">intermediate_max_pockets</span> <span class="o">=</span> <span class="n">determine_bottom_up_max_pockets</span><span class="p">(</span><span class="n">previous_qbaf</span><span class="p">,</span> <span class="p">[</span><span class="n">qbaf</span><span class="p">],</span> <span class="n">topic_argument_1</span><span class="p">,</span> <span class="n">topic_argument_2</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+         <span class="n">intermediate_max_pockets</span> <span class="o">=</span> <span class="n">determine_max_pockets</span><span class="p">(</span><span class="n">previous_qbaf</span><span class="p">,</span> <span class="p">[</span><span class="n">qbaf</span><span class="p">],</span> <span class="n">topic_argument_1</span><span class="p">,</span> <span class="n">topic_argument_2</span><span class="p">)</span>
+      <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">pocket</span><span class="p">)</span> <span class="o">+</span> <span class="n">new_args_to_prev</span> <span class="k">for</span> <span class="n">pocket</span> <span class="ow">in</span> <span class="n">intermediate_max_pockets</span><span class="p">]</span>
+  <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">new_arguments</span><span class="p">(</span><span class="n">qbaf_initial</span><span class="p">,</span> <span class="n">qbaf_collection</span><span class="p">))]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">determine_bottom_up_max_pockets</span><span class="p">(</span><span class="n">qbaf_initial</span><span class="p">:</span> <span class="n">QBAFramework</span><span class="p">,</span>
+                                 <span class="n">qbaf_collection</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QBAFramework</span><span class="p">],</span>
+                                 <span class="n">topic_argument_1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                 <span class="n">topic_argument_2</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">   </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">   Returns all the maximal pockets w.r.t. qbaf_initial and qbaf_collection usinga bottom-up approach.</span>
+
+<span class="sd">   Args:</span>
+<span class="sd">      qbaf_initial (QBAFramework): The initial QBAF. </span>
+<span class="sd">      qbaf_collection (list[QBAFramework]): The collection of QBAFs to be considered. </span>
+<span class="sd">      topic_argument_1 (str): The first topic argument to be considered.</span>
+<span class="sd">      topic_argument_2 (str): The second topic argument to be considered. </span>
+<span class="sd">  </span>
+<span class="sd">   Returns:</span>
+<span class="sd">      list[set[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+
+   <span class="n">new_args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_arguments</span><span class="p">(</span><span class="n">qbaf_initial</span><span class="p">,</span> <span class="n">qbaf_collection</span><span class="p">))</span>
+
+   <span class="k">def</span><span class="w"> </span><span class="nf">backtrack_pockets</span><span class="p">(</span><span class="n">current_set</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                         <span class="n">remaining_args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> 
+                         <span class="n">max_pockets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">      </span><span class="sd">&quot;&quot;&quot;Implements a bottoms-up search for maximal pockets.</span>
+<span class="sd">      </span>
+<span class="sd">      Args:</span>
+<span class="sd">         current_set (list[str]): The current list of arguments considered.</span>
+<span class="sd">         remaining_args (list[str]): The set of arguments left to be checked for extending current_set.</span>
+<span class="sd">         max_pockets (list[str]): The list of maximal pockets.</span>
+
+<span class="sd">      Returns:</span>
+<span class="sd">         list[set[str]]: returns the set of all maximal pockets with respect to qbaf_intial and qbaf-collection.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      
+      <span class="n">is_maximal</span> <span class="o">=</span> <span class="kc">True</span>
+
+      <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">remaining_args</span><span class="p">):</span> <span class="c1">#Checks whether a pocket can be extended</span>
+         <span class="k">if</span><span class="p">(</span><span class="n">is_pocket_max</span><span class="p">(</span><span class="n">qbaf_initial</span><span class="p">,</span>
+                          <span class="n">qbaf_collection</span><span class="p">,</span>
+                          <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">current_set</span><span class="p">)</span><span class="o">|</span><span class="nb">set</span><span class="p">(</span><span class="n">arg</span><span class="p">)),</span>
+                          <span class="n">topic_argument_1</span><span class="p">,</span>
+                          <span class="n">topic_argument_2</span><span class="p">)):</span>
+           <span class="n">is_maximal</span> <span class="o">=</span> <span class="kc">False</span>
+           <span class="n">backtrack_pockets</span><span class="p">(</span><span class="n">current_set</span> <span class="o">+</span> <span class="p">[</span><span class="n">arg</span><span class="p">],</span>
+                             <span class="n">remaining_args</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:],</span>
+                             <span class="n">max_pockets</span><span class="p">)</span>
+
+      
+      <span class="k">if</span><span class="p">(</span><span class="n">is_maximal</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span> <span class="c1">#checks whether the extended pocket is maximal.</span>
+          <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="nb">set</span><span class="p">(</span><span class="n">current_set</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">max_pockets</span><span class="p">]):</span>
+              <span class="k">return</span>
+          
+          <span class="n">max_pockets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">current_set</span><span class="p">))</span>
+      
+      <span class="k">return</span> <span class="n">max_pockets</span>
+   
+   <span class="k">return</span> <span class="n">backtrack_pockets</span><span class="p">([],</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_args</span><span class="p">),</span> <span class="p">[])</span>
 </pre></div>
 
                 </article>
