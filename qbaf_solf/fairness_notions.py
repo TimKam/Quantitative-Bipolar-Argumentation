@@ -1,5 +1,5 @@
 from qbaf import QBAFramework
-from qbaf_solf.safety_liveness_oscillations import *
+from qbaf_solf.safety_oscillations_liveness import *
 import numpy as np
 import matplotlib.pyplot as plt
 import math
