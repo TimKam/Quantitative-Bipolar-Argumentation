@@ -98,8 +98,6 @@ def calculate_shannon_fairness(qbaf_collection: list[QBAFramework],
       return 1
     sum_of_oscillations = sum([x[1] for x in oscillations.items()])
     oscillation_probability = {x: oscillations[x]/sum_of_oscillations for x in oscillations.keys()}
-    print(oscillation_probability)
-
 
     # Calculating the information coefficient
     info_coefficient = {x: (-math.log(oscillation_probability[x])/math.log(len(topic_set))) for x in oscillations.keys() if oscillation_probability[x] > 0}
