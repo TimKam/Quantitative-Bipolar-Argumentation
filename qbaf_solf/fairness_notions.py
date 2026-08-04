@@ -62,13 +62,6 @@ def calculate_gini_fairness(qbaf_collection: list[QBAFramework],
     area_enclosed = np.trapezoid(np.abs(fairness_line - safety_curve), x_axis)
     gini_fairness = (2 / (1 + math.e ** (-area_enclosed))) - 1
 
-    # Plotting the safety curve and fairness line
-    #plt.xticks(x_axis, ['0']+[x[0] for x in sorted_oscillations])
-    #plt.plot(x_axis, safety_curve, label = 'Safety Curve', color='green', marker = 's')
-    #plt.plot(x_axis, fairness_line, label = 'Fairness Line', linestyle = 'dashed', color='red')
-    #plt.fill_between(x_axis, safety_curve, fairness_line, alpha=0.4)
-    #plt.legend()
-    #plt.show()
 
     return gini_fairness
 
