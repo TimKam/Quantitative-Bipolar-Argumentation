@@ -64,6 +64,7 @@ def number_of_oscillations(qbaf_collection: list[QBAFramework],
         dict: the number of oscillations of the topic_set.
 
     """
+    
     oscillations = {x: 0 for x in topic_set}
 
     for i in range(0, len(qbaf_collection)-1):

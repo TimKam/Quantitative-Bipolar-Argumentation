@@ -6,6 +6,19 @@ def is_ideal_fair(qbaf_collection: list[QBAFramework],
                  topic_set: list[str],
                  threshold: float) -> bool:
 
+    """
+      Checks whether the qbaf_collection is ideally fair w.r.t. to qbaf_collection,
+      topic_set and the threshold.
+      
+      Args:
+        qbaf_collection (list[QBAFramework]): The QBAF dialogue.
+        topic_set (list[str]): The topic set.
+        threshold: The credibility threshold.
+        
+      Returns:
+        bool: True if the qbaf_collection is ideally fair, false otherwise.
+    """
+
     safe_check = [is_safe(qbaf_collection, [x], threshold) for x in topic_set]
 
     return True if (all(safe_check) or not any(safe_check)) else False
@@ -14,6 +27,18 @@ def is_ideal_fair(qbaf_collection: list[QBAFramework],
 def is_live_fair(qbaf_collection: list[QBAFramework],
                  topic_set: list[str],
                  threshold: float) -> bool:
+    """
+          Checks whether the qbaf_collection is lively fair w.r.t. to qbaf_collection,
+          topic_set and the threshold.
+          
+          Args:
+            qbaf_collection (list[QBAFramework]): The QBAF dialogue.
+            topic_set (list[str]): The topic set.
+            threshold: The credibility threshold.
+            
+          Returns:
+            bool: True if the qbaf_collection is lively fair, false otherwise.
+    """
 
     live_check =[is_live(qbaf_collection, [x], threshold) for x in topic_set]
 
@@ -23,6 +48,18 @@ def is_live_fair(qbaf_collection: list[QBAFramework],
 def is_cautious_fair(qbaf_collection: list[QBAFramework],
                      topic_set: list[str],
                      threshold: float) -> bool:
+    """
+          Checks whether the qbaf_collection is cautiously fair w.r.t. to qbaf_collection,
+          topic_set and the threshold.
+          
+          Args:
+            qbaf_collection (list[QBAFramework]): The QBAF dialogue.
+            topic_set (list[str]): The topic set.
+            threshold: The credibility threshold.
+            
+          Returns:
+            bool: True if the collection is cautiously fair, false otherwise.
+    """
 
     safe_check =[is_safe(qbaf_collection, [x], threshold) for x in topic_set]
     live_check =[is_live(qbaf_collection, [x], threshold) for x in topic_set]
@@ -32,7 +69,7 @@ def is_cautious_fair(qbaf_collection: list[QBAFramework],
 def calculate_area_under_curve(x_axis: list[float],
                                y_axis: list[float]) -> float:
     """
-      Calculates the area under the curve defined by x_axis and the points in y_axis
+      Calculates the area under the curve defined by x_axis and the points in y_axis.
       
       Args: 
         x_axis (list[float]): The x_axis of the function.
