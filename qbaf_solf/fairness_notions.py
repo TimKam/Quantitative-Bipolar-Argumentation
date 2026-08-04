@@ -1,8 +1,34 @@
 from qbaf import QBAFramework
 from qbaf_solf.safety_oscillations_liveness import *
 import numpy as np
-import matplotlib.pyplot as plt
 import math
+
+def is_ideal_fair(qbaf_collection: list[QBAFramework],
+                 topic_set: list[str],
+                 threshold: float) -> bool:
+
+    safe_check = [is_safe(qbaf_collection, [x], threshold) for x in topic_set]
+
+    return True if (all(safe_check) or not any(safe_check)) else False
+
+
+def is_live_fair(qbaf_collection: list[QBAFramework],
+                 topic_set: list[str],
+                 threshold: float) -> bool:
+
+    live_check =[is_live(qbaf_collection, [x], threshold) for x in topic_set]
+
+    return True if (all(live_check) or not any(live_check)) else False
+
+
+def is_cautious_fair(qbaf_collection: list[QBAFramework],
+                     topic_set: list[str],
+                     threshold: float) -> bool:
+
+    safe_check =[is_safe(qbaf_collection, [x], threshold) for x in topic_set]
+    live_check =[is_live(qbaf_collection, [x], threshold) for x in topic_set]
+
+    return True if ((any(safe_check) and all(live_check)) or not any(safe_check)) else False
 
 
 def calculate_gini_fairness(qbaf_collection: list[QBAFramework],
@@ -37,12 +63,12 @@ def calculate_gini_fairness(qbaf_collection: list[QBAFramework],
     gini_fairness = (2 / (1 + math.e ** (-area_enclosed))) - 1
 
     # Plotting the safety curve and fairness line
-    plt.xticks(x_axis, ['0']+[x[0] for x in sorted_oscillations])
-    plt.plot(x_axis, safety_curve, label = 'Safety Curve', color='green', marker = 's')
-    plt.plot(x_axis, fairness_line, label = 'Fairness Line', linestyle = 'dashed', color='red')
-    plt.fill_between(x_axis, safety_curve, fairness_line, alpha=0.4)
-    plt.legend()
-    plt.show()
+    #plt.xticks(x_axis, ['0']+[x[0] for x in sorted_oscillations])
+    #plt.plot(x_axis, safety_curve, label = 'Safety Curve', color='green', marker = 's')
+    #plt.plot(x_axis, fairness_line, label = 'Fairness Line', linestyle = 'dashed', color='red')
+    #plt.fill_between(x_axis, safety_curve, fairness_line, alpha=0.4)
+    #plt.legend()
+    #plt.show()
 
     return gini_fairness
 
