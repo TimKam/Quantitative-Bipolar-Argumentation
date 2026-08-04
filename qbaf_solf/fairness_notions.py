@@ -42,7 +42,8 @@ def calculate_area_under_curve(x_axis: list[float],
         float: returns the area under the curve.
     """
 
-    area = sum([0.5 * (y_axis[i] + y_axis[i+1]) * (y_axis[i] + y_axis[i+1])] for i in range(0, len(x_axis)-1))
+    area = sum([0.5 * (y_axis[i] + y_axis[i+1]) * (x_axis[i+1] - x_axis[i]) for i in range(0, len(x_axis)-1)])
+    print(area)
     return area
 
 
@@ -75,7 +76,7 @@ def calculate_gini_fairness(qbaf_collection: list[QBAFramework],
     fairness_line = [(safety_curve[-1]/len(topic_set)) * x for x in x_axis]
 
     # Calculating Gini fairness
-    area_enclosed = calculate_area_under_curve(x_axis, safety_curve) - calculate_area_under_curve(x_axis, fairness_line)
+    area_enclosed = abs(calculate_area_under_curve(x_axis, safety_curve) - calculate_area_under_curve(x_axis, fairness_line))
     gini_fairness = (2 / (1 + math.e ** (-area_enclosed))) - 1
 
 
