@@ -1,4 +1,5 @@
-from qbaf_solf.fairness_notions import *
+from qbaf import QBAFramework
+from qbaf_solf.fairness_notions import calculate_gini_fairness, calculate_shannon_fairness, is_live_fair, is_ideal_fair, is_cautious_fair
 
 args = ['a', 'b', 'c']
 args_1 = ['a', 'b', 'c', 'd']
