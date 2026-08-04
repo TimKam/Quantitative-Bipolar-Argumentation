@@ -1,6 +1,5 @@
 from qbaf import QBAFramework
 from qbaf_solf.safety_oscillations_liveness import *
-import numpy as np
 import math
 
 def is_ideal_fair(qbaf_collection: list[QBAFramework],
@@ -30,6 +29,23 @@ def is_cautious_fair(qbaf_collection: list[QBAFramework],
 
     return True if ((any(safe_check) and all(live_check)) or not any(safe_check)) else False
 
+def calculate_area_under_curve(x_axis: list[float],
+                               y_axis: list[float]) -> float:
+    """
+      Calculates the area under the curve defined by x_axis and the points in y_axis
+      
+      Args: 
+        x_axis (list[float]): The x_axis of the function.
+        y_axis (list[float]): The y_axis of the function.
+        
+      Returns:
+        float: returns the area under the curve.
+    """
+
+    area = sum([0.5 * (y_axis[i] + y_axis[i+1]) * (y_axis[i] + y_axis[i+1])] for i in range(0, len(x_axis)-1))
+    return area
+
+
 
 def calculate_gini_fairness(qbaf_collection: list[QBAFramework],
                             topic_set: list[str],
@@ -56,10 +72,10 @@ def calculate_gini_fairness(qbaf_collection: list[QBAFramework],
       safety_curve.append(safety_curve[-1] + int(x[1]))
 
     # Calculating the fairness line
-    fairness_line = np.linspace(0, safety_curve[-1], len(topic_set)+1)
+    fairness_line = [(safety_curve[-1]/len(topic_set)) * x for x in x_axis]
 
-    # Calulating Gini fairness
-    area_enclosed = np.trapezoid(np.abs(fairness_line - safety_curve), x_axis)
+    # Calculating Gini fairness
+    area_enclosed = calculate_area_under_curve(x_axis, safety_curve) - calculate_area_under_curve(x_axis, fairness_line)
     gini_fairness = (2 / (1 + math.e ** (-area_enclosed))) - 1
 
 
