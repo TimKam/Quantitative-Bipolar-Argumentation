@@ -80,7 +80,6 @@ def calculate_area_under_curve(x_axis: list[float],
     """
 
     area = sum([0.5 * (y_axis[i] + y_axis[i+1]) * (x_axis[i+1] - x_axis[i]) for i in range(0, len(x_axis)-1)])
-    print(area)
     return area
 
 
