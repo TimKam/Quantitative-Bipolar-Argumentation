@@ -95,7 +95,7 @@ def calculate_gini_fairness(qbaf_collection: list[QBAFramework],
         qbaf_collection (list[QBAFramework]): The collection of QBAFs.
         topic_set (list[str]): The considered set of arguments.
         threshold (float): The justification threshold.
-        
+
       Returns:
         float: returns the Gini oscillation fairness score.
 
@@ -131,6 +131,7 @@ def calculate_shannon_fairness(qbaf_collection: list[QBAFramework],
         qbaf_collection (list[QBAFramework]): The collection of QBAFs.
         topic_set (list[str]): The considered set of arguments.
         threshold (float): The justification threshold.
+        
       Returns:
         float: returns the Shannon oscillation fairness score.
 
