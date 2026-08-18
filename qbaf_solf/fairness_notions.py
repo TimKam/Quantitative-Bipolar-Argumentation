@@ -139,7 +139,7 @@ def calculate_gini_fairness(qbaf_collection: list[QBAFramework],
 
     # Calculating Gini fairness
     area_enclosed = abs(calculate_area_under_curve(x_axis, safety_curve) - calculate_area_under_curve(x_axis, fairness_line))
-    gini_fairness = area_enclosed/(0.5 * (len(topic_set)-1) * fairness_line[-1])
+    gini_fairness = 2/(1 + math.exp(-area_enclosed )) - 1 
 
 
     return gini_fairness
