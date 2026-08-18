@@ -83,28 +83,53 @@ def calculate_area_under_curve(x_axis: list[float],
     return area
 
 
+def calculate_threshold_excess(qbaf_collection: list[QBAFramework],
+                               topic_set: list[str],
+                               threshold: float) -> int:
+
+    """
+      Calculates the threshold exceeding instances of the topic set.
+
+      Args:
+        qbaf_collection (list[QBAFramework]): The collection of QBAFs.
+        topic_set (list[str]): The considered set of arguments.
+        threshold (float): The credibility threshold.
+
+      Returns:
+        int: returns the number of threshold exceeding instances.
+    """
+
+    instances_of_credibility = dict()
+
+    for topic_arg in topic_set:
+      instances_of_credibility.update({topic_arg: len([qbaf for qbaf in qbaf_collection if (qbaf.final_strengths[topic_arg] >= threshold)])})
+
+    return instances_of_credibility
+
+
+
 
 def calculate_gini_fairness(qbaf_collection: list[QBAFramework],
                             topic_set: list[str],
                             threshold: float) -> list:
 
     """
-      Calculates the Gini oscillation fainress of the topic set.
+      Calculates the Gini based fainress of the topic set.
 
       Args:
         qbaf_collection (list[QBAFramework]): The collection of QBAFs.
         topic_set (list[str]): The considered set of arguments.
-        threshold (float): The justification threshold.
+        threshold (float): The credibility threshold.
 
       Returns:
-        float: returns the Gini oscillation fairness score.
+        float: returns the Gini based fairness score.
 
     """
 
     x_axis = [x for x in range(0, len(topic_set)+1)]
 
     # Calculating the safety curve
-    sorted_oscillations = sorted(number_of_oscillations(qbaf_collection, topic_set, threshold).items(), key=lambda item: item[1])
+    sorted_oscillations = sorted(calculate_threshold_excess(qbaf_collection, topic_set, threshold).items(), key=lambda item: item[1])
     safety_curve = [0]
     for x in sorted_oscillations:
       safety_curve.append(safety_curve[-1] + int(x[1]))
@@ -114,7 +139,7 @@ def calculate_gini_fairness(qbaf_collection: list[QBAFramework],
 
     # Calculating Gini fairness
     area_enclosed = abs(calculate_area_under_curve(x_axis, safety_curve) - calculate_area_under_curve(x_axis, fairness_line))
-    gini_fairness = (2 / (1 + math.e ** (-area_enclosed))) - 1
+    gini_fairness = area_enclosed/(0.5 * (len(topic_set)-1) * fairness_line[-1])
 
 
     return gini_fairness
@@ -125,7 +150,7 @@ def calculate_shannon_fairness(qbaf_collection: list[QBAFramework],
                                threshold: float) -> list:
 
     """
-      Calculates the Shannon oscillation fainress of the topic set.
+      Calculates the Shannon based fainress of the topic set.
 
       Args:
         qbaf_collection (list[QBAFramework]): The collection of QBAFs.
@@ -133,15 +158,19 @@ def calculate_shannon_fairness(qbaf_collection: list[QBAFramework],
         threshold (float): The justification threshold.
         
       Returns:
-        float: returns the Shannon oscillation fairness score.
+        float: returns the Shannon based fairness score.
 
     """
 
+    if (len(topic_set) <= 1):
+        return 1
+
+    
     x_axis = [x for x in range(0, len(topic_set)+1)]
 
 
     # Calculating the oscillation probability
-    oscillations = number_of_oscillations(qbaf_collection, topic_set, threshold)
+    oscillations = calculate_threshold_excess(qbaf_collection, topic_set, threshold)
     if all(oscillations[x] == 0 for x in oscillations.keys()):
       return 1
     sum_of_oscillations = sum([x[1] for x in oscillations.items()])
@@ -153,3 +182,6 @@ def calculate_shannon_fairness(qbaf_collection: list[QBAFramework],
 
 
     return shannon_fairness
+
+
+
