@@ -22,6 +22,7 @@ def test_gini_fairness():
     gini_1 = calculate_gini_fairness([Q, Q_1, Q_2], ['b', 'c', 'a'], 0.51)
     gini_2 = calculate_gini_fairness([Q, Q_1], ['b', 'c', 'a'], 0.51)
 
+
     assert (gini_1 > 0.76 and gini_1 < 0.77)
     assert (gini_2 > 0.46 and gini_2 < 0.47)
 
