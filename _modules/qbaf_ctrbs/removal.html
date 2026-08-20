@@ -295,7 +295,7 @@
 <div class="viewcode-block" id="determine_removal_ctrb">
 <a class="viewcode-back" href="../../index.html#qbaf_ctrbs.removal.determine_removal_ctrb">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">determine_removal_ctrb</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">contributors</span><span class="p">,</span> <span class="n">qbaf</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determines the removal contribution of a contributor</span>
+<span class="w">    </span><span class="sd">"""Determines the removal contribution of a contributor</span>
 <span class="sd">    or a set of contributors to a topic argument.</span>
 
 <span class="sd">    Args:</span>
@@ -305,14 +305,14 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        float: The contribution of the contributor to the topic</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">contributors</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
         <span class="n">contributors</span> <span class="o">=</span> <span class="p">{</span><span class="n">contributors</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">topic</span> <span class="ow">in</span> <span class="n">contributors</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span> <span class="p">(</span>
-            <span class="s1">&#39;An argument</span><span class="se">\&#39;</span><span class="s1">s removal contribution to itself cannot be determined.&#39;</span><span class="p">)</span>
+            <span class="s1">'An argument</span><span class="se">\'</span><span class="s1">s removal contribution to itself cannot be determined.'</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">item</span> <span class="ow">in</span> <span class="n">qbaf</span><span class="o">.</span><span class="n">arguments</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">[</span><span class="n">topic</span><span class="p">,</span> <span class="o">*</span><span class="n">contributors</span><span class="p">]):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span> <span class="p">(</span><span class="s1">&#39;Topic and contributor must be in the QBAF.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span> <span class="p">(</span><span class="s1">'Topic and contributor must be in the QBAF.'</span><span class="p">)</span>
     <span class="n">fs_with</span> <span class="o">=</span> <span class="n">qbaf</span><span class="o">.</span><span class="n">final_strengths</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span>
     <span class="n">restriction</span> <span class="o">=</span> <span class="n">restrict</span><span class="p">(</span><span class="n">qbaf</span><span class="p">,</span> <span class="n">qbaf</span><span class="o">.</span><span class="n">arguments</span> <span class="o">-</span> <span class="n">contributors</span><span class="p">)</span>
     <span class="n">fs_without</span> <span class="o">=</span> <span class="n">restriction</span><span class="o">.</span><span class="n">final_strengths</span><span class="p">[</span><span class="n">topic</span><span class="p">]</span>

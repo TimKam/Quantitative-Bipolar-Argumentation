@@ -303,7 +303,7 @@
                               <span class="n">topic_argument_2</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Checks whether qbaf_initial is general robust inconsistent with respect to</span>
 <span class="sd">    qbaf_collection.</span>
 
@@ -316,7 +316,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">       bool: True if qbaf_initial is general robust inconsistent with respect to</span>
 <span class="sd">       qbaf_collection, False otherwise.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">for</span> <span class="n">qbaf</span> <span class="ow">in</span> <span class="n">qbaf_collection</span><span class="p">:</span>
       <span class="k">if</span> <span class="p">(</span><span class="n">qbaf</span><span class="o">.</span><span class="n">are_strength_consistent</span><span class="p">(</span><span class="n">qbaf_initial</span><span class="p">,</span>
@@ -335,7 +335,7 @@
                                  <span class="n">qbaf_collection</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QBAFramework</span><span class="p">],</span>
                                  <span class="n">topic_argument_1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                                  <span class="n">topic_argument_2</span><span class="p">:</span> <span class="nb">str</span> <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Checks whether qbaf_initial is expansion robust consistent with respect to</span>
 <span class="sd">    qbaf_collection.</span>
 
@@ -348,7 +348,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">       bool: True if qbaf_initial is general robust consistent with respect to</span>
 <span class="sd">       qbaf_collection, False otherwise.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     
     <span class="n">updated_qbaf_collection</span> <span class="o">=</span> <span class="p">[</span><span class="n">qbaf</span> <span class="k">for</span> <span class="n">qbaf</span> <span class="ow">in</span> <span class="n">qbaf_collection</span> <span class="k">if</span> <span class="p">(</span><span class="n">is_expansion</span> <span class="p">(</span><span class="n">qbaf_initial</span><span class="p">,</span> <span class="n">qbaf</span><span class="p">))]</span>
 
@@ -371,7 +371,7 @@
                                      <span class="n">topic_argument_2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                                      <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                                      <span class="n">mutable_args</span><span class="p">:</span> <span class="nb">set</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Checks whether qbaf_initial is bounded-update robust inconsistent with respect to qbaf_collection, epsilon and the mutable_args.</span>
 
 <span class="sd">    Args:</span>
@@ -384,7 +384,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">      bool: True if qbaf_initial is bounded-update robust inconsistent with respect to qbaf_collection, False otherwise.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">updated_qbaf_collection</span> <span class="o">=</span> <span class="p">[</span><span class="n">qbaf</span> <span class="k">for</span> <span class="n">qbaf</span> <span class="ow">in</span> <span class="n">qbaf_updates</span> <span class="k">if</span> <span class="p">(</span><span class="n">is_bounded_update</span><span class="p">(</span><span class="n">qbaf_initial</span><span class="p">,</span> <span class="n">qbaf</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">mutable_args</span><span class="p">))]</span>
 
     <span class="k">for</span> <span class="n">qbaf</span> <span class="ow">in</span> <span class="n">updated_qbaf_collection</span><span class="p">:</span>

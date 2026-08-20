@@ -409,11 +409,11 @@ The library is written in CPython (C with a Python API) to facilitate speed and 
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qbaf</span><span class="w"> </span><span class="kn">import</span> <span class="n">QBAFramework</span>
 
 <span class="n">qbaf</span> <span class="o">=</span> <span class="n">QBAFramework</span><span class="p">(</span>
-    <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">],</span>
     <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">],</span>
-    <span class="p">[(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)],</span>
-    <span class="p">[(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)],</span>
-    <span class="n">semantics</span><span class="o">=</span><span class="s2">&quot;DFQuAD_model&quot;</span><span class="p">,</span>
+    <span class="p">[(</span><span class="s1">'b'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">)],</span>
+    <span class="p">[(</span><span class="s1">'c'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">)],</span>
+    <span class="n">semantics</span><span class="o">=</span><span class="s2">"DFQuAD_model"</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -429,7 +429,7 @@ The library is written in CPython (C with a Python API) to facilitate speed and 
 </ul>
 <p>Once the framework has been created, you can inspect whether it is acyclic and what final strengths it assigns:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qbaf</span><span class="o">.</span><span class="n">final_strengths</span>
-<span class="n">qbaf</span><span class="o">.</span><span class="n">final_strength</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="n">qbaf</span><span class="o">.</span><span class="n">final_strength</span><span class="p">(</span><span class="s1">'a'</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To understand how different arguments affect a topic argument, QBAF-Py provides several contribution functions, supporting both individual contributors and sets of contributors.</p>
@@ -444,7 +444,7 @@ The library is written in CPython (C with a Python API) to facilitate speed and 
 <p>For example, to compute the removal contribution of <code class="docutils literal notranslate"><span class="pre">c</span></code> to <code class="docutils literal notranslate"><span class="pre">a</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qbaf_ctrbs.removal</span><span class="w"> </span><span class="kn">import</span> <span class="n">determine_removal_ctrb</span>
 
-<span class="n">contribution</span> <span class="o">=</span> <span class="n">determine_removal_ctrb</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">qbaf</span><span class="p">)</span>
+<span class="n">contribution</span> <span class="o">=</span> <span class="n">determine_removal_ctrb</span><span class="p">(</span><span class="s1">'a'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">,</span> <span class="n">qbaf</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">contribution</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -462,11 +462,11 @@ To control the convergence criteria, you can also pass the following arguments w
 </ul>
 <p>For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cyclic_qbaf</span> <span class="o">=</span> <span class="n">QBAFramework</span><span class="p">(</span>
-    <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">],</span>
     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
-    <span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)],</span>
+    <span class="p">[(</span><span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">),</span> <span class="p">(</span><span class="s1">'b'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">)],</span>
     <span class="p">[],</span>
-    <span class="n">semantics</span><span class="o">=</span><span class="s2">&quot;DFQuAD_model&quot;</span><span class="p">,</span>
+    <span class="n">semantics</span><span class="o">=</span><span class="s2">"DFQuAD_model"</span><span class="p">,</span>
     <span class="n">allow_cycles</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">max_iterations</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
     <span class="n">convergence_threshold</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">,</span>
