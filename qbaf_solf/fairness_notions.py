@@ -66,6 +66,8 @@ def is_cautious_fair(qbaf_collection: list[QBAFramework],
 
     return True if ((any(safe_check) and all(live_check)) or not any(safe_check)) else False
 
+
+
 def calculate_area_under_curve(x_axis: list[float],
                                y_axis: list[float]) -> float:
     """
@@ -102,7 +104,10 @@ def calculate_threshold_excess(qbaf_collection: list[QBAFramework],
     instances_of_credibility = dict()
 
     for topic_arg in topic_set:
-      instances_of_credibility.update({topic_arg: len([qbaf for qbaf in qbaf_collection if (qbaf.final_strengths[topic_arg] >= threshold)])})
+      s = [qbaf for qbaf in qbaf_collection if (qbaf.final_strength[topic_arg] >= threshold)]
+      instances = len(s)
+      print(f"{topic_arg} has instances {instances}")
+      instances_of_credibility.update({topic_arg: instances})
 
     return instances_of_credibility
 
@@ -138,6 +143,7 @@ def calculate_lorenz_gini_fairness(qbaf_collection: list[QBAFramework],
     cumulative = 0
     for x in sorted_oscillations:
       cumulative += x[1]
+      print(cumulative)
       lorenz_curve.append(cumulative / sum_of_oscillations)
 
     area_enclosed = calculate_area_under_curve(x_axis, x_axis) - calculate_area_under_curve(x_axis, lorenz_curve)
