@@ -1,6 +1,6 @@
 from qbaf import QBAFramework
-from qbaf_solf.fairness_notions import calculate_gini_fairness, calculate_shannon_fairness, is_live_fair, is_ideal_fair, is_cautious_fair
- 
+from qbaf_solf.fairness_notions import *
+
 
 args = ['a', 'b', 'c']
 args_1 = ['a', 'b', 'c', 'd']
@@ -22,9 +22,17 @@ def test_gini_fairness():
     gini_1 = calculate_gini_fairness([Q, Q_1, Q_2], ['b', 'c', 'a'], 0.51)
     gini_2 = calculate_gini_fairness([Q, Q_1], ['b', 'c', 'a'], 0.51)
 
+    assert (gini_1 > 0.221 and gini_1 < 0.222)
+    assert (gini_2 > 0.632 and gini_2 < 0.633)
 
-    assert (gini_1 > 0.76 and gini_1 < 0.77)
-    assert (gini_2 > 0.46 and gini_2 < 0.47)
+
+def test_lorenz_gini_fairness():
+    gini_1 = calculate_lorenz_gini_fairness([Q, Q_1, Q_2], ['b', 'c', 'a'], 0.51)
+    gini_2 = calculate_lorenz_gini_fairness([Q, Q_1], ['b', 'c', 'a'], 0.51)
+
+
+    assert (gini_1 > 0.55 and gini_1 < 0.56)
+    assert (gini_2 > 0.66 and gini_2 < 0.67)
 
 
 def test_shannon_fairness():
