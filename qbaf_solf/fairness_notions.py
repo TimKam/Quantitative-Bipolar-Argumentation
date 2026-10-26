@@ -104,7 +104,7 @@ def calculate_threshold_excess(qbaf_collection: list[QBAFramework],
     instances_of_credibility = dict()
 
     for topic_arg in topic_set:
-      s = [qbaf for qbaf in qbaf_collection if (qbaf.final_strength[topic_arg] >= threshold)]
+      s = [qbaf for qbaf in qbaf_collection if qbaf.final_strength(topic_arg) >= threshold]
       instances = len(s)
       print(f"{topic_arg} has instances {instances}")
       instances_of_credibility.update({topic_arg: instances})
