@@ -87,7 +87,7 @@ def calculate_area_under_curve(x_axis: list[float],
 
 def calculate_threshold_excess(qbaf_collection: list[QBAFramework],
                                topic_set: list[str],
-                               threshold: float) -> int:
+                               threshold: float) -> dict:
 
     """
       Calculates the threshold exceeding instances of the topic set.
@@ -98,7 +98,7 @@ def calculate_threshold_excess(qbaf_collection: list[QBAFramework],
         threshold (float): The credibility threshold.
 
       Returns:
-        int: returns the number of threshold exceeding instances.
+        dict: returns the number of threshold exceeding instances per topic.
     """
 
     instances_of_credibility = dict()
@@ -115,9 +115,9 @@ def calculate_threshold_excess(qbaf_collection: list[QBAFramework],
 
 def calculate_lorenz_gini_fairness(qbaf_collection: list[QBAFramework],
                                   topic_set: list[str],
-                                  threshold: float) -> list:
+                                  threshold: float) -> float:
     """
-    Calculates the Lorenz-Gini based fainress of the topic set.
+    Calculates the Lorenz-Gini based fairness of the topic set.
    
          Args:
            qbaf_collection (list[QBAFramework]): The collection of QBAFs.
@@ -152,7 +152,7 @@ def calculate_lorenz_gini_fairness(qbaf_collection: list[QBAFramework],
 
 def calculate_gini_fairness(qbaf_collection: list[QBAFramework],
                             topic_set: list[str],
-                            threshold: float) -> list:
+                            threshold: float) -> float:
 
     """
       Calculates the Gini based fainress of the topic set.
@@ -189,7 +189,7 @@ def calculate_gini_fairness(qbaf_collection: list[QBAFramework],
 
 def calculate_shannon_fairness(qbaf_collection: list[QBAFramework],
                                topic_set: list[str],
-                               threshold: float) -> list:
+                               threshold: float) -> float:
 
     """
       Calculates the Shannon based fainress of the topic set.
