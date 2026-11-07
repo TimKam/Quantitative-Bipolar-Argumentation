@@ -142,7 +142,6 @@ def calculate_lorenz_gini_fairness(qbaf_collection: list[QBAFramework],
     cumulative = 0
     for x in sorted_oscillations:
       cumulative += x[1]
-      print(cumulative)
       lorenz_curve.append(cumulative / sum_of_oscillations)
 
     area_enclosed = calculate_area_under_curve(x_axis, x_axis) - calculate_area_under_curve(x_axis, lorenz_curve)
@@ -207,10 +206,6 @@ def calculate_shannon_fairness(qbaf_collection: list[QBAFramework],
 
     if (len(topic_set) <= 1):
         return 1
-
-    
-    x_axis = [x for x in range(0, len(topic_set)+1)]
-
 
     # Calculating the oscillation probability
     oscillations = calculate_threshold_excess(qbaf_collection, topic_set, threshold)
